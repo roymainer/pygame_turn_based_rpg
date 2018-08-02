@@ -4,7 +4,7 @@ from Shared.Animator import Animator
 
 class Character(GameObject):
 
-    def __init__(self, spritesheet_file, size, position):
+    def __init__(self, spritesheet_file, size, position, object_type):
 
         self.__animator = Animator(spritesheet_file, sprite_size=size)
         self.__actions_list = self.__animator.get_animations_keys()
@@ -12,7 +12,11 @@ class Character(GameObject):
         image = self.__animator.get_next_sprite(self.__action)
         super(Character, self).__init__(image, position)
 
+
         self.__speed = (0, 0)
+
+    def __repr__(self):
+        return "Character"
 
     def update(self, seconds):
         self.image = self.__animator.get_next_sprite(self.__action)

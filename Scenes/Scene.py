@@ -41,3 +41,5 @@ class Scene:
 
     def add_game_object(self, game_object):
         self.__game_objects.append(game_object)
+
+

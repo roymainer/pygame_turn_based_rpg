@@ -7,6 +7,13 @@ class GameConstants:
     FPS = 60
     INTERVAL = .15  # animation interval
 
+    STARTING_SCENE = 0
+
+    """ Define Types """
+    ALL_GAME_OBJECTS = 0
+    PLAYER_GAME_OBJECTS = 1
+    COMPUTER_GAME_OBJECTS = 2
+
     """ SCREEN DIVISION CONSTANTS """
 
     BATTLE_AREA_PLAYER_BORDER = int(SCREEN_SIZE[0]*3/8)  # 300
@@ -47,6 +54,8 @@ class GameConstants:
     COMPUTER_BOTTOM_FRONT = (COMPUTER_FRONT_COLUMN, PLAYERS_BOTTOM_ROW)
 
     """ SPRITES """
+    DARK_LAIR = os.path.join("Assets", "Graphics", "dark_lair.png")
+
     ADVENTURER_SPRITE_SHEET = os.path.join("Assets", "Graphics", "adventurer_sprite_sheet.png")
     ADVENTURER_SIZE = (50 * 3, 37 * 3)
     ADVENTURER_SPEED = (15, 15)
@@ -61,6 +70,9 @@ class GameConstants:
     SLIME_SIZE = (100 * 1, 74 * 1)
     SLIME_SPEED = (15, 15)
 
+    """ COLORS """
     BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+    BRIGHT_GREEN = (0, 255, 0)  # lime
 
     TEXT_SIZE_SMALL = 17
