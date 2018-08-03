@@ -7,6 +7,8 @@ Created: Jul 30, 2018
 """
 import pygame
 
+from Shared.GameConstants import GameConstants
+
 
 def prepare_animations(spritesheet_file, atlas_file, sprite_size=None):
 
@@ -72,22 +74,6 @@ class Animator(object):
         else:
             return index + 1
 
-    def set_flip(self):
-        self.__flip = True
-
-    def unset_flip(self):
-        self.__flip = False
-
-    def flip_sprites_ver(self):
-        """
-        Flips the x axis of the sprites in the animation dict
-        """
-        for action_key, sprites_list in self.__animation_dict.items():
-            for i in range(0, len(sprites_list)):
-                sprite = sprites_list[i]
-                self.__animation_dict[action_key][i] = pygame.transform.flip(sprite, True, False)
-        return self.__animation_dict
-
     def get_next_sprite(self, animation_key: str) -> pygame.Surface:
         """
         Returns the next sprite in the animation
@@ -118,6 +104,22 @@ class Animator(object):
         :return: surface
         """
         return self.__animation_dict[self.__animation_key][-1]
+
+    def set_flip(self):
+        self.__flip = True
+
+    def unset_flip(self):
+        self.__flip = False
+
+    def flip_sprites_ver(self):
+        """
+        Flips the x axis of the sprites in the animation dict
+        """
+        for action_key, sprites_list in self.__animation_dict.items():
+            for i in range(0, len(sprites_list)):
+                sprite = sprites_list[i]
+                self.__animation_dict[action_key][i] = pygame.transform.flip(sprite, True, False)
+        return self.__animation_dict
 
     def reset_animation(self):
         self.__sprite_index = 0

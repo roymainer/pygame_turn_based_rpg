@@ -1,55 +1,17 @@
-from Shared.GameObject import GameObject
-from Shared.Animator import Animator
+"""
+Character class is an extension of the AnimatedObject class
+it supports more actions (animations), character attributes and sounds (need to add)
+"""
 
 
-class Character(GameObject):
+from Shared.AnimatedObject import AnimatedObject
+
+
+class Character(AnimatedObject):
 
     def __init__(self, spritesheet_file, size, position, object_type):
-
-        self.__animator = Animator(spritesheet_file, sprite_size=size)
-        self.__actions_list = self.__animator.get_animations_keys()
-        self.__action = "idle"  # every character must have idle stance!
-        image = self.__animator.get_next_sprite(self.__action)
-        super(Character, self).__init__(image, position)
-
-
-        self.__speed = (0, 0)
+        super(Character, self).__init__(spritesheet_file, size, position, object_type)
+        self.set_action("idle") # every character must have idle stance!
 
     def __repr__(self):
         return "Character"
-
-    def update(self, seconds):
-        self.image = self.__animator.get_next_sprite(self.__action)
-
-        if self.__speed[0] < 0:  # move left
-            self.__animator.set_flip()
-        elif self.__speed[0] > 0:
-            self.__animator.unset_flip()
-
-        x = self.rect.x
-        y = self.rect.y
-
-        self.set_position((x + self.__speed[0], y + self.__speed[1]))  # update position
-
-    def set_speed(self, speed):
-        self.__speed = speed
-
-    def get_speed(self):
-        return self.__speed
-
-    def set_action(self, action):
-        if action not in self.get_actions_list():
-            return
-        self.__action = action
-
-    def get_action(self):
-        return self.__action
-
-    def get_actions_list(self):
-        return self.__animator.get_animations_keys()
-
-    def turn_right(self):
-        self.__animator.unset_flip()
-
-    def turn_left(self):
-        self.__animator.set_flip()

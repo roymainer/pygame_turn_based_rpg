@@ -56,6 +56,9 @@ class GameConstants:
     """ SPRITES """
     DARK_LAIR = os.path.join("Assets", "Graphics", "dark_lair.png")
 
+    TRIANGLE_TOP_DOWN_SHEET = os.path.join("Assets", "Graphics", "triangle_top_down.png")
+    TRIANGLE_TOP_DOWN_SIZE = (33 * 1, 59 * 1)
+
     ADVENTURER_SPRITE_SHEET = os.path.join("Assets", "Graphics", "adventurer_sprite_sheet.png")
     ADVENTURER_SIZE = (50 * 3, 37 * 3)
     ADVENTURER_SPEED = (15, 15)

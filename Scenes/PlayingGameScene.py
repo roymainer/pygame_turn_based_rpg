@@ -1,6 +1,8 @@
 import pygame
 
 from Scenes.Scene import Scene
+from Shared import GameObject
+from Shared.AnimatedObject import AnimatedObject
 from Shared.GameConstants import GameConstants
 from Shared.Util import load_character, Marker
 
@@ -26,6 +28,9 @@ class PlayingGameScene(Scene):
         focused_sprite = self.get_game().collide_point(mouse_pos)
         if focused_sprite is not None:
             self.add_marker(focused_sprite)
+        else:
+            if self.__marker is not None:
+                self.remove_marker()
 
         print("Marker: {}".format(self.__marker is not None))
 
@@ -51,13 +56,14 @@ class PlayingGameScene(Scene):
         return
 
     def add_marker(self, focused_sprite):
-        # image = focused_sprite.get_image()
-        # pygame.draw.ellipse(image, GameConstants.BRIGHT_GREEN, image.get_rect(), 1)  # draw the ellipse
-
-        rect = focused_sprite.get_rect()
-        self.__marker = Marker(rect)
-        self.get_game().add_sprite_to_group(self.__marker)
-        return
+        rect = pygame.Rect((0, 0), GameConstants.TRIANGLE_TOP_DOWN_SIZE)  # create a temp rect
+        rect.bottom = focused_sprite.get_rect().top
+        rect.centerx = focused_sprite.get_rect().centerx
+        position = (rect.top, rect.left)  # draw the marker right above the focused_sprite
+        self.__marker = AnimatedObject(GameConstants.TRIANGLE_TOP_DOWN_SHEET,
+                                       GameConstants.TRIANGLE_TOP_DOWN_SIZE,
+                                       position=position,
+                                       object_type=GameConstants.ALL_GAME_OBJECTS)
 
     def remove_marker(self):
         self.__marker.kill()

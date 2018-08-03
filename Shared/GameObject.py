@@ -42,6 +42,8 @@ class GameObject(Sprite):
     def get_size(self) -> Tuple:
         return self.rect.size
 
+    def set_type(self, object_type):
+        self.__object_type = object_type
+
     def get_type(self):
         return self.__object_type
-
