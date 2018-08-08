@@ -7,17 +7,17 @@ from Shared.GameConstants import GameConstants
 from Shared.GameObject import GameObject
 
 
-def load_character(game_engine, scene, key, position, type):
+def load_character(game_engine, scene, key, position, object_type):
     key = key.lower()
     sprite_sheet = Util.GAME_OBJECTS_DICT[key]["sprite_sheet"]
     size = Util.GAME_OBJECTS_DICT[key]["size"]
-    new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)
+    new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
 
-    character = Character(sprite_sheet, size, new_position, type)  # init adventurer
+    character = Character(sprite_sheet, size, new_position, object_type)  # init adventurer
 
     scene.add_game_object(character)  # add to scene objects list
 
-    game_engine.add_sprite_to_group(character, type)  # add to game engine sprites group
+    game_engine.add_sprite_to_group(character, object_type)  # add to game engine sprites group
     return
 
 

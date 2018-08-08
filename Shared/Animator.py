@@ -3,11 +3,9 @@ Animator Class
 Works with single sprite sheet and an atlas file
 
 Created: Jul 30, 2018
-@author: rmainer
+@author: Roy Mainer
 """
 import pygame
-
-from Shared.GameConstants import GameConstants
 
 
 def prepare_animations(spritesheet_file, atlas_file, sprite_size=None):
@@ -90,12 +88,12 @@ class Animator(object):
             if self.__sprite_index == len(self.__animation_dict[self.__animation_key]):
                 self.__sprite_index = 0
 
-        image = self.__animation_dict[self.__animation_key][self.__sprite_index]
+        _image = self.__animation_dict[self.__animation_key][self.__sprite_index]
 
         if self.__flip:
-            image = pygame.transform.flip(image, True, False)
+            _image = pygame.transform.flip(image, True, False)
 
-        return image
+        return _image
 
     def get_last_sprite(self) -> pygame.Surface:
         """

@@ -1,0 +1,8 @@
+top-down-00 = 0 0 33 59
+top-down-01 = 34 0 33 59
+top-down-02 = 68 0 33 59
+top-down-03 = 0 60 33 59
+top-down-04 = 34 60 33 59
+top-down-05 = 68 60 33 59
+top-down-06 = 102 0 33 59
+top-down-07 = 136 0 33 59

@@ -20,6 +20,8 @@ class GameObject(Sprite):
         self.rect.y = position[1]
         self.__object_type = object_type
 
+        # print("GameObj of type: {} added at (top, left): ({}, {})".format(object_type, self.rect.left, self.rect.top))
+
     def __repr__(self):
         return "GameObject"
 

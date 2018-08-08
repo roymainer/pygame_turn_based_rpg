@@ -11,7 +11,7 @@ class Character(AnimatedObject):
 
     def __init__(self, spritesheet_file, size, position, object_type):
         super(Character, self).__init__(spritesheet_file, size, position, object_type)
-        self.set_action("idle") # every character must have idle stance!
+        self.set_action("idle")  # every character must have idle stance!
 
     def __repr__(self):
         return "Character"
