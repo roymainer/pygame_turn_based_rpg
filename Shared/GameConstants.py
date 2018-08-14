@@ -28,9 +28,9 @@ class GameConstants:
     """ PLAYER AREA """
     PLAYERS_BACK_COLUMN = int(SCREEN_SIZE[0]*3/32)  # 75
     PLAYERS_FRONT_COLUMN = int(SCREEN_SIZE[0]*6/32 + PADX)  # 225
-    PLAYERS_TOP_ROW = int(SCREEN_SIZE[1]*5/12 - 2 * PADY)  # 100
-    PLAYERS_MIDDLE_ROW = int(SCREEN_SIZE[1]/2 - PADY)  # 300
-    PLAYERS_BOTTOM_ROW = int(SCREEN_SIZE[1]*7/12)  # 400
+    PLAYERS_TOP_ROW = int(SCREEN_SIZE[1]*5/12 - 3*PADY)  # 100
+    PLAYERS_MIDDLE_ROW = int(SCREEN_SIZE[1]/2 - 2*PADY)  # 300
+    PLAYERS_BOTTOM_ROW = int(SCREEN_SIZE[1]*7/12 - PADY)  # 400
 
     # Playing Scene CENTER Positions
     PLAYER_TOP_BACK = (PLAYERS_BACK_COLUMN, PLAYERS_TOP_ROW)  # (75, 250)
@@ -54,28 +54,16 @@ class GameConstants:
     COMPUTER_MIDDLE_FRONT = (COMPUTER_FRONT_COLUMN, PLAYERS_MIDDLE_ROW)
     COMPUTER_BOTTOM_FRONT = (COMPUTER_FRONT_COLUMN, PLAYERS_BOTTOM_ROW)
 
+    """ Menus """
+    PLAYER_UNITS_MENU_WIDTH = PLAYERS_FRONT_COLUMN + 2 * PADX
+    COMPUTER_UNITS_MENU_WIDTH = SCREEN_SIZE[0] - COMPUTER_FRONT_COLUMN + PADX
+
     """ SPRITES """
     DARK_LAIR = os.path.join("Assets", "Graphics", "dark_lair.png")
     CAVE_TILE = os.path.join("Assets", "Graphics", "cave_tile.png")
 
-    GAME_SCENE_MENU = os.path.join("Assets", "Graphics", "game_scene_menu.png")
-
     TRIANGLE_TOP_DOWN_SHEET = os.path.join("Assets", "Graphics", "triangle_top_down_sprite_sheet.png")
     TRIANGLE_TOP_DOWN_SIZE = (int(33 * 0.5), int(59 * 0.5))
-
-    ADVENTURER_SPRITE_SHEET = os.path.join("Assets", "Graphics", "adventurer_sprite_sheet.png")
-    ADVENTURER_SIZE = (50 * 3, 37 * 3)
-    ADVENTURER_SPEED = (15, 15)
-
-    DARK_SPRITE_SHEET = os.path.join("Assets", "Graphics", "dark_sprite_sheet.png")
-
-    SKELETON_SPRITE_SHEET = os.path.join("Assets", "Graphics", "skeleton_sprite_sheet.png")
-    SKELETON_SIZE = (100 * 1, 74 * 1)
-    SKELETON_SPEED = (15, 15)
-
-    SLIME_SPRITE_SHEET = os.path.join("Assets", "Graphics", "slime_sprite_sheet.png")
-    SLIME_SIZE = (100 * 1, 74 * 1)
-    SLIME_SPEED = (15, 15)
 
     """ COLORS """
     BLACK = (0, 0, 0)

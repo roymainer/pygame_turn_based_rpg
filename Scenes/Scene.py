@@ -1,6 +1,6 @@
 import pygame
 from Shared.GameConstants import GameConstants
-from Shared.Text import Text
+from UI.Text import Text
 
 
 class Scene:
@@ -9,7 +9,7 @@ class Scene:
         self.__game_engine = game_engine  # save the game class/engine
         # self.__texts = []  # each scene has a list of text to display
         # self.__buttons = []  # a list of buttons
-        self.__game_objects = []
+        self.__scene_objects = []
 
     def get_game(self):
         return self.__game_engine
@@ -35,11 +35,12 @@ class Scene:
         """ Abstract method to render scene elements """
         pass
 
-    def add_text(self, string, x=0, y=0, color=(255, 255, 255), background=(0, 0, 0),
+    def add_text(self, string, position, color=(255, 255, 255), background=(0, 0, 0),
                  size=GameConstants.TEXT_SIZE_SMALL):
-        self.__texts.append(Text(string, x, y, color, background, size))
+        self.__texts.append(Text(string, position, color, background, size))
 
-    def add_game_object(self, game_object):
-        self.__game_objects.append(game_object)
+    def add_scene_object(self, game_object):
+        self.__scene_objects.append(game_object)
 
-
+    def get_scene_objects_list(self):
+        return self.__scene_objects

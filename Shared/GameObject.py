@@ -10,17 +10,16 @@ from Shared.GameConstants import GameConstants
 
 class GameObject(Sprite):
 
-    image = []  # a list of all images
+    # image = []  # a list of all images
 
     def __init__(self, image, position, object_type=GameConstants.ALL_GAME_OBJECTS):
-        super(GameObject, self).__init__()  # call the parent class
-        self.image = image
+        self.image = image  # must get an image not a string (Example: to support Animator...)
         self.rect = self.image.get_rect()
         self.rect.x = position[0]
         self.rect.y = position[1]
         self.__object_type = object_type
 
-        # print("GameObj of type: {} added at (top, left): ({}, {})".format(object_type, self.rect.left, self.rect.top))
+        super(GameObject, self).__init__()  # call the parent class
 
     def __repr__(self):
         return "GameObject"
@@ -35,11 +34,10 @@ class GameObject(Sprite):
         return self.rect
 
     def set_position(self, position):
-        self.rect.x = position[0]
-        self.rect.y = position[1]
+        self.rect.topleft = position
 
     def get_position(self) -> Tuple:
-        return self.rect.x, self.rect.y
+        return self.rect.topleft
 
     def get_size(self) -> Tuple:
         return self.rect.size

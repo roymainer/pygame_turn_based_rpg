@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pygame
 
-from Shared.Util import Pointer
+from Shared.Util import MousePointer
 from Scenes.MainMenuScene import MainMenuScene
 from Scenes.PlayingGameScene import PlayingGameScene
 from Shared.GameConstants import GameConstants
@@ -13,7 +13,7 @@ class GameEngine:
     def __init__(self):
 
         pygame.init()
-        pygame.mixer.init()
+        # pygame.mixer.init()
 
         self.__screen = pygame.display.set_mode(GameConstants.SCREEN_SIZE)
         self.__clock = pygame.time.Clock()
@@ -61,7 +61,8 @@ class GameEngine:
                 current_scene.handle_events()
                 current_scene.update()
 
-                self.__all_sprites.update(seconds)
+                self.__all_sprites.update()
+                # self.__all_sprites.update(seconds)
                 self.__all_sprites.draw(self.__screen)
 
             pygame.display.set_caption("[FPS]: %.2f" % (self.__clock.get_fps()))
@@ -103,7 +104,7 @@ class GameEngine:
         return self.__mouse_position, self.__mouse_buttons
 
     def collide_point(self, point: Tuple):
-        pointer = Pointer(point)
+        pointer = MousePointer(point)
         focus_group = pygame.sprite.spritecollide(pointer, self.__all_sprites, False)
         if any(focus_group):
             return focus_group[0]

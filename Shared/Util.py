@@ -2,45 +2,18 @@ import pygame
 from pygame import Surface
 from pygame.rect import Rect
 from pygame.sprite import Sprite
-from Shared.Character import Character
 from Shared.GameConstants import GameConstants
 from Shared.GameObject import GameObject
 
 
-def load_character(game_engine, scene, key, position, object_type):
-    key = key.lower()
-    sprite_sheet = Util.GAME_OBJECTS_DICT[key]["sprite_sheet"]
-    size = Util.GAME_OBJECTS_DICT[key]["size"]
-    new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
-
-    character = Character(sprite_sheet, size, new_position, object_type)  # init adventurer
-
-    scene.add_game_object(character)  # add to scene objects list
-
-    game_engine.add_sprite_to_group(character, object_type)  # add to game engine sprites group
-    return
-
-
-class Util:
-
-    GAME_OBJECTS_DICT = {
-        "adventurer":
-            {"sprite_sheet": GameConstants.ADVENTURER_SPRITE_SHEET,
-             "size": GameConstants.ADVENTURER_SIZE},
-        "slime":
-            {"sprite_sheet": GameConstants.SLIME_SPRITE_SHEET,
-             "size": GameConstants.SLIME_SIZE}
-    }
-
-
-class Pointer(Sprite):
+class MousePointer(Sprite):
     """Pointer is used to detect which Sprite the mouse points at """
 
     def __init__(self, point):
         size = (1, 1)
         self.image = Surface(size)  # single pixel surface
         self.rect = Rect(point, size)
-        super(Pointer, self).__init__()
+        super(MousePointer, self).__init__()
 
 
 class Marker(GameObject):

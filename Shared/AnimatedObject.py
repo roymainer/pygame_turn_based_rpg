@@ -22,7 +22,8 @@ class AnimatedObject(GameObject):
     def __repr__(self):
         return "AnimatedObject"
 
-    def update(self, seconds):
+    # def update(self, seconds):
+    def update(self):
         self.image = self.__animator.get_next_sprite(self.__action)
 
         if self.__speed[0] < 0:  # move left
