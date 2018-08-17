@@ -69,6 +69,7 @@ class PlayingGameSceneUI:
     def add_actions_menu(self, unit):
         if self.__menus[ACTIONS_MENU] is not None:
             self.__menus[ACTIONS_MENU].kill()  # delete the menu from any of it's groups
+            self.__menus[ACTIONS_MENU] = None
 
         player_menu_size = self.__menus[PLAYER_UNITS_MENU].get_size()
         computer_menu_size = self.__menus[COMPUTER_UNITS_MENU].get_size()

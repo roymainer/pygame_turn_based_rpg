@@ -63,7 +63,8 @@ class PlayingGameScene(Scene):
                 self.__UI.add_actions_menu(current_unit)  # add new actions menu for the unit
                 game = self.get_game()
                 sprites = game.get_sprites_group(GameConstants.ALL_GAME_OBJECTS)
-                print("Number of sprites: " + str(len(sprites.spritedict)))
+                # print("Number of sprites: " + str(len(sprites.spritedict)))
+                # print("Sprites: "+str(sprites.spritedict.keys()))
         else:
             # if current unit is none
             # TODO: this code should never be reached, I need to check if there are no more computer/player units

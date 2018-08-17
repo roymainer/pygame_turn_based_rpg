@@ -110,6 +110,12 @@ class Menu(UIObject):
 
     def update(self):
         pass
+    
+    def kill(self):
+        for item in self.__menu_items_list:
+            item.kill()
+            
+        super(Menu, self).kill()
 
 
 if __name__ == "__main__":

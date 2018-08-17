@@ -35,3 +35,8 @@ class UnitsMenu(Menu):
             self.add_text_to_menu(string)
 
         return
+
+    def kill(self):
+        for unit_text_obj in self.__units_list:
+            unit_text_obj.kill()
+        super(UnitsMenu, self).kill()
