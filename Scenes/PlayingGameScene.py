@@ -60,8 +60,10 @@ class PlayingGameScene(Scene):
                 self.__current_action = UnitAction(current_unit)  # create a new action for the unit
                 self.__UI.add_player_marker(current_unit)  # add a new marker for the unit
                 print("Current Unit's turn: {}".format(current_unit.get_name()))
-                # noinspection PyTypeChecker
                 self.__UI.add_actions_menu(current_unit)  # add new actions menu for the unit
+                game = self.get_game()
+                sprites = game.get_sprites_group(GameConstants.ALL_GAME_OBJECTS)
+                print("Number of sprites: " + str(len(sprites.spritedict)))
         else:
             # if current unit is none
             # TODO: this code should never be reached, I need to check if there are no more computer/player units

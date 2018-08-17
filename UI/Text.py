@@ -24,6 +24,9 @@ class Text(UIObject):
 
         super(Text, self).__init__(image=self.image, position=self.rect.topleft)  # init the Sprite object
 
+    def __repr__(self):
+        return "Text"
+
     def get_string(self):
         return self.__string
 

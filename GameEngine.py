@@ -78,8 +78,10 @@ class GameEngine:
     def stop(self):
         self.__mainloop = False
 
-    def add_sprite_to_group(self, sprite, group_type=None):
+    def add_sprite_to_group(self, sprite, group_type=None, layer=1):
         self.__all_sprites.add(sprite)
+        if layer > 0:
+            self.__all_sprites.change_layer(sprite,layer)
         if group_type == GameConstants.PLAYER_GAME_OBJECTS:
             self.__player_sprites.add(sprite)
         if group_type == GameConstants.COMPUTER_GAME_OBJECTS:

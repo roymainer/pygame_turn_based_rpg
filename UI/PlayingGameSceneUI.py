@@ -5,6 +5,7 @@ from Shared.Bestiary import *
 from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
 from UI.Menu import Menu
+from UI.MenuPointer import MenuPointer
 from UI.UnitsMenu import UnitsMenu
 
 PLAYER_UNITS_MENU = 0
@@ -27,6 +28,7 @@ class PlayingGameSceneUI:
                         COMPUTER_UNITS_MENU: self.__add_computers_units_menu()}
         self.__player_markers = []
         self.__computer_markers = []
+        self.__pointer = MenuPointer()
 
     def __add_player_units_menu(self):
         menu_size = (GameConstants.PLAYER_UNITS_MENU_WIDTH,
@@ -79,43 +81,36 @@ class PlayingGameSceneUI:
         menu_position = (self.__menus[PLAYER_UNITS_MENU].get_rect().right, GameConstants.BATTLE_AREA_BOTTOM)
         menu = Menu(UIConstants.SPRITE_BLUE_MENU, menu_size, menu_actions_list, menu_position)
 
+        game_engine = self.scene.get_game()
         # add menu,  menu items and pointer to game engine sprites group
-        self.scene.get_game().add_sprite_to_group(menu)
+        game_engine.add_sprite_to_group(menu)
         for i in range(menu.get_menu_items_count()):
-            self.scene.get_game().add_sprite_to_group(menu.get_item_from_menu(i))
-        self.scene.get_game().add_sprite_to_group(menu.get_pointer())
+            game_engine.add_sprite_to_group(menu.get_item_from_menu(i))
+        self.__pointer.assign_pointer_to_menu(menu)
+        game_engine.add_sprite_to_group(self.__pointer, 0)
         self.__menus[ACTIONS_MENU] = menu
 
     def remove_actions_menu(self):
         self.__menus[ACTIONS_MENU].kill()  # remove the actions menu
 
+    def set_focused_menu(self, menu):
+        # remove focus from all other menus
+        for menu in self.__menus.values():
+            menu.unset_focused()
+
+        menu.set_focused()
+        self.__pointer.assign_pointer_to_menu(menu)
+        return
+
     def get_focused_menu(self):
         focused_menu = self.__menus[ACTIONS_MENU]  # default
-
         for menu in self.__menus.values():
             if menu is None:
                 continue
             if menu.is_focused():
                 focused_menu = menu
                 break
-
         return focused_menu
-
-    def focus_on_actions_menu(self):
-        for menu in self.__menus.values():
-            menu.unset_focused()  # remove focus from all other menus
-        self.__menus[COMPUTER_UNITS_MENU].remove_pointer()  # delete the computer units menu pointer
-        self.__menus[ACTIONS_MENU].set_focused()  # set focus to actions menu
-        return
-
-    def focus_on_computer_units_menu(self):
-        # once the player selects an action/magic, the focus should move to computer units menu to select a target
-        for menu in self.__menus.values():
-            menu.unset_focused()  # remove focus from all other menus
-        self.__menus[COMPUTER_UNITS_MENU].set_focused()
-        self.__menus[COMPUTER_UNITS_MENU].set_pointer()
-        self.scene.get_game().add_sprite_to_group(self.__menus[COMPUTER_UNITS_MENU].get_pointer())
-        return
 
     def __move_pointer(self, direction):
         focused_menu = self.get_focused_menu()
@@ -134,9 +129,7 @@ class PlayingGameSceneUI:
     def return_to_previous_menu(self):
         if self.__menus[COMPUTER_UNITS_MENU].is_focused() or self.__menus[PLAYER_UNITS_MENU].is_focused():
             self.__menus[COMPUTER_UNITS_MENU].unset_focused()
-            self.__menus[COMPUTER_UNITS_MENU].remove_pointer()
             self.__menus[PLAYER_UNITS_MENU].unset_focused()
-            self.__menus[PLAYER_UNITS_MENU].remove_pointer()
             self.__menus[ACTIONS_MENU].set_focused()
         return
 
@@ -145,8 +138,12 @@ class PlayingGameSceneUI:
         current_action = self.scene.get_current_action()
         if self.__menus[ACTIONS_MENU].is_focused():
             current_action.set_action(focused_menu.get_selected_item())
-            if focused_menu.get_selected_item().get_string() == ACTION_ATTACK:
-                self.focus_on_computer_units_menu()
+            action = focused_menu.get_selected_item()
+            if action.get_string() == ACTION_ATTACK:
+                self.set_focused_menu(self.__menus[COMPUTER_UNITS_MENU])
+            elif action.get_string() == ACTION_MAGIC:
+                # TODO: add this
+                pass
         elif self.__menus[COMPUTER_UNITS_MENU].is_focused():
             targets = self.__menus[COMPUTER_UNITS_MENU].get_selected_item()
             current_action.set_targets(targets)
@@ -154,33 +151,53 @@ class PlayingGameSceneUI:
             targets = self.__menus[PLAYER_UNITS_MENU].get_selected_item()
             current_action.set_targets(targets)
 
-    def add_player_marker(self, focused_sprite):
-        if any(self.__player_markers):
-            self.remove_player_markers()  # delete any old markers
+    def __add_marker(self, unit, green=True):
 
-        rect = pygame.Rect((0, 0), UIConstants.MARKER_GREEN_SIZE)  # create a temp rect
-        rect.top = focused_sprite.get_rect().top - int(rect.height / 2)
-        rect.left = focused_sprite.get_rect().centerx - int(rect.width / 2)
+        if green:
+            marker_spritesheet = UIConstants.MARKER_GREEN_SPRITE_SHEET
+            marker_size = UIConstants.MARKER_GREEN_SIZE
+        else:
+            marker_spritesheet = UIConstants.MARKER_RED_SPRITE_SHEET
+            marker_size = UIConstants.MARKER_RED_SIZE
+
+        rect = pygame.Rect((0, 0), marker_size)  # create a temp rect
+        rect.top = unit.get_rect().top - int(rect.height / 2)
+        rect.left = unit.get_rect().centerx - int(rect.width / 2)
         position = rect.topleft  # draw the marker right above the focused_sprite
-        self.__player_markers.append(AnimatedObject(UIConstants.MARKER_GREEN_SPRITE_SHEET,
-                                                    UIConstants.MARKER_GREEN_SIZE,
-                                                    position=position,
-                                                    object_type=GameConstants.ALL_GAME_OBJECTS))
+
+        marker = AnimatedObject(marker_spritesheet, marker_size,
+                                position=position,
+                                object_type=GameConstants.ALL_GAME_OBJECTS)
+
         # add to game engine sprites group
         game_engine = self.scene.get_game()
-        for marker in self.__player_markers:
-            game_engine.add_sprite_to_group(marker, marker.get_type())
+        game_engine.add_sprite_to_group(marker, marker.get_size())
+        return marker
 
-    def __remove_markers(self, markers):
-        for marker in markers:
-            if marker is not None:
-                marker.kill()
-        return
+    def add_player_marker(self, player_units):
+        if type(player_units) is not list:
+            player_units = [player_units]
+
+        self.remove_player_markers()
+
+        for unit in player_units:
+            self.__player_markers.append(self.__add_marker(unit, True))
+
+    def add_computer_markers(self, computer_units):
+        if type(computer_units) is not list:
+            computer_units = [computer_units]
+
+        self.remove_computer_markers()
+
+        for unit in computer_units:
+            self.__computer_markers.append(self.__add_marker(unit, False))
 
     def remove_player_markers(self):
-        self.__remove_markers(self.__player_markers)
+        for marker in self.__player_markers:
+            marker.kill()
         self.__player_markers = []
 
     def remove_computer_markers(self):
-        self.__remove_markers(self.__computer_markers)
+        for marker in self.__computer_markers:
+            marker.kill()
         self.__computer_markers = []

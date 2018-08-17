@@ -18,6 +18,9 @@ class UnitsMenu(Menu):
         super(UnitsMenu, self).__init__(image_path, image_size, menu_options_list, position)
         self.unset_focused()
 
+    def __repr__(self):
+        return "UnitsMenu"
+
     def update_menu(self):
 
         # TODO: need to think, maybe this update should happen only when there is actual change to a unit
