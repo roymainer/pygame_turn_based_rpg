@@ -1,5 +1,14 @@
 import os
 
+UNIT_TYPE_MELEE = 0
+UNIT_TYPE_RANGE = 1
+UNIT_TYPE_MAGIC = 2
+
+ACTION_ATTACK = "Attack"
+ACTION_SKILLS = "Skills"
+ACTION_ITEMS = "Items"
+ACTION_MAGIC = "Magic"
+
 
 def get_sprite_sheet_path(file_name):
     return os.path.join("Assets", "Graphics", "Characters", file_name)
@@ -7,17 +16,16 @@ def get_sprite_sheet_path(file_name):
 
 def get_unit_actions(unit):
     unit_type = unit.get_unit_type()
-    if unit_type == Bestiary.UNIT_TYPE_MELEE:
-        return ["Attack", "Skills", "Items"]
-    if unit_type == Bestiary.UNIT_TYPE_RANGE:
-        return ["Attack", "Skills", "Items"]
+    if unit_type == UNIT_TYPE_MELEE:
+        return [ACTION_ATTACK, ACTION_SKILLS, ACTION_ITEMS]
+    if unit_type == UNIT_TYPE_RANGE:
+        return [ACTION_ATTACK, ACTION_SKILLS, ACTION_ITEMS]
+    if unit_type == UNIT_TYPE_MAGIC:
+        return [ACTION_ATTACK, ACTION_MAGIC, ACTION_SKILLS, ACTION_ITEMS]
     return
 
 
 class Bestiary:
-
-    UNIT_TYPE_MELEE = 0
-    UNIT_TYPE_RANGE = 1
 
     NAME = "Name",
     UNIT_TYPE = "Unit_Type"

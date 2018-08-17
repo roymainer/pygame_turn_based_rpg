@@ -62,9 +62,6 @@ class GameConstants:
     DARK_LAIR = os.path.join("Assets", "Graphics", "dark_lair.png")
     CAVE_TILE = os.path.join("Assets", "Graphics", "cave_tile.png")
 
-    TRIANGLE_TOP_DOWN_SHEET = os.path.join("Assets", "Graphics", "triangle_top_down_sprite_sheet.png")
-    TRIANGLE_TOP_DOWN_SIZE = (int(33 * 0.5), int(59 * 0.5))
-
     """ COLORS """
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)

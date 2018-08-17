@@ -26,7 +26,8 @@ class Menu(UIObject):
         self.__menu_items_list = []
         self.add_menu_items(menu_options)
 
-        self.__pointer = MenuPointer(self)  # a pointer sprite to select menu items
+        self.__pointer = None
+        self.set_pointer()  # a pointer sprite to select menu items
         self.__menu_item_selected = None  # the selected menu item
         self.__focused = True  # active menu True/False
 
@@ -71,8 +72,17 @@ class Menu(UIObject):
         item = self.__menu_items_list[index]
         self.__menu_items_list.remove(item)
 
+    def set_pointer(self):
+        self.__pointer = MenuPointer(self)
+
     def get_pointer(self):
         return self.__pointer
+
+    def remove_pointer(self):
+        if self.__pointer is not None:
+            self.__pointer.kill()
+            self.__pointer = None
+        return
 
     def is_focused(self):
         return self.__focused
@@ -82,6 +92,10 @@ class Menu(UIObject):
 
     def unset_focused(self):
         self.__focused = False
+        
+    def kill(self):
+        self.__pointer.kill()
+        super(Menu, self).kill()
 
 
 if __name__ == "__main__":

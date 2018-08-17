@@ -1,6 +1,4 @@
-import operator
-
-from Shared.Bestiary import Bestiary
+from Shared.Bestiary import UNIT_TYPE_MELEE, UNIT_TYPE_RANGE
 
 
 class TurnManager:
@@ -25,9 +23,9 @@ class TurnManager:
 
         unit_type = new_unit.get_unit_type()
 
-        if unit_type == Bestiary.UNIT_TYPE_MELEE:
+        if unit_type == UNIT_TYPE_MELEE:
             units_list.insert(0, new_unit)  # Melee units are lower indexed (front line)
-        elif unit_type == Bestiary.UNIT_TYPE_RANGE:
+        elif unit_type == UNIT_TYPE_RANGE:
             units_list.append(new_unit)
 
         self.__sort_all_units_list()  # sort the units each time we add another one
@@ -36,7 +34,7 @@ class TurnManager:
     def __remove_unit(self, units_list, unit):
         if self.__all_units_sorted[self.__current_unit] == unit:
             # if current turn's unit is the unit to remove, increment the index
-            self.get_next_unit()  # ignore the return value
+            self.set_next_unit()  # ignore the return value
         units_list.remove(unit)  # remove the unit from the list
         self.__sort_all_units_list()
         return
@@ -56,12 +54,11 @@ class TurnManager:
     def get_current_unit(self):
         return self.__all_units_sorted[self.__current_unit]
 
-    def get_next_unit(self):
+    def set_next_unit(self):
         self.__current_unit += 1
         if self.__current_unit == len(self.__all_units_sorted):
             self.__current_unit = 0
-
-        return self.__all_units_sorted[self.__current_unit]
+        # return self.__all_units_sorted[self.__current_unit]
 
     def get_all_units_list(self):
         return self.__all_units_sorted
