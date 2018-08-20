@@ -70,3 +70,6 @@ class Character(AnimatedObject):
     def get_unit_type(self):
         return self.__attributes[Bestiary.UNIT_TYPE]
 
+    def is_killed(self):
+        return self.get_wounds() <= 0
+

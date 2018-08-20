@@ -2,7 +2,7 @@ from Shared import Bestiary, Rolls
 
 """ Key (unit_ws) : value (dict : key (enemy_ws) : value (dice roll to hit)) """
 # rows: unit's weapon skill, columns: target's weapon skill
-TO_HIT_CHART = {
+TO_HIT_CHART_CLOSE_COMBAT = {
     1: {1: 4, 2: 4, 3: 5, 4: 5, 5: 5, 6: 5, 7: 5, 8: 5, 9: 5, 10: 5},
     2: {1: 3, 2: 4, 3: 4, 4: 4, 5: 5, 6: 5, 7: 5, 8: 5, 9: 5, 10: 5},
     3: {1: 3, 2: 3, 3: 4, 4: 4, 5: 4, 6: 4, 7: 5, 8: 5, 9: 5, 10: 5},
@@ -14,6 +14,8 @@ TO_HIT_CHART = {
     9: {1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 4, 10: 4},
     10: {1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 3, 10: 4},
 }
+
+TO_HIT_CHART_RANGED = {1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1, 7: 0, 8: -1, 9: -2, 10: -3}
 
 # rows: unit's strength, columns: target_toughness
 TO_WOUND_CHART = {
@@ -93,7 +95,7 @@ class UnitAction:
         else:
             return False
 
-    def get_roll_to_hit(self, target) -> bool:
+    def get_roll_to_hit_close_combat(self, target) -> bool:
         print("Rolling to hit:")
         roll = Rolls.get_d6_roll()
         if roll == 6:
@@ -105,7 +107,26 @@ class UnitAction:
         else:
             ws = self.__unit.get_weapon_skill()
             target_ws = target.get_weapon_skill()
-            required_roll = TO_HIT_CHART[ws][target_ws]
+            required_roll = TO_HIT_CHART_CLOSE_COMBAT[ws][target_ws]
+            if roll >= required_roll:
+                print("Target hit!")
+                return True
+        print("Missed target!")
+        return False
+
+    def get_roll_to_hit_ranged(self, target) -> bool:
+        # TODO: target might be behind cover
+        print("Rolling to hit:")
+        roll = Rolls.get_d6_roll()
+        if roll == 6:
+            print("Target hit!")
+            return True
+        elif roll == 1:
+            print("Missed target!")
+            return False
+        else:
+            bs = self.__unit.get_ballistic_skill()
+            required_roll = TO_HIT_CHART_RANGED[bs]
             if roll >= required_roll:
                 print("Target hit!")
                 return True
@@ -145,12 +166,13 @@ class UnitAction:
             target_armor = target.get_armor()
             target_wards = target.get_wards()
 
-            if Bestiary.WARD_SHIELD_ENCHANTED in target_wards:
-                target_armor -= 1
+            required_roll = ARMOR_SAVES[target_armor]  # the required target roll to be saved by the armor
 
-            required_roll = ARMOR_SAVES[target_armor]
+            if Bestiary.WARD_SHIELD_ENCHANTED in target_wards:
+                required_roll -= 1
+
             armor_modifier = ARMOR_SAVE_MODIFIER[s]
-            roll = roll - armor_modifier  # the stronger the weapon, the lower the chance that the armor will block
+            roll += armor_modifier  # the stronger the weapon, the lower the chance that the armor will block
             if roll >= required_roll:
                 print("Target saved by armor!")
                 return True
@@ -185,7 +207,6 @@ class UnitAction:
         return False
 
     def perform_action(self):
-        # TODO: add animations
         unit_type = self.__unit.get_unit_type()
 
         action = self.get_action()
@@ -193,17 +214,42 @@ class UnitAction:
         if action == Bestiary.ACTION_ATTACK:
             if unit_type == Bestiary.UNIT_TYPE_MELEE:
                 self.__unit.set_action("attack1")
+                number_of_attacks = self.__unit.get_attacks()
+                for a in range(number_of_attacks):
+
+                    alive_targets = [x for x in self.__targets if not x.is_killed()]
+
+                    if not any(alive_targets):
+                        # if all targets eliminated return
+                        self.__finished = True
+                        return
+
+                    # target = self.__targets[0]  # 1st target
+                    target = alive_targets[0]  # get the first remaining alive target
+
+                    hit = self.get_roll_to_hit_close_combat(target)
+                    if hit:
+                        wound = self.get_roll_to_wound(target)
+                        if wound:
+                            saved_by_armor = self.get_armor_saving_throw(target)
+                            if not saved_by_armor:
+                                saved_by_ward = self.get_ward_saving_throw(target)
+                                if saved_by_ward:
+                                    continue
+                                else:
+                                    target_wounds = target.get_wounds()
+                                    target.set_wounds(target_wounds - 1)
+
             elif unit_type == Bestiary.UNIT_TYPE_RANGE:
                 self.__unit.set_action("bow")
-            number_of_attacks = self.__unit.get_attacks()
-            for a in range(number_of_attacks):
+                # ranged units can only shoot once
 
                 if not any(self.__targets):
                     # if all targets eliminated return
                     return
 
                 target = self.__targets[0]  # 1st target
-                hit = self.get_roll_to_hit(target)
+                hit = self.get_roll_to_hit_close_combat(target)
                 if hit:
                     wound = self.get_roll_to_wound(target)
                     if wound:
@@ -211,17 +257,26 @@ class UnitAction:
                         if not saved_by_armor:
                             saved_by_ward = self.get_ward_saving_throw(target)
                             if saved_by_ward:
-                                continue
+                                return
                             else:
                                 target_wounds = target.get_wounds()
                                 target.set_wounds(target_wounds - 1)
-                                self.__finished = True
+
+            self.__finished = True
 
     def is_finished(self):
         if self.__finished:
             if self.__unit.is_animation_cycle_done():
-                self.__finished = False
-                return True
+                self.__unit.set_action("idle")
+
+                """ Animate targets death """
+                for target in self.__targets:
+                    if target.is_killed():
+                        target.set_action("die")
+
+                if target.is_animation_cycle_done():
+                    self.__finished = False
+                    return True
         else:
             return self.__finished
 

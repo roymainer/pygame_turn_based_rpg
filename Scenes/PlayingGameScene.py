@@ -72,17 +72,29 @@ class PlayingGameScene(Scene):
             self.__UI.remove_marker()  # delete the marker
             self.__UI.remove_actions_menu()  # remove the actions menu
 
+        """ Perform Action """
         if self.__current_action.is_ready():
             self.__current_action.perform_action()
 
+        """ Wait for animation to finish """
         if self.__current_action.is_finished():
-            self.__current_unit.set_action("idle")
+
+            """ Remove any dead units """
+            for unit in self.__turn_manager.get_all_units_list():
+                if unit.is_killed():
+                    unit.kill()
+                    self.__turn_manager.remove_unit(unit)
+
+            # self.__current_unit.set_action("idle")  # return acting unit to idle
             self.__current_action = None  # remove the current action
             self.__current_unit = None  # remove the current unit
             self.__turn_manager.set_next_unit()  # advance the turn manager to next unit
 
     def get_current_action(self):
         return self.__current_action
+
+    def get_turn_manager(self):
+        return self.__turn_manager
 
     def load_level(self):
         # load adventurer
@@ -150,6 +162,3 @@ class PlayingGameScene(Scene):
 
         self.get_game().set_background(surface)
         return
-
-    def get_turn_manager(self):
-        return self.__turn_manager

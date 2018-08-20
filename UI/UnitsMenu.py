@@ -32,13 +32,15 @@ class UnitsMenu(Menu):
     def get_selectd_unit(self):
         return self.__units_list[self.get_index()]
 
-    def update_menu(self, game):
-
-        # TODO: need to think, maybe this update should happen only when there is actual change to a unit
+    def update_menu(self, game, units_list):
 
         # clear the menu
         while self.get_menu_items_count() > 0:
             self.remove_item_from_menu(0)
+            self.__units_list = []
+
+        # update units list
+        self.__units_list = units_list
 
         # populate menu with new strings
         for unit in self.__units_list:

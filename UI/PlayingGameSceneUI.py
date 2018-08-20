@@ -31,8 +31,13 @@ class PlayingGameSceneUI:
         self.__pointer = MenuPointer()
 
     def update_units_menu(self):
-        self.__menus[PLAYER_UNITS_MENU].update_menu(self.scene.get_game())
-        self.__menus[COMPUTER_UNITS_MENU].update_menu(self.scene.get_game())
+        tm = self.scene.get_turn_manager()
+
+        player_units = tm.get_all_player_units()
+        self.__menus[PLAYER_UNITS_MENU].update_menu(self.scene.get_game(), player_units)
+
+        computer_units = tm.get_all_computer_units()
+        self.__menus[COMPUTER_UNITS_MENU].update_menu(self.scene.get_game(), computer_units)
 
     def __add_player_units_menu(self):
         menu_size = (GameConstants.PLAYER_UNITS_MENU_WIDTH,

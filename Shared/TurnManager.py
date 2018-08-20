@@ -45,12 +45,6 @@ class TurnManager:
     def add_computer_unit(self, new_unit):
         self.__add_unit(self.__computer_units, new_unit)
 
-    def remove_player_unit(self, unit):
-        self.__remove_unit(self.__player_units, unit)
-
-    def remove_computer_unit(self, unit):
-        self.__remove_unit(self.__computer_units, unit)
-
     def get_current_unit(self):
         return self.__all_units_sorted[self.__current_unit]
 
@@ -78,3 +72,18 @@ class TurnManager:
 
     def get_all_computer_units(self):
         return self.__computer_units
+
+    def remove_unit(self, unit):
+
+        if unit in self.__player_units:
+            self.__player_units.remove(unit)
+        elif unit in self.__computer_units:
+            self.__computer_units.remove(unit)
+
+        if unit in self.__all_units_sorted:
+            if self.__all_units_sorted[self.__current_unit] == unit:
+                # if current turn's unit is the unit to remove, increment the index
+                self.set_next_unit()  # ignore the return value
+
+            self.__sort_all_units_list()  # sort all units again
+        return

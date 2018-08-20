@@ -69,6 +69,7 @@ class Bestiary:
               SIZE: (50 * 3, 37 * 3)}
     WARRIOR = {NAME: "Warrior", UNIT_TYPE: UNIT_TYPE_MELEE,
                M: 5, WS: 4, BS: 5, S: 3, T: 3, W: 1, I: 5, A: 1, LD: 8,
+               # M: 5, WS: 9, BS: 5, S: 9, T: 3, W: 1, I: 5, A: 9, LD: 8,
                ARMOR: ARMOR_LIGHT,
                WARD: [WARD_NONE],
                SPRITE_SHEET: get_sprite_sheet_path("dark_sprite_sheet.png"),
@@ -90,4 +91,4 @@ class Bestiary:
                 ARMOR: ARMOR_NONE,
                 WARD: [WARD_NONE],
                 SPRITE_SHEET: get_sprite_sheet_path("skeleton_sprite_sheet.png"),
-                SIZE: (50 * 3, 37 * 3)}
+                SIZE: (50 * 2, 37 * 2)}
