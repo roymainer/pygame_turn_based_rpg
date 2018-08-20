@@ -55,7 +55,7 @@ class GameConstants:
     COMPUTER_BOTTOM_FRONT = (COMPUTER_FRONT_COLUMN, PLAYERS_BOTTOM_ROW)
 
     """ Menus """
-    PLAYER_UNITS_MENU_WIDTH = PLAYERS_FRONT_COLUMN + 2 * PADX
+    PLAYER_UNITS_MENU_WIDTH = PLAYERS_FRONT_COLUMN + 1 * PADX
     COMPUTER_UNITS_MENU_WIDTH = SCREEN_SIZE[0] - COMPUTER_FRONT_COLUMN + PADX
 
     """ SPRITES """
@@ -63,8 +63,16 @@ class GameConstants:
     CAVE_TILE = os.path.join("Assets", "Graphics", "cave_tile.png")
 
     """ COLORS """
-    BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
-    BRIGHT_GREEN = (0, 255, 0)  # lime
+    BLACK = (0, 0, 0)
+    BRIGHTRED = (255, 0, 0)
+    RED = (155, 0, 0,)
+    BRIGHTGREEN = (0, 255, 0)
+    GREEN = (0, 155, 0)
+    BRIGHTBLUE = (0, 0, 255)
+    BLUE = (0, 0, 155)
+    BRIGHTYELLOW = (255, 255, 0)
+    YELLOW = (155, 155, 0)
+    DARKGRAY = (40, 40, 40)
 
     TEXT_SIZE_SMALL = 17

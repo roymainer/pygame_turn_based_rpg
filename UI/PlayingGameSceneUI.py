@@ -30,12 +30,18 @@ class PlayingGameSceneUI:
         self.__computer_markers = []
         self.__pointer = MenuPointer()
 
+    def update_units_menu(self):
+        self.__menus[PLAYER_UNITS_MENU].update_menu(self.scene.get_game())
+        self.__menus[COMPUTER_UNITS_MENU].update_menu(self.scene.get_game())
+
     def __add_player_units_menu(self):
         menu_size = (GameConstants.PLAYER_UNITS_MENU_WIDTH,
                      GameConstants.SCREEN_SIZE[1] - GameConstants.BATTLE_AREA_BOTTOM)
 
         characters_list = []
-        for scene_object in self.scene.get_scene_objects_list():
+        tm = self.scene.get_turn_manager()
+        player_units = tm.get_all_player_units()
+        for scene_object in player_units:
             if scene_object.get_type() == GameConstants.PLAYER_GAME_OBJECTS:
                 characters_list.append(scene_object)
         menu_position = (0, GameConstants.BATTLE_AREA_BOTTOM)
@@ -53,7 +59,9 @@ class PlayingGameSceneUI:
                      GameConstants.SCREEN_SIZE[1] - GameConstants.BATTLE_AREA_BOTTOM)
 
         characters_list = []
-        for scene_object in self.scene.get_scene_objects_list():
+        tm = self.scene.get_turn_manager()
+        computer_units = tm.get_all_computer_units()
+        for scene_object in computer_units:
             if scene_object.get_type() == GameConstants.COMPUTER_GAME_OBJECTS:
                 characters_list.append(scene_object)
         menu_position = (GameConstants.COMPUTER_FRONT_COLUMN - GameConstants.PADX, GameConstants.BATTLE_AREA_BOTTOM)
@@ -89,6 +97,7 @@ class PlayingGameSceneUI:
             game_engine.add_sprite_to_group(menu.get_item_from_menu(i))
         self.__pointer.assign_pointer_to_menu(menu)
         game_engine.add_sprite_to_group(self.__pointer, 0)
+        # noinspection PyTypeChecker
         self.__menus[ACTIONS_MENU] = menu
 
     def remove_actions_menu(self):
@@ -96,10 +105,11 @@ class PlayingGameSceneUI:
 
     def set_focused_menu(self, menu):
         # remove focus from all other menus
-        for menu in self.__menus.values():
-            menu.unset_focused()
+        for _menu in self.__menus.values():
+            _menu.unset_focused()
 
         menu.set_focused()
+        menu.get_selected_item().unmark_string()  # unmark selected option text
         self.__pointer.assign_pointer_to_menu(menu)
         return
 
@@ -123,31 +133,46 @@ class PlayingGameSceneUI:
 
     def move_pointer_up(self):
         self.__move_pointer(UP)
+        if self.__menus[COMPUTER_UNITS_MENU].is_focused():
+            # TODO: what happens when many units are selected?
+            tm = self.scene.get_turn_manager()
+            unit_index = self.__menus[COMPUTER_UNITS_MENU].get_index()
+            unit = tm.get_computer_unit(unit_index)  # fix unit offset
+            self.add_computer_markers(unit)
 
     def move_pointer_down(self):
         self.__move_pointer(DOWN)
+        if self.__menus[COMPUTER_UNITS_MENU].is_focused():
+            # TODO: what happens when many units are selected?
+            tm = self.scene.get_turn_manager()
+            unit_index = self.__menus[COMPUTER_UNITS_MENU].get_index()
+            unit = tm.get_computer_unit(unit_index)  # fix unit offset
+            self.add_computer_markers(unit)
 
     def return_to_previous_menu(self):
         if self.__menus[COMPUTER_UNITS_MENU].is_focused() or self.__menus[PLAYER_UNITS_MENU].is_focused():
-            self.__menus[COMPUTER_UNITS_MENU].unset_focused()
-            self.__menus[PLAYER_UNITS_MENU].unset_focused()
-            self.__menus[ACTIONS_MENU].set_focused()
+            self.set_focused_menu(menu=self.__menus[ACTIONS_MENU])
         return
 
     def add_menu_selection_to_current_action(self):
         focused_menu = self.get_focused_menu()
-        current_action = self.scene.get_current_action()
+        focused_menu.get_selected_item().mark_string()  # mark the selected text
+        current_action = self.scene.get_current_action()  # get current_action object from the scene
         if self.__menus[ACTIONS_MENU].is_focused():
-            current_action.set_action(focused_menu.get_selected_item())
-            action = focused_menu.get_selected_item()
-            if action.get_string() == ACTION_ATTACK:
+            action_string = focused_menu.get_selected_item().get_string()  # get selected action string
+            if action_string == ACTION_ATTACK:
+                current_action.set_action(action_string)  # action is a string
                 self.set_focused_menu(self.__menus[COMPUTER_UNITS_MENU])
-            elif action.get_string() == ACTION_MAGIC:
+                tm = self.scene.get_turn_manager()
+                self.add_computer_markers(tm.get_computer_unit(0))  # return the first computer unit and mark it
+            elif action_string == ACTION_MAGIC:
                 # TODO: add this
                 pass
         elif self.__menus[COMPUTER_UNITS_MENU].is_focused():
-            targets = self.__menus[COMPUTER_UNITS_MENU].get_selected_item()
+            # targets = self.__menus[COMPUTER_UNITS_MENU].get_selected_item()
+            targets = self.__menus[COMPUTER_UNITS_MENU].get_selectd_unit()
             current_action.set_targets(targets)
+            self.remove_computer_markers()
         elif self.__menus[PLAYER_UNITS_MENU].is_focused():
             targets = self.__menus[PLAYER_UNITS_MENU].get_selected_item()
             current_action.set_targets(targets)
@@ -183,6 +208,7 @@ class PlayingGameSceneUI:
 
         for unit in player_units:
             self.__player_markers.append(self.__add_marker(unit, True))
+            self.mark_player_item(unit)
 
     def add_computer_markers(self, computer_units):
         if type(computer_units) is not list:
@@ -198,7 +224,28 @@ class PlayingGameSceneUI:
             marker.kill()
         self.__player_markers = []
 
+        self.unmark_computer_items()
+
     def remove_computer_markers(self):
         for marker in self.__computer_markers:
             marker.kill()
         self.__computer_markers = []
+
+        self.unmark_player_items()
+
+    def mark_player_item(self, unit):
+        for i in range(self.__menus[PLAYER_UNITS_MENU].get_menu_items_count()):
+            menu_unit = self.__menus[PLAYER_UNITS_MENU].get_unit_by_index(i)
+            if menu_unit == unit:
+                item = self.__menus[PLAYER_UNITS_MENU].get_item_from_menu(i)
+                item.mark_string()
+
+    def unmark_player_items(self):
+        for i in range(self.__menus[PLAYER_UNITS_MENU].get_menu_items_count()):
+            item = self.__menus[PLAYER_UNITS_MENU].get_item_from_menu(i)
+            item.unmark_string()
+
+    def unmark_computer_items(self):
+        for i in range(self.__menus[COMPUTER_UNITS_MENU].get_menu_items_count()):
+            item = self.__menus[COMPUTER_UNITS_MENU].get_item_from_menu(i)
+            item.unmark_string()

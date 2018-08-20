@@ -45,10 +45,14 @@ class AnimatedObject(GameObject):
     def set_action(self, action):
         if action not in self.get_actions_list():
             return
+        self.__animator.reset_animation()
         self.__action = action
 
     def get_action(self):
         return self.__action
+
+    def is_animation_cycle_done(self):
+        return self.__animator.is_animation_cycle_done()
 
     def get_actions_list(self):
         return self.__animator.get_animations_keys()

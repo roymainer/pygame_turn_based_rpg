@@ -40,6 +40,9 @@ class Character(AnimatedObject):
     def get_toughness(self):
         return self.__attributes[Bestiary.T]
 
+    def set_wounds(self, wounds):
+        self.__current_wounds = wounds
+
     def get_wounds(self):
         return self.__current_wounds
 
@@ -55,5 +58,15 @@ class Character(AnimatedObject):
     def get_leadership(self):
         return self.__attributes[Bestiary.LD]
 
+    def get_armor(self):
+        return self.__attributes[Bestiary.ARMOR]
+
+    def get_wards(self):
+        return self.__attributes[Bestiary.WARD]
+
+    def remove_ward(self, ward):
+        self.__attributes[Bestiary.WARD].remove(ward)
+
     def get_unit_type(self):
         return self.__attributes[Bestiary.UNIT_TYPE]
+

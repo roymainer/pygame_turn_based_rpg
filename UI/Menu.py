@@ -3,7 +3,6 @@ import pygame
 from Shared.GameConstants import GameConstants
 from Shared.MiniGameEngine import MiniGameEngine
 from Shared.UIConstants import UIConstants
-# from UI.MenuPointer import MenuPointer
 from UI.Text import Text
 from UI.UIObject import UIObject
 from typing import Tuple
@@ -26,13 +25,13 @@ class Menu(UIObject):
         self.__menu_items_list = []
         self.add_menu_items(menu_options)
 
-        # self.__pointer = None
-        # self.set_pointer()  # a pointer sprite to select menu items
-
         self.__menu_item_selected = None  # the selected menu item
         self.__focused = True  # active menu True/False
 
         self.__index = 0  # index of selected menu item
+
+    def __repr__(self):
+        return "Menu"
 
     def add_text_to_menu(self, string):
 
@@ -51,7 +50,6 @@ class Menu(UIObject):
         self.__menu_items_list.append(menu_item)
 
     def move_pointer_up(self):
-        # self.__pointer.move_up()
         # only change the index, the pointer will update it's position accordingly
         if self.__index == 0:
             # if pointing at top menu item, overlap to bottom item
@@ -60,7 +58,6 @@ class Menu(UIObject):
             self.__index -= 1
 
     def move_pointer_down(self):
-        # self.__pointer.move_down()
         # only change the index, the pointer will update it's position accordingly
         if self.__index == len(self.__menu_items_list) - 1:  # if pointing to the last menu item
             self.__index = 0
@@ -85,19 +82,8 @@ class Menu(UIObject):
 
     def remove_item_from_menu(self, index):
         item = self.__menu_items_list[index]
+        item.kill()
         self.__menu_items_list.remove(item)
-
-    # def set_pointer(self):
-    #     self.__pointer = MenuPointer(self)
-    #
-    # def get_pointer(self):
-    #     return self.__pointer
-    #
-    # def remove_pointer(self):
-    #     if self.__pointer is not None:
-    #         self.__pointer.kill()
-    #         self.__pointer = None
-    #     return
 
     def is_focused(self):
         return self.__focused

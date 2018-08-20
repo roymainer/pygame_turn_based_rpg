@@ -35,10 +35,25 @@ class Text(UIObject):
 
         font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
 
-        self.image = font_obj.render(text=self.__string,
-                                     antialias=False,
-                                     color=self.__text_color,
-                                     background=self.__background_color)
+        self.image = font_obj.render(self.__string, False, self.__text_color, self.__background_color)
+
+        topleft = self.rect.topleft  # save previous position
+        self.rect = self.image.get_rect()  # create a new rect
+        self.rect.topleft = topleft  # update new rects position
+
+    def mark_string(self):
+        font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
+
+        self.image = font_obj.render(self.__string, False, GameConstants.BRIGHTGREEN, self.__background_color)
+
+        topleft = self.rect.topleft  # save previous position
+        self.rect = self.image.get_rect()  # create a new rect
+        self.rect.topleft = topleft  # update new rects position
+
+    def unmark_string(self):
+        font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
+
+        self.image = font_obj.render(self.__string, False, self.__text_color, self.__background_color)
 
         topleft = self.rect.topleft  # save previous position
         self.rect = self.image.get_rect()  # create a new rect

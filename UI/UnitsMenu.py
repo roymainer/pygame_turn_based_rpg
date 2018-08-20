@@ -1,8 +1,13 @@
+from Shared.UIConstants import UIConstants
 from UI.Menu import Menu
 
 
 def get_string(unit):
-    return unit.get_name() + " "*20 + "HP: " + str(unit.get_wounds()) + "/" + str(unit.get_max_wounds())
+    string = unit.get_name() + "_" + "HP: " + str(unit.get_wounds()) + "/" + str(unit.get_max_wounds())
+    num_chars = len(string)
+    delta_chars = UIConstants.MENU_MAX_CHARS - num_chars
+    string = string.replace("_", " "*delta_chars)
+    return string
 
 
 class UnitsMenu(Menu):
@@ -21,7 +26,13 @@ class UnitsMenu(Menu):
     def __repr__(self):
         return "UnitsMenu"
 
-    def update_menu(self):
+    def get_unit_by_index(self, index):
+        return self.__units_list[index]
+
+    def get_selectd_unit(self):
+        return self.__units_list[self.get_index()]
+
+    def update_menu(self, game):
 
         # TODO: need to think, maybe this update should happen only when there is actual change to a unit
 
@@ -33,6 +44,9 @@ class UnitsMenu(Menu):
         for unit in self.__units_list:
             string = get_string(unit)
             self.add_text_to_menu(string)
+
+        for i in range(self.get_menu_items_count()):
+            game.add_sprite_to_group(self.get_item_from_menu(i))
 
         return
 

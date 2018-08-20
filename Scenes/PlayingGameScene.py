@@ -33,8 +33,10 @@ class PlayingGameScene(Scene):
                     self.__UI.return_to_previous_menu()
                 if event.key == pygame.K_UP:
                     self.__UI.move_pointer_up()
+                    # need to add move computer marker up
                 if event.key == pygame.K_DOWN:
                     self.__UI.move_pointer_down()
+                    # need to add move computer marker down
                 if event.key == pygame.K_RETURN:
                     self.__UI.add_menu_selection_to_current_action()
 
@@ -56,15 +58,12 @@ class PlayingGameScene(Scene):
         current_unit = self.__turn_manager.get_current_unit()
         if current_unit is not None:
             if current_unit != self.__current_unit:
+                self.__UI.update_units_menu()
                 self.__current_unit = current_unit  # store the current unit
                 self.__current_action = UnitAction(current_unit)  # create a new action for the unit
                 self.__UI.add_player_marker(current_unit)  # add a new marker for the unit
                 print("Current Unit's turn: {}".format(current_unit.get_name()))
                 self.__UI.add_actions_menu(current_unit)  # add new actions menu for the unit
-                game = self.get_game()
-                sprites = game.get_sprites_group(GameConstants.ALL_GAME_OBJECTS)
-                # print("Number of sprites: " + str(len(sprites.spritedict)))
-                # print("Sprites: "+str(sprites.spritedict.keys()))
         else:
             # if current unit is none
             # TODO: this code should never be reached, I need to check if there are no more computer/player units
@@ -75,6 +74,9 @@ class PlayingGameScene(Scene):
 
         if self.__current_action.is_ready():
             self.__current_action.perform_action()
+
+        if self.__current_action.is_finished():
+            self.__current_unit.set_action("idle")
             self.__current_action = None  # remove the current action
             self.__current_unit = None  # remove the current unit
             self.__turn_manager.set_next_unit()  # advance the turn manager to next unit
@@ -87,7 +89,7 @@ class PlayingGameScene(Scene):
         object_type = GameConstants.PLAYER_GAME_OBJECTS
         self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_TOP_BACK, object_type)
         self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_MIDDLE_BACK, object_type)
-        self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_BOTTOM_BACK, object_type)
+        self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
         self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_TOP_FRONT, object_type)
         self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_MIDDLE_FRONT, object_type)
         self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_BOTTOM_FRONT, object_type)
@@ -96,13 +98,13 @@ class PlayingGameScene(Scene):
         self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_TOP_BACK, object_type)
         self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_MIDDLE_BACK, object_type)
         self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_BOTTOM_BACK, object_type)
-        self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_TOP_FRONT, object_type)
-        self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_MIDDLE_FRONT, object_type)
-        self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_BOTTOM_FRONT, object_type)
+        self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_TOP_FRONT, object_type, turn_left=True)
+        self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_MIDDLE_FRONT, object_type, turn_left=True)
+        self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_BOTTOM_FRONT, object_type, turn_left=True)
 
         return
 
-    def load_character(self, character_attributes, position, object_type):
+    def load_character(self, character_attributes, position, object_type, turn_left=False):
         sprite_sheet = character_attributes[Bestiary.SPRITE_SHEET]
         size = character_attributes[Bestiary.SIZE]
         new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
@@ -110,7 +112,10 @@ class PlayingGameScene(Scene):
         character = Character(attributes=character_attributes, spritesheet_file=sprite_sheet, size=size,
                               position=new_position, object_type=object_type)  # init adventurer
 
-        self.add_scene_object(character)  # add to scene objects list
+        if turn_left:
+            character.turn_left()
+
+        # self.add_scene_object(character)  # add to scene objects list
         if object_type == GameConstants.PLAYER_GAME_OBJECTS:
             self.__turn_manager.add_player_unit(character)
         elif object_type == GameConstants.COMPUTER_GAME_OBJECTS:
@@ -145,3 +150,6 @@ class PlayingGameScene(Scene):
 
         self.get_game().set_background(surface)
         return
+
+    def get_turn_manager(self):
+        return self.__turn_manager

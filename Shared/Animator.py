@@ -51,6 +51,7 @@ class Animator(object):
         self.__animation_key = ""   # animation key (name)
         self.__sprite_index = 0     # index of current sprite in animation list of sprites
         self.__flip = False  # flip the image
+        self.__animation_cycle_finished = False
 
     def get_animations_keys(self) -> []:
         return list(self.__animation_dict.keys())
@@ -86,12 +87,13 @@ class Animator(object):
         else:
             self.__sprite_index += 1
             if self.__sprite_index == len(self.__animation_dict[self.__animation_key]):
+                self.__animation_cycle_finished = True
                 self.__sprite_index = 0
 
         _image = self.__animation_dict[self.__animation_key][self.__sprite_index]
 
         if self.__flip:
-            _image = pygame.transform.flip(image, True, False)
+            _image = pygame.transform.flip(_image, True, False)
 
         return _image
 
@@ -119,8 +121,12 @@ class Animator(object):
                 self.__animation_dict[action_key][i] = pygame.transform.flip(sprite, True, False)
         return self.__animation_dict
 
+    def is_animation_cycle_done(self):
+        return self.__animation_cycle_finished
+
     def reset_animation(self):
         self.__sprite_index = 0
+        self.__animation_cycle_finished = False
 
 
 if __name__ == "__main__":

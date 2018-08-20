@@ -66,3 +66,15 @@ class TurnManager:
     def is_player_turn(self):
         current_unit = self.__all_units_sorted[self.__current_unit]
         return current_unit in self.__all_units_sorted
+    
+    def get_player_unit(self, index):
+        return self.__player_units[index]
+
+    def get_all_player_units(self):
+        return self.__player_units
+
+    def get_computer_unit(self, index):
+        return self.__computer_units[index]
+
+    def get_all_computer_units(self):
+        return self.__computer_units
