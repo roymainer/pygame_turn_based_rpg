@@ -11,7 +11,6 @@ Used both by Models and units alike
 from random import choice
 
 
-
 def get_d6_roll():
     return choice([1, 2, 3, 4, 5, 6])
 

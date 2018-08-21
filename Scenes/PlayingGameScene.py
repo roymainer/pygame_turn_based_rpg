@@ -2,10 +2,10 @@ import pygame
 
 from Scenes.Scene import Scene
 from Shared.Bestiary import *
-from Shared.Character import Character
+from Shared.Unit import Unit
 from Shared.GameConstants import GameConstants
-from Shared.TurnManager import TurnManager
-from Shared.UnitAction import UnitAction
+from TurnManager import TurnManager
+from ActionManager import ActionManager
 from UI.PlayingGameSceneUI import PlayingGameSceneUI
 
 
@@ -41,29 +41,20 @@ class PlayingGameScene(Scene):
                     self.__UI.add_menu_selection_to_current_action()
 
     def update(self):
-        # mouse_pos, mouse_clicked = self.get_game().get_mouse()
-        #
-        # focused_sprite = self.get_game().collide_point(mouse_pos)
-        # if focused_sprite is not None:
-        #     if self.__focused_sprite != focused_sprite:
-        #         self.__focused_sprite = focused_sprite
-        #         if self.__marker is not None:
-        #             self.remove_marker()
-        #         self.add_marker(focused_sprite)
-        #         print("adding marker")
-        # else:
-        #     self.remove_marker()
-        #     self.__focused_sprite = None
 
         current_unit = self.__turn_manager.get_current_unit()
         if current_unit is not None:
             if current_unit != self.__current_unit:
+                print("Current Unit's turn: {}".format(current_unit.get_name()))
                 self.__UI.update_units_menu()
                 self.__current_unit = current_unit  # store the current unit
-                self.__current_action = UnitAction(current_unit)  # create a new action for the unit
+                self.__current_action = ActionManager(current_unit)  # create a new action for the unit
                 self.__UI.add_player_marker(current_unit)  # add a new marker for the unit
-                print("Current Unit's turn: {}".format(current_unit.get_name()))
                 self.__UI.add_actions_menu(current_unit)  # add new actions menu for the unit
+
+                if current_unit in self.__turn_manager.get_all_computer_units():
+                    # check if unit is a computer unit
+                    self.play_computer_turn()
         else:
             # if current unit is none
             # TODO: this code should never be reached, I need to check if there are no more computer/player units
@@ -100,11 +91,11 @@ class PlayingGameScene(Scene):
         # load adventurer
         object_type = GameConstants.PLAYER_GAME_OBJECTS
         self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_TOP_BACK, object_type)
-        self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_MIDDLE_BACK, object_type)
-        self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
-        self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_TOP_FRONT, object_type)
-        self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_MIDDLE_FRONT, object_type)
-        self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_BOTTOM_FRONT, object_type)
+        # self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_MIDDLE_BACK, object_type)
+        # self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
+        # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_TOP_FRONT, object_type)
+        # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_MIDDLE_FRONT, object_type)
+        # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_BOTTOM_FRONT, object_type)
 
         object_type = GameConstants.COMPUTER_GAME_OBJECTS
         self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_TOP_BACK, object_type)
@@ -121,8 +112,8 @@ class PlayingGameScene(Scene):
         size = character_attributes[Bestiary.SIZE]
         new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
 
-        character = Character(attributes=character_attributes, spritesheet_file=sprite_sheet, size=size,
-                              position=new_position, object_type=object_type)  # init adventurer
+        character = Unit(attributes=character_attributes, spritesheet_file=sprite_sheet, size=size,
+                         position=new_position, object_type=object_type)  # init adventurer
 
         if turn_left:
             character.turn_left()
@@ -161,4 +152,14 @@ class PlayingGameScene(Scene):
                 surface.blit(battleground_tile, (x, y))
 
         self.get_game().set_background(surface)
+        return
+
+    def play_computer_turn(self):
+        self.__current_action.set_action(ACTION_ATTACK)
+        targets = self.__turn_manager.get_all_player_units()
+        # TODO: improve the target selection process, lowest WS/ lowest wounds/...
+        if not any(targets):
+            return
+        target = targets[0]
+        self.__current_action.set_targets(target)
         return

@@ -51,6 +51,7 @@ class TurnManager:
     def set_next_unit(self):
         self.__current_unit += 1
         if self.__current_unit == len(self.__all_units_sorted):
+            self.__sort_all_units_list()
             self.__current_unit = 0
         # return self.__all_units_sorted[self.__current_unit]
 

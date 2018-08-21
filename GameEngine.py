@@ -2,7 +2,6 @@ from typing import Tuple
 
 import pygame
 
-from Shared.Util import MousePointer
 from Scenes.MainMenuScene import MainMenuScene
 from Scenes.PlayingGameScene import PlayingGameScene
 from Shared.GameConstants import GameConstants

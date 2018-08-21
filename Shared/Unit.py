@@ -1,17 +1,21 @@
 """
 Character class is an extension of the AnimatedObject class
 it supports more actions (animations), character attributes and sounds (need to add)
+Required Actions:
+idle
+attack / shoot / cast
+items
+die
 """
-
-
+from Shared.GameConstants import GameConstants
 from Shared.AnimatedObject import AnimatedObject
-from Shared.Bestiary import Bestiary
+from Shared.Bestiary import *
 
 
-class Character(AnimatedObject):
+class Unit(AnimatedObject):
 
     def __init__(self, attributes, spritesheet_file, size, position, object_type):
-        super(Character, self).__init__(spritesheet_file, size, position, object_type)
+        super(Unit, self).__init__(spritesheet_file, size, position, object_type)
         self.set_action("idle")  # every character must have idle stance!
 
         # TODO: instead of loading from a py file need to load from an encrypted file
@@ -69,6 +73,13 @@ class Character(AnimatedObject):
 
     def get_unit_type(self):
         return self.__attributes[Bestiary.UNIT_TYPE]
+
+    def is_front_row(self):
+        position = self.get_position()
+        if position[0] == GameConstants.PLAYERS_FRONT_COLUMN or position[0] == GameConstants.COMPUTER_FRONT_COLUMN:
+            return True
+        else:
+            return False
 
     def is_killed(self):
         return self.get_wounds() <= 0

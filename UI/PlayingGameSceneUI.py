@@ -180,6 +180,8 @@ class PlayingGameSceneUI:
             self.remove_computer_markers()
         elif self.__menus[PLAYER_UNITS_MENU].is_focused():
             targets = self.__menus[PLAYER_UNITS_MENU].get_selected_item()
+            if type(targets) is not list:
+                targets = [targets]
             current_action.set_targets(targets)
 
     def __add_marker(self, unit, green=True):
@@ -254,3 +256,4 @@ class PlayingGameSceneUI:
         for i in range(self.__menus[COMPUTER_UNITS_MENU].get_menu_items_count()):
             item = self.__menus[COMPUTER_UNITS_MENU].get_item_from_menu(i)
             item.unmark_string()
+

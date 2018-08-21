@@ -1,4 +1,5 @@
-from Shared import Bestiary, Rolls
+from Shared import Bestiary
+import Rolls
 
 """ Key (unit_ws) : value (dict : key (enemy_ws) : value (dice roll to hit)) """
 # rows: unit's weapon skill, columns: target's weapon skill
@@ -47,26 +48,13 @@ WARD_SAVES = {Bestiary.WARD_NONE: 7,
               }
 
 
-# ARMOR_TYPES_DICT = {
-#     "SHIELD": -1,
-#     "MOUNTED": -1,
-#     "BARDING": -1,  # mount
-#     "LIGHT ARMOR": -1,
-#     "HEAVY ARMOR": -2,
-#     "DRAGON ARMOR": -2,
-#     "FULLPLATE ARMOR": -3,
-#     "GROMRIL ARMOR": -3,
-#     "CHAOS ARMOR": -3
-# }
-
-
-class UnitAction:
+class ActionManager:
 
     def __init__(self, unit, action=None, targets=None):
         self.__unit = unit
         self.__action = action
         self.__targets = targets
-        self.__finished = False
+        self.__finished = False  # action is finished
 
     def get_unit(self):
         return self.__unit
@@ -88,9 +76,11 @@ class UnitAction:
 
     def is_ready(self):
         if self.__finished:
+            # action already finished
             return False
 
         if self.__unit is not None and self.__action is not None and self.__targets is not None:
+            # if all parameters are different than None, the action is ready
             return True
         else:
             return False
@@ -114,6 +104,7 @@ class UnitAction:
         print("Missed target!")
         return False
 
+    # noinspection PyUnusedLocal
     def get_roll_to_hit_ranged(self, target) -> bool:
         # TODO: target might be behind cover
         print("Rolling to hit:")
@@ -155,9 +146,6 @@ class UnitAction:
     def get_armor_saving_throw(self, target) -> bool:
         print("Target rolling to armor save:")
         roll = Rolls.get_d6_roll()
-        # if roll == 6:
-        #     print("Target saved from wound!")
-        #     return True
         if roll == 1:
             print("Target armor save throw failed")
             return False
@@ -179,12 +167,10 @@ class UnitAction:
         print("Target armor save throw failed")
         return False
 
+    # noinspection PyMethodMayBeStatic
     def get_ward_saving_throw(self, target) -> bool:
         print("Target rolling to ward save:")
         roll = Rolls.get_d6_roll()
-        # if roll == 6:
-        #     print("Target saved from wound!")
-        #     return True
         if roll == 1:
             print("Target save throw failed")
             return False
@@ -208,66 +194,74 @@ class UnitAction:
 
     def perform_action(self):
         unit_type = self.__unit.get_unit_type()
-
         action = self.get_action()
         print("Perform Action: " + action)
+
+        """ ATTACK """
         if action == Bestiary.ACTION_ATTACK:
+            self.__unit.set_action("attack")
+
+            """ CLOSE_COMBAT """
             if unit_type == Bestiary.UNIT_TYPE_MELEE:
-                self.__unit.set_action("attack1")
-                number_of_attacks = self.__unit.get_attacks()
-                for a in range(number_of_attacks):
-
-                    alive_targets = [x for x in self.__targets if not x.is_killed()]
-
-                    if not any(alive_targets):
-                        # if all targets eliminated return
-                        self.__finished = True
-                        return
-
-                    # target = self.__targets[0]  # 1st target
-                    target = alive_targets[0]  # get the first remaining alive target
-
-                    hit = self.get_roll_to_hit_close_combat(target)
-                    if hit:
-                        wound = self.get_roll_to_wound(target)
-                        if wound:
-                            saved_by_armor = self.get_armor_saving_throw(target)
-                            if not saved_by_armor:
-                                saved_by_ward = self.get_ward_saving_throw(target)
-                                if saved_by_ward:
-                                    continue
-                                else:
-                                    target_wounds = target.get_wounds()
-                                    target.set_wounds(target_wounds - 1)
+                self.close_combat_attacks()
 
             elif unit_type == Bestiary.UNIT_TYPE_RANGE:
-                self.__unit.set_action("bow")
-                # ranged units can only shoot once
-
-                if not any(self.__targets):
-                    # if all targets eliminated return
-                    return
-
-                target = self.__targets[0]  # 1st target
-                hit = self.get_roll_to_hit_close_combat(target)
-                if hit:
-                    wound = self.get_roll_to_wound(target)
-                    if wound:
-                        saved_by_armor = self.get_armor_saving_throw(target)
-                        if not saved_by_armor:
-                            saved_by_ward = self.get_ward_saving_throw(target)
-                            if saved_by_ward:
-                                return
-                            else:
-                                target_wounds = target.get_wounds()
-                                target.set_wounds(target_wounds - 1)
+                self.range_attack()
 
             self.__finished = True
+
+    def close_combat_attacks(self):
+        number_of_attacks = self.__unit.get_attacks()
+        for a in range(number_of_attacks):
+
+            alive_targets = [x for x in self.__targets if not x.is_killed()]
+
+            if not any(alive_targets):
+                # if all targets eliminated return
+                self.__finished = True
+                return
+
+            # target = self.__targets[0]  # 1st target
+            target = alive_targets[0]  # get the first remaining alive target
+
+            hit = self.get_roll_to_hit_close_combat(target)
+            if hit:
+                wound = self.get_roll_to_wound(target)
+                if wound:
+                    saved_by_armor = self.get_armor_saving_throw(target)
+                    if not saved_by_armor:
+                        saved_by_ward = self.get_ward_saving_throw(target)
+                        if saved_by_ward:
+                            continue
+                        else:
+                            target_wounds = target.get_wounds()
+                            target.set_wounds(target_wounds - 1)
+
+    def range_attack(self):
+        if not any(self.__targets):
+            # if all targets eliminated return
+            return
+
+        target = self.__targets[0]  # 1st target
+        hit = self.get_roll_to_hit_close_combat(target)
+        if hit:
+            wound = self.get_roll_to_wound(target)
+            if wound:
+                saved_by_armor = self.get_armor_saving_throw(target)
+                if not saved_by_armor:
+                    saved_by_ward = self.get_ward_saving_throw(target)
+                    if saved_by_ward:
+                        return
+                    else:
+                        target_wounds = target.get_wounds()
+                        target.set_wounds(target_wounds - 1)
 
     def is_finished(self):
         if self.__finished:
             if self.__unit.is_animation_cycle_done():
                 self.__unit.set_action("idle")
+
+                target = self.__targets[0]
 
                 """ Animate targets death """
                 for target in self.__targets:
@@ -279,4 +273,3 @@ class UnitAction:
                     return True
         else:
             return self.__finished
-

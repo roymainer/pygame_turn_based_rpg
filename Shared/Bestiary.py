@@ -9,6 +9,17 @@ ACTION_SKILLS = "Skills"
 ACTION_ITEMS = "Items"
 ACTION_MAGIC = "Magic"
 
+""" Weapon Types """
+# TODO: need to replace weapons and armor, ... with objects, have to
+SWORD = "Sword"
+GREAT_SWORD = "Great Sword"
+HALBERD = "Halberd"
+PIKE = "Pike"
+SPEAR = "Spear"
+BOW = "Bow"
+CROSSBOW = "Crossbow"
+LANCE = "Lance"
+
 """Armor types"""
 ARMOR_NONE = "None"
 ARMOR_LIGHT = "Light Armor"
@@ -28,7 +39,7 @@ WARD_TALISMAN_OF_PROTECTION = "Talisman of Protection"
 
 
 def get_sprite_sheet_path(file_name):
-    return os.path.join("Assets", "Graphics", "Characters", file_name)
+    return os.path.join("Assets", "Graphics", "Units", file_name)
 
 
 def get_unit_actions(unit):
@@ -44,6 +55,9 @@ def get_unit_actions(unit):
 
 class Bestiary:
 
+    SPRITE_SHEET = "Sprite_Sheet"
+    SIZE = "Size"
+
     NAME = "Name",
     UNIT_TYPE = "Unit_Type"
     M = "M"
@@ -55,24 +69,23 @@ class Bestiary:
     I = "I"
     A = "A"
     LD = "LD"
+    WEAPON = "WEAPON"
     ARMOR = "ARMOR"
     WARD = "WARD"
 
-    SPRITE_SHEET = "Sprite_Sheet"
-    SIZE = "Size"
-
+    """ Empire """
     ARCHER = {NAME: "Archer", UNIT_TYPE: UNIT_TYPE_RANGE,
               M: 5, WS: 4, BS: 5, S: 3, T: 3, W: 1, I: 5, A: 1, LD: 8,
               ARMOR: ARMOR_NONE,
               WARD: [WARD_NONE],  # there can always be more than one ward
-              SPRITE_SHEET: get_sprite_sheet_path("adventurer_sprite_sheet.png"),
+              SPRITE_SHEET: get_sprite_sheet_path("archer_sprite_sheet.png"),
               SIZE: (50 * 3, 37 * 3)}
     WARRIOR = {NAME: "Warrior", UNIT_TYPE: UNIT_TYPE_MELEE,
                M: 5, WS: 4, BS: 5, S: 3, T: 3, W: 1, I: 5, A: 1, LD: 8,
                # M: 5, WS: 9, BS: 5, S: 9, T: 3, W: 1, I: 5, A: 9, LD: 8,
                ARMOR: ARMOR_LIGHT,
                WARD: [WARD_NONE],
-               SPRITE_SHEET: get_sprite_sheet_path("dark_sprite_sheet.png"),
+               SPRITE_SHEET: get_sprite_sheet_path("warrior_sprite_sheet.png"),
                SIZE: (50 * 3, 37 * 3)}
     DWARF_MINER = {NAME: "Miner", UNIT_TYPE: UNIT_TYPE_MELEE,
                    M: 3, WS: 4, BS: 3, S: 3, T: 4, W: 1, I: 2, A: 1, LD: 9,
