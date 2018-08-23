@@ -1,9 +1,10 @@
 import pygame
 
 from Shared.AnimatedObject import AnimatedObject
-from Shared.Bestiary import *
+# from Shared.Bestiary import *
 from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
+from Shared.Model import *
 from UI.Menu import Menu
 from UI.MenuPointer import MenuPointer
 from UI.UnitsMenu import UnitsMenu
@@ -90,7 +91,7 @@ class PlayingGameSceneUI:
         menu_size = (GameConstants.SCREEN_SIZE[0] - player_menu_size[0] - computer_menu_size[0],
                      player_menu_size[1])
 
-        menu_actions_list = get_unit_actions(unit)
+        menu_actions_list = Model.get_unit_actions(unit)
 
         menu_position = (self.__menus[PLAYER_UNITS_MENU].get_rect().right, GameConstants.BATTLE_AREA_BOTTOM)
         menu = Menu(UIConstants.SPRITE_BLUE_MENU, menu_size, menu_actions_list, menu_position)

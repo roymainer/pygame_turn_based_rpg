@@ -1,107 +1,48 @@
 import os
 
-UNIT_TYPE_MELEE = 0
-UNIT_TYPE_RANGE = 1
-UNIT_TYPE_MAGIC = 2
-
-ACTION_ATTACK = "Attack"
-ACTION_SKILLS = "Skills"
-ACTION_ITEMS = "Items"
-ACTION_MAGIC = "Magic"
-
-""" Weapon Types """
-# TODO: need to replace weapons and armor, ... with objects, have to
-SWORD = "Sword"
-GREAT_SWORD = "Great Sword"
-HALBERD = "Halberd"
-PIKE = "Pike"
-SPEAR = "Spear"
-BOW = "Bow"
-CROSSBOW = "Crossbow"
-LANCE = "Lance"
-
-"""Armor types"""
-ARMOR_NONE = "None"
-ARMOR_LIGHT = "Light Armor"
-ARMOR_LIGHT_AND_SHIELD = "Light Armor and Shield"
-ARMOR_HEAVY = "Heavy Armor"
-ARMOR_HEAVY_AND_SHIELD = "Heavy Armor and Shield"
-
-""" Ward types """
-WARD_NONE = "None"
-WARD_SHIELD_ENCHANTED = "Enchanted Shield"
-WARD_SHIELD_CHARMED = "Charmed Shield"
-WARD_SHIELD_SPELL = "Spell Shield"
-WARD_ARMOR_SCALES_GLITTERING = "Glittering Scales"
-WARD_TALISMAN_OF_PRESERVATION = "Talisman of Preservation"
-WARD_TALISMAN_OF_ENDURANCE = "Talisman of Endurance"
-WARD_TALISMAN_OF_PROTECTION = "Talisman of Protection"
+from Shared.Model import *
+from Shared.Shield import *
+from Shared.Weapon import *
 
 
 def get_sprite_sheet_path(file_name):
     return os.path.join("Assets", "Graphics", "Units", file_name)
 
 
-def get_unit_actions(unit):
-    unit_type = unit.get_unit_type()
-    if unit_type == UNIT_TYPE_MELEE:
-        return [ACTION_ATTACK, ACTION_SKILLS, ACTION_ITEMS]
-    if unit_type == UNIT_TYPE_RANGE:
-        return [ACTION_ATTACK, ACTION_SKILLS, ACTION_ITEMS]
-    if unit_type == UNIT_TYPE_MAGIC:
-        return [ACTION_ATTACK, ACTION_MAGIC, ACTION_SKILLS, ACTION_ITEMS]
-    return
+def get_empire_archer():
+    __EMPIRE_ARCHER_SPRITE_SHEET = get_sprite_sheet_path("archer_sprite_sheet.png")
+    __EMPIRE_ARCHER_SIZE = (50 * 3, 37 * 3)
+    __EMPIRE_ARCHER_ATTRIBUTES = Attributes(name="Empire Archer", m=4, ws=3, bs=3, s=3, t=3, w=1, i=3, a=1, ld=7)
+    return Model(sprite_sheet_file=__EMPIRE_ARCHER_SPRITE_SHEET, size=__EMPIRE_ARCHER_SIZE,
+                 position=(0, 0), object_type=GameConstants.PLAYER_GAME_OBJECTS, model_type=MODEL_TYPE_RANGE,
+                 attributes=__EMPIRE_ARCHER_ATTRIBUTES, armor=ARMOR_NONE, weapon=BOW, shield=SHIELD_NONE)
 
 
-class Bestiary:
+def get_empire_swordsman():
+    __EMPIRE_SWORDSMAN_SPRITE_SHEET = get_sprite_sheet_path("warrior_sprite_sheet.png")
+    __EMPIRE_SWORDSMAN_SIZE = (50 * 3, 37 * 3)
+    __EMPIRE_SWORDSMAN_ATTRIBUTES = Attributes(name="Empire Swordsman", m=4, ws=4, bs=3, s=3, t=3, w=1, i=3, a=1, ld=7)
+    return Model(sprite_sheet_file=__EMPIRE_SWORDSMAN_SPRITE_SHEET, size=__EMPIRE_SWORDSMAN_SIZE,
+                 position=(0, 0), object_type=GameConstants.PLAYER_GAME_OBJECTS, model_type=MODEL_TYPE_MELEE,
+                 attributes=__EMPIRE_SWORDSMAN_ATTRIBUTES, armor=LIGHT_ARMOR, weapon=BOW, shield=SHIELD)
 
-    SPRITE_SHEET = "Sprite_Sheet"
-    SIZE = "Size"
 
-    NAME = "Name",
-    UNIT_TYPE = "Unit_Type"
-    M = "M"
-    WS = "WS"
-    BS = "BS"
-    S = "S"
-    T = "T"
-    W = "W"
-    I = "I"
-    A = "A"
-    LD = "LD"
-    WEAPON = "WEAPON"
-    ARMOR = "ARMOR"
-    WARD = "WARD"
+def get_undead_skeleton_halberd():
+    __UNDEAD_SKELETON_HALBERD_SPRITE_SHEET = get_sprite_sheet_path("skeleton_sprite_sheet.png")
+    __UNDEAD_SKELETON_HALBERD_SIZE = (50 * 2, 37 * 2)
+    __UNDEAD_SKELETON_HALBERD_ATTRIBUTES = Attributes(name="Undead Halberd", m=4, ws=2, bs=2, s=3, t=3, w=1, i=2, a=1,
+                                                      ld=3)
+    return Model(sprite_sheet_file=__UNDEAD_SKELETON_HALBERD_SPRITE_SHEET,
+                 size=__UNDEAD_SKELETON_HALBERD_SIZE, position=(0, 0),
+                 object_type=GameConstants.COMPUTER_GAME_OBJECTS, model_type=MODEL_TYPE_MELEE,
+                 attributes=__UNDEAD_SKELETON_HALBERD_ATTRIBUTES, armor=ARMOR_NONE, weapon=HALBERD,
+                 shield=SHIELD_NONE)
 
-    """ Empire """
-    ARCHER = {NAME: "Archer", UNIT_TYPE: UNIT_TYPE_RANGE,
-              M: 5, WS: 4, BS: 5, S: 3, T: 3, W: 1, I: 5, A: 1, LD: 8,
-              ARMOR: ARMOR_NONE,
-              WARD: [WARD_NONE],  # there can always be more than one ward
-              SPRITE_SHEET: get_sprite_sheet_path("archer_sprite_sheet.png"),
-              SIZE: (50 * 3, 37 * 3)}
-    WARRIOR = {NAME: "Warrior", UNIT_TYPE: UNIT_TYPE_MELEE,
-               M: 5, WS: 4, BS: 5, S: 3, T: 3, W: 1, I: 5, A: 1, LD: 8,
-               # M: 5, WS: 9, BS: 5, S: 9, T: 3, W: 1, I: 5, A: 9, LD: 8,
-               ARMOR: ARMOR_LIGHT,
-               WARD: [WARD_NONE],
-               SPRITE_SHEET: get_sprite_sheet_path("warrior_sprite_sheet.png"),
-               SIZE: (50 * 3, 37 * 3)}
-    DWARF_MINER = {NAME: "Miner", UNIT_TYPE: UNIT_TYPE_MELEE,
-                   M: 3, WS: 4, BS: 3, S: 3, T: 4, W: 1, I: 2, A: 1, LD: 9,
-                   ARMOR: ARMOR_NONE,
-                   WARD: [WARD_NONE],
-                   SPRITE_SHEET: get_sprite_sheet_path("dark_sprite_sheet.png"),
-                   SIZE: (50 * 3, 37 * 3)}
-    SLIME = {NAME: "Slime", UNIT_TYPE: UNIT_TYPE_MELEE,
-             M: 5, WS: 3, BS: 3, S: 3, T: 3, W: 1, I: 4, A: 1, LD: 5,
-             ARMOR: ARMOR_NONE,
-             WARD: [WARD_NONE],
-             SPRITE_SHEET: get_sprite_sheet_path("slime_sprite_sheet.png"),
-             SIZE: (100 * 1, 74 * 1)}
-    SKELETON = {NAME: "Skeleton", UNIT_TYPE: UNIT_TYPE_MELEE,
-                M: 4, WS: 2, BS: 2, S: 3, T: 3, W: 1, I: 2, A: 1, LD: 3,
-                ARMOR: ARMOR_NONE,
-                WARD: [WARD_NONE],
-                SPRITE_SHEET: get_sprite_sheet_path("skeleton_sprite_sheet.png"),
-                SIZE: (50 * 2, 37 * 2)}
+
+def get_slime_monster():
+    __SLIME_SPRITE_SHEET = get_sprite_sheet_path("slime_sprite_sheet.png")
+    __SLIME_SIZE = (100 * 1, 74 * 1)
+    __SLIME_ATTRIBUTES = Attributes(name="Slime", m=4, ws=4, bs=3, s=3, t=3, w=1, i=3, a=1, ld=7)
+    return Model(sprite_sheet_file=__SLIME_SPRITE_SHEET, size=__SLIME_SIZE,
+                 position=(0, 0), object_type=GameConstants.PLAYER_GAME_OBJECTS, model_type=MODEL_TYPE_MELEE,
+                 attributes=__SLIME_ATTRIBUTES, armor=ARMOR_NONE, weapon=WEAPON_NONE, shield=SHIELD_NONE)

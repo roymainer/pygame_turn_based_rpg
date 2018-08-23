@@ -1,8 +1,7 @@
 import pygame
 
-from Scenes.Scene import Scene
 from Shared.Bestiary import *
-from Shared.Unit import Unit
+from Scenes.Scene import Scene
 from Shared.GameConstants import GameConstants
 from TurnManager import TurnManager
 from ActionManager import ActionManager
@@ -90,41 +89,77 @@ class PlayingGameScene(Scene):
     def load_level(self):
         # load adventurer
         object_type = GameConstants.PLAYER_GAME_OBJECTS
-        self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_TOP_BACK, object_type)
-        # self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_MIDDLE_BACK, object_type)
-        # self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
-        # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_TOP_FRONT, object_type)
-        # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_MIDDLE_FRONT, object_type)
-        # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_BOTTOM_FRONT, object_type)
+        self.load_model(get_empire_archer(), GameConstants.PLAYER_TOP_BACK, object_type)
+        self.load_model(get_empire_archer(), GameConstants.PLAYER_MIDDLE_BACK, object_type)
+        self.load_model(get_empire_archer(), GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
+        self.load_model(get_empire_swordsman(), GameConstants.PLAYER_TOP_FRONT, object_type)
+        self.load_model(get_empire_swordsman(), GameConstants.PLAYER_MIDDLE_FRONT, object_type)
+        self.load_model(get_empire_swordsman(), GameConstants.PLAYER_BOTTOM_FRONT, object_type)
 
         object_type = GameConstants.COMPUTER_GAME_OBJECTS
-        self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_TOP_BACK, object_type)
-        self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_MIDDLE_BACK, object_type)
-        self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_BOTTOM_BACK, object_type)
-        self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_TOP_FRONT, object_type, turn_left=True)
-        self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_MIDDLE_FRONT, object_type, turn_left=True)
-        self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_BOTTOM_FRONT, object_type, turn_left=True)
+        self.load_model(get_slime_monster(), GameConstants.COMPUTER_TOP_BACK, object_type)
+        self.load_model(get_slime_monster(), GameConstants.COMPUTER_MIDDLE_BACK, object_type)
+        self.load_model(get_slime_monster(), GameConstants.COMPUTER_BOTTOM_BACK, object_type)
+        self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_TOP_FRONT, object_type, turn_left=True)
+        self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, turn_left=True)
+        self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, turn_left=True)
 
         return
 
-    def load_character(self, character_attributes, position, object_type, turn_left=False):
-        sprite_sheet = character_attributes[Bestiary.SPRITE_SHEET]
-        size = character_attributes[Bestiary.SIZE]
-        new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
+    def load_model(self, model, position, object_type, turn_left=False):
+        size = model.get_size()
 
-        character = Unit(attributes=character_attributes, spritesheet_file=sprite_sheet, size=size,
-                         position=new_position, object_type=object_type)  # init adventurer
+        new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
+        model.set_position(new_position)
 
         if turn_left:
-            character.turn_left()
+            model.turn_left()
 
         # self.add_scene_object(character)  # add to scene objects list
         if object_type == GameConstants.PLAYER_GAME_OBJECTS:
-            self.__turn_manager.add_player_unit(character)
+            self.__turn_manager.add_player_unit(model)
         elif object_type == GameConstants.COMPUTER_GAME_OBJECTS:
-            self.__turn_manager.add_computer_unit(character)
-        self.get_game().add_sprite_to_group(character, object_type)  # add to game engine sprites group
+            self.__turn_manager.add_computer_unit(model)
+        self.get_game().add_sprite_to_group(model, object_type)  # add to game engine sprites group
         return
+
+    # def load_level(self):
+    #     # load adventurer
+    #     object_type = GameConstants.PLAYER_GAME_OBJECTS
+    #     self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_TOP_BACK, object_type)
+    #     # self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_MIDDLE_BACK, object_type)
+    #     # self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
+    #     # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_TOP_FRONT, object_type)
+    #     # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_MIDDLE_FRONT, object_type)
+    #     # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_BOTTOM_FRONT, object_type)
+    #
+    #     object_type = GameConstants.COMPUTER_GAME_OBJECTS
+    #     self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_TOP_BACK, object_type)
+    #     self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_MIDDLE_BACK, object_type)
+    #     self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_BOTTOM_BACK, object_type)
+    #     self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_TOP_FRONT, object_type, turn_left=True)
+    #     self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_MIDDLE_FRONT, object_type, turn_left=True)
+    #     self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_BOTTOM_FRONT, object_type, turn_left=True)
+    #
+    #     return
+    # def load_character(self, character_attributes, position, object_type, turn_left=False):
+    #     sprite_sheet = character_attributes[Bestiary.SPRITE_SHEET]
+    #     size = character_attributes[Bestiary.SIZE]
+    #     new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
+    #
+    #     character = Model(attributes=character_attributes, spritesheet_file=sprite_sheet, size=size,
+    #                       position=new_position, object_type=object_type)  # init adventurer
+    #
+    #     if turn_left:
+    #         character.turn_left()
+    #
+    #     # self.add_scene_object(character)  # add to scene objects list
+    #     if object_type == GameConstants.PLAYER_GAME_OBJECTS:
+    #         self.__turn_manager.add_player_unit(character)
+    #     elif object_type == GameConstants.COMPUTER_GAME_OBJECTS:
+    #         self.__turn_manager.add_computer_unit(character)
+    #     self.get_game().add_sprite_to_group(character, object_type)  # add to game engine sprites group
+    #     return
 
     def create_background(self):
         surface = pygame.Surface(GameConstants.SCREEN_SIZE)  # create an empty surface

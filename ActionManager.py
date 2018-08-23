@@ -33,11 +33,11 @@ TO_WOUND_CHART = {
 }
 
 # keys are armor types, values are required rolls
-ARMOR_SAVES = {Bestiary.ARMOR_NONE: 7,
-               Bestiary.ARMOR_LIGHT: 6,
-               Bestiary.ARMOR_LIGHT_AND_SHIELD: 5,
-               Bestiary.ARMOR_HEAVY: 5,
-               Bestiary.ARMOR_HEAVY_AND_SHIELD: 4}
+# ARMOR_SAVES = {Bestiary.ARMOR_NONE: 7,
+#                Bestiary.ARMOR_LIGHT: 6,
+#                Bestiary.ARMOR_LIGHT_AND_SHIELD: 5,
+#                Bestiary.ARMOR_HEAVY: 5,
+#                Bestiary.ARMOR_HEAVY_AND_SHIELD: 4}
 
 # keys are the attacking unit's strength
 ARMOR_SAVE_MODIFIER = {1: 0, 2: 0, 3: 0, 4: -1, 5: -2, 6: -3, 7: -4, 8: -5, 9: -6, 10: -7}
@@ -154,7 +154,8 @@ class ActionManager:
             target_armor = target.get_armor()
             target_wards = target.get_wards()
 
-            required_roll = ARMOR_SAVES[target_armor]  # the required target roll to be saved by the armor
+            # required_roll = ARMOR_SAVES[target_armor]  # the required target roll to be saved by the armor
+            required_roll = self.__unit.get_armor.get_[target_armor]  # the required target roll to be saved by the armor
 
             if Bestiary.WARD_SHIELD_ENCHANTED in target_wards:
                 required_roll -= 1
@@ -193,7 +194,7 @@ class ActionManager:
         return False
 
     def perform_action(self):
-        unit_type = self.__unit.get_unit_type()
+        unit_type = self.__unit.get_model_type()
         action = self.get_action()
         print("Perform Action: " + action)
 

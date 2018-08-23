@@ -1,4 +1,4 @@
-from Shared.Bestiary import UNIT_TYPE_MELEE, UNIT_TYPE_RANGE
+from Shared.Model import MODEL_TYPE_MELEE, MODEL_TYPE_RANGE
 
 
 class TurnManager:
@@ -21,11 +21,11 @@ class TurnManager:
 
     def __add_unit(self, units_list, new_unit):
 
-        unit_type = new_unit.get_unit_type()
+        unit_type = new_unit.get_model_type()
 
-        if unit_type == UNIT_TYPE_MELEE:
+        if unit_type == MODEL_TYPE_MELEE:
             units_list.insert(0, new_unit)  # Melee units are lower indexed (front line)
-        elif unit_type == UNIT_TYPE_RANGE:
+        elif unit_type == MODEL_TYPE_RANGE:
             units_list.append(new_unit)
 
         self.__sort_all_units_list()  # sort the units each time we add another one
