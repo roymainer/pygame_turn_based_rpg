@@ -32,7 +32,7 @@ class MenuPointer(UIObject):
 
         positions = []
 
-        padx = 10
+        padx = 2
 
         for i in range(self.__menu.get_menu_items_count()):
             menu_item = self.__menu.get_item_from_menu(i)  # get first item
@@ -50,8 +50,9 @@ class MenuPointer(UIObject):
         menu_item_size = menu_item.get_size()
 
         original_size = self.image.get_rect().size
-        size_ratio = menu_item_size[1]/original_size[1]
-        new_size = (int(original_size[0]*size_ratio), menu_item_size[1])
+        # size_ratio = menu_item_size[1]/original_size[1]
+        new_size = (int(original_size[0]), int(menu_item_size[1]))
+        # new_size = (int(original_size[0]*size_ratio), int(menu_item_size[1]))
 
         self.set_size(new_size)
 

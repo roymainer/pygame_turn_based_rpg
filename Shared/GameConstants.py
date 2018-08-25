@@ -65,14 +65,14 @@ class GameConstants:
     """ COLORS """
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
-    BRIGHTRED = (255, 0, 0)
+    BRIGHT_RED = (255, 0, 0)
     RED = (155, 0, 0,)
-    BRIGHTGREEN = (0, 255, 0)
+    BRIGHT_GREEN = (0, 255, 0)
     GREEN = (0, 155, 0)
-    BRIGHTBLUE = (0, 0, 255)
+    BRIGHT_BLUE = (0, 0, 255)
     BLUE = (0, 0, 155)
-    BRIGHTYELLOW = (255, 255, 0)
+    BRIGHT_YELLOW = (255, 255, 0)
     YELLOW = (155, 155, 0)
-    DARKGRAY = (40, 40, 40)
+    BRIGHT_GRAY = (128, 128, 128)
+    DARK_GRAY = (40, 40, 40)
 
-    TEXT_SIZE_SMALL = 17

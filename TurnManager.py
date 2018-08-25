@@ -31,14 +31,6 @@ class TurnManager:
         self.__sort_all_units_list()  # sort the units each time we add another one
         return
 
-    def __remove_unit(self, units_list, unit):
-        if self.__all_units_sorted[self.__current_unit] == unit:
-            # if current turn's unit is the unit to remove, increment the index
-            self.set_next_unit()  # ignore the return value
-        units_list.remove(unit)  # remove the unit from the list
-        self.__sort_all_units_list()
-        return
-
     def add_player_unit(self, new_unit):
         self.__add_unit(self.__player_units, new_unit)
 
@@ -46,11 +38,16 @@ class TurnManager:
         self.__add_unit(self.__computer_units, new_unit)
 
     def get_current_unit(self):
-        return self.__all_units_sorted[self.__current_unit]
+        if self.__current_unit not in range(len(self.__all_units_sorted)):
+            self.advance_to_next_unit()
+        try:
+            return self.__all_units_sorted[self.__current_unit]
+        except:
+            print("bad index!!!!")
 
-    def set_next_unit(self):
+    def advance_to_next_unit(self):
         self.__current_unit += 1
-        if self.__current_unit == len(self.__all_units_sorted):
+        if self.__current_unit not in range(len(self.__all_units_sorted)):
             self.__sort_all_units_list()
             self.__current_unit = 0
         # return self.__all_units_sorted[self.__current_unit]
@@ -82,9 +79,9 @@ class TurnManager:
             self.__computer_units.remove(unit)
 
         if unit in self.__all_units_sorted:
-            if self.__all_units_sorted[self.__current_unit] == unit:
-                # if current turn's unit is the unit to remove, increment the index
-                self.set_next_unit()  # ignore the return value
-
+            # if self.__all_units_sorted[self.__current_unit] == unit:
+            #     # if current turn's unit is the unit to remove, increment the index
+            #     self.set_next_unit()  # ignore the return value
+            self.__all_units_sorted.remove(unit)  # remove the unit
             self.__sort_all_units_list()  # sort all units again
         return

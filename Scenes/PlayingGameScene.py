@@ -41,6 +41,12 @@ class PlayingGameScene(Scene):
 
     def update(self):
 
+        # if self.__current_action is not None:
+            # texts = [x for x in self.__current_action.get_texts() if x.get_alpha() == 255]
+            # for text in texts:
+            #     print("%%%%%%%%%%%%%%%%%%% Adding Fading Text: " + text.get_string() + " %%%%%%%%%%%%%%%%%%%")
+            #     self.get_game().add_sprite_to_group(text, None)
+
         current_unit = self.__turn_manager.get_current_unit()
         if current_unit is not None:
             if current_unit != self.__current_unit:
@@ -54,17 +60,19 @@ class PlayingGameScene(Scene):
                 if current_unit in self.__turn_manager.get_all_computer_units():
                     # check if unit is a computer unit
                     self.play_computer_turn()
-        else:
-            # if current unit is none
-            # TODO: this code should never be reached, I need to check if there are no more computer/player units
-            self.__current_unit = None  # remove the current unit
-            self.__current_action = None  # remove the current action
-            self.__UI.remove_marker()  # delete the marker
-            self.__UI.remove_actions_menu()  # remove the actions menu
+        # else:
+        #     # if current unit is none
+        #     # TODO: this code should never be reached, I need to check if there are no more computer/player units
+        #     self.__current_unit = None  # remove the current unit
+        #     self.__current_action.destroy()
+        #     self.__current_action = None  # remove the current action
+        #     self.__UI.remove_actions_menu()  # remove the actions menu
 
         """ Perform Action """
         if self.__current_action.is_ready():
             self.__current_action.perform_action()
+            for text in self.__current_action.get_texts():
+                self.get_game().add_sprite_to_group(text, None)
 
         """ Wait for animation to finish """
         if self.__current_action.is_finished():
@@ -76,9 +84,10 @@ class PlayingGameScene(Scene):
                     self.__turn_manager.remove_unit(unit)
 
             # self.__current_unit.set_action("idle")  # return acting unit to idle
+            self.__current_action.destroy()
             self.__current_action = None  # remove the current action
             self.__current_unit = None  # remove the current unit
-            self.__turn_manager.set_next_unit()  # advance the turn manager to next unit
+            self.__turn_manager.advance_to_next_unit()  # advance the turn manager to next unit
 
     def get_current_action(self):
         return self.__current_action

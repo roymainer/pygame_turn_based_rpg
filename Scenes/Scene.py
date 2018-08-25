@@ -1,5 +1,5 @@
 import pygame
-from Shared.GameConstants import GameConstants
+from Shared.UIConstants import UIConstants
 from UI.Text import Text
 
 
@@ -36,7 +36,7 @@ class Scene:
         pass
 
     def add_text(self, string, position, color=(255, 255, 255), background=(0, 0, 0),
-                 size=GameConstants.TEXT_SIZE_SMALL):
+                 size=UIConstants.TEXT_SIZE_SMALL):
         self.__texts.append(Text(string, position, color, background, size))
 
     def add_scene_object(self, game_object):

@@ -3,7 +3,7 @@ from Shared.AnimatedObject import AnimatedObject
 
 class AnimAttrObject(AnimatedObject):
     
-    def __init__(self, sprite_sheet_file, size, position, object_type,
+    def __init__(self, sprite_sheet_file=None, size=None, position=None, object_type=None,
                  name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0):
         super(AnimAttrObject, self).__init__(sprite_sheet_file, size, position, object_type)
 
@@ -42,7 +42,7 @@ class AnimAttrObject(AnimatedObject):
     def get_initiative(self):
         return self.__I
 
-    def get_attack(self):
+    def get_attacks(self):
         return self.__A
 
     def get_leadership(self):

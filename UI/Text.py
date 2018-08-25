@@ -1,6 +1,6 @@
 import pygame
-# from pygame.sprite import Sprite
 from Shared.GameConstants import GameConstants
+from Shared.UIConstants import UIConstants
 from UI.UIObject import UIObject
 
 
@@ -9,14 +9,16 @@ class Text(UIObject):
     def __init__(self, string, position,
                  text_color=GameConstants.WHITE,
                  background_color=None,
-                 font_size=GameConstants.TEXT_SIZE_SMALL):
+                 font_size=UIConstants.TEXT_SIZE_SMALL):
 
         self.__text_color = text_color
         self.__background_color = background_color
         self.__font_size = font_size
 
         self.__string = string
-        font_obj = pygame.font.Font(None, self.__font_size)
+        # font_obj = pygame.font.Font(None, self.__font_size)
+        font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)
+        # font_obj = pygame.font.Font("joystix monospace.ttf", self.__font_size)
         self.image = font_obj.render(string, False, self.__text_color, self.__background_color)
 
         self.rect = self.image.get_rect()
@@ -33,7 +35,8 @@ class Text(UIObject):
     def set_string(self, string):
         self.__string = string  # update text string
 
-        font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
+        # font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
+        font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
 
         self.image = font_obj.render(self.__string, False, self.__text_color, self.__background_color)
 
@@ -42,16 +45,18 @@ class Text(UIObject):
         self.rect.topleft = topleft  # update new rects position
 
     def mark_string(self):
-        font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
+        # font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
+        font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
 
-        self.image = font_obj.render(self.__string, False, GameConstants.BRIGHTGREEN, self.__background_color)
+        self.image = font_obj.render(self.__string, False, GameConstants.BRIGHT_GREEN, self.__background_color)
 
         topleft = self.rect.topleft  # save previous position
         self.rect = self.image.get_rect()  # create a new rect
         self.rect.topleft = topleft  # update new rects position
 
     def unmark_string(self):
-        font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
+        # font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
+        font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
 
         self.image = font_obj.render(self.__string, False, self.__text_color, self.__background_color)
 

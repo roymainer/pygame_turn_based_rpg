@@ -10,6 +10,9 @@ import pygame
 
 def prepare_animations(spritesheet_file, atlas_file, sprite_size=None):
 
+    if spritesheet_file is None:
+        return {}
+
     sprite_sheet = pygame.image.load(spritesheet_file).convert_alpha()
 
     if atlas_file is None:

@@ -12,7 +12,9 @@ from random import choice
 
 
 def get_d6_roll():
-    return choice([1, 2, 3, 4, 5, 6])
+    roll = choice([1, 2, 3, 4, 5, 6])
+    print("Rolled: " + str(roll))
+    return roll
 
 
 def get_two_d6_roll():

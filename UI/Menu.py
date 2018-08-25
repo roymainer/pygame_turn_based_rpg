@@ -15,7 +15,7 @@ class Menu(UIObject):
                  menu_options=None,
                  position=(0, 0)):
 
-        self.__padx = 25  # padding between menu left side and item left side
+        self.__padx = 15  # padding between menu left side and item left side
         self.__pady = 15  # padding between menu items
 
         image = pygame.image.load(image_path).convert_alpha()
@@ -45,7 +45,7 @@ class Menu(UIObject):
             # if there are no items in the list (this is the new item added)
             position = (self.get_position()[0] + self.__padx, self.get_position()[1] + self.__pady)
 
-        menu_item = Text(string, position, GameConstants.WHITE, None, 24)
+        menu_item = Text(string, position, GameConstants.WHITE, None, UIConstants.TEXT_SIZE_SMALL)
 
         self.__menu_items_list.append(menu_item)
 
@@ -65,6 +65,8 @@ class Menu(UIObject):
             self.__index += 1
 
     def get_index(self):
+        if self.__index not in range(self.get_menu_items_count()):
+            self.__index = 0
         return self.__index
 
     def add_menu_items(self, menu_items):
@@ -78,6 +80,8 @@ class Menu(UIObject):
         return len(self.__menu_items_list)
 
     def get_item_from_menu(self, index):
+        if index not in range(self.get_menu_items_count()):
+            index = 0
         return self.__menu_items_list[index]
 
     def remove_item_from_menu(self, index):

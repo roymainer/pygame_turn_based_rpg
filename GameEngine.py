@@ -101,13 +101,13 @@ class GameEngine:
     def set_background(self, background: pygame.Surface):
         self.__background = background
 
-    def get_mouse(self):
-        return self.__mouse_position, self.__mouse_buttons
+    # def get_mouse(self):
+    #     return self.__mouse_position, self.__mouse_buttons
 
-    def collide_point(self, point: Tuple):
-        pointer = MousePointer(point)
-        focus_group = pygame.sprite.spritecollide(pointer, self.__all_sprites, False)
-        if any(focus_group):
-            return focus_group[0]
-        else:
-            return None
+    # def collide_point(self, point: Tuple):
+    #     pointer = MousePointer(point)
+    #     focus_group = pygame.sprite.spritecollide(pointer, self.__all_sprites, False)
+    #     if any(focus_group):
+    #         return focus_group[0]
+    #     else:
+    #         return None

@@ -3,7 +3,9 @@ import os
 
 class UIConstants:
 
-    MENU_MAX_CHARS = 40
+    ARCADE_CLASSIC_FONT = os.path.join("Assets", "Graphics", "joystix monospace.ttf")
+    TEXT_SIZE_SMALL = 11
+    MENU_MAX_CHARS = 26
 
     SPRITE_BLUE_MENU = os.path.join("Assets", "Graphics", "UI", "blue_menu.png")
     SPRITE_MENU_POINTER = os.path.join("Assets", "Graphics", "UI", "menu_pointer.png")

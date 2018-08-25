@@ -7,11 +7,6 @@ attack / shoot / cast
 items
 die
 """
-
-from Shared.AnimatedObject import AnimatedObject
-from Shared.Armor import *
-from Shared.GameConstants import GameConstants
-from Shared.Shield import *
 from Shared.Weapon import *
 
 SPRITE_SHEET = "Sprite_Sheet"
@@ -38,84 +33,45 @@ def get_model_actions(model):
     return
 
 
-class Model(AnimatedObject):
+class Model(AnimAttrObject):
     # TODO: add wards and inventory
-    def __init__(self, sprite_sheet_file, size, position, object_type, model_type, attributes: Attributes,
-                 armor=ARMOR_NONE, weapon=HAND_WEAPON, shield=SHIELD_NONE):
-        sprite_sheet_file = sprite_sheet_file
-        size = size
-        super(Model, self).__init__(sprite_sheet_file, size, position, object_type)
+    # TODO: instead of loading from a py file need to load from an encrypted file
+    def __init__(self, sprite_sheet_file, size, position, object_type, model_type,
+                 name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0,
+                 armor=None, weapon=None, shield=None):
+        super(Model, self).__init__(sprite_sheet_file, size, position, object_type, name, m, ws, bs, s, t, w, i, a, ld)
 
-        self.set_action("idle")  # every character must have idle stance!
         self.__model_type = model_type
-
-        # TODO: instead of loading from a py file need to load from an encrypted file
-        self.__attributes = attributes
-        self.__current_wounds = self.__attributes.get_wounds()
-
         self.__armor = armor
         self.__weapon = weapon
         self.__shield = shield
         # self.__wards = None
         # self.__inventory = None
+        self.__current_wounds = self.get_wounds()
+
+        self.set_action("idle")  # every character must have idle stance!
 
     def __repr__(self):
-        return "Character"
-
-    def get_name(self):
-        return self.__attributes.get_name()
-
-    def get_move(self):
-        return self.__attributes.get_move()
-
-    def get_weapon_skill(self):
-        return self.__attributes.get_weapon_skill()
-
-    def get_ballistic_skill(self):
-        return self.__attributes.get_ballistic_skill()
-
-    def get_strength(self):
-        return self.__attributes.get_strength()
-
-    def get_toughness(self):
-        return self.__attributes.get_toughness()
+        return self.get_name()
 
     def set_wounds(self, wounds):
         self.__current_wounds = wounds
 
-    def get_wounds(self):
+    def get_current_wounds(self):
         return self.__current_wounds
 
-    def get_max_wounds(self):
-        return self.__attributes.get_wounds()
-
-    def get_initiative(self):
-        return self.__attributes.get_initiative()
-
-    def get_attacks(self):
-        return self.__attributes.get_attack()
-
-    def get_leadership(self):
-        return self.__attributes.get_leadership()
-
-    def set_armor(self, armor):
-        self.__armor = armor
-
     def get_armor(self):
-        # return self.__attributes[Bestiary.ARMOR]
         return self.__armor
-
-    def set_weapon(self, weapon):
-        self.__weapon = weapon
 
     def get_weapon(self):
         return self.__weapon
 
-    def set_shield(self, shield):
-        self.__shield = shield
-
     def get_shield(self):
         return self.__shield
+
+    def get_wards(self):
+        # TODO: need to complete the models wards
+        return []
 
     def get_model_type(self):
         return self.__model_type
@@ -128,4 +84,4 @@ class Model(AnimatedObject):
             return False
 
     def is_killed(self):
-        return self.get_wounds() <= 0
+        return self.get_current_wounds() <= 0

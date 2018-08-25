@@ -1,8 +1,10 @@
-from Shared import Bestiary
 import Rolls
+from Shared import Bestiary
+from Shared.GameConstants import GameConstants
+from UI.Text import Text
 
-""" Key (unit_ws) : value (dict : key (enemy_ws) : value (dice roll to hit)) """
-# rows: unit's weapon skill, columns: target's weapon skill
+""" Key (model_ws) : value (dict : key (enemy_ws) : value (dice roll to hit)) """
+# rows: model's weapon skill, columns: target's weapon skill
 TO_HIT_CHART_CLOSE_COMBAT = {
     1: {1: 4, 2: 4, 3: 5, 4: 5, 5: 5, 6: 5, 7: 5, 8: 5, 9: 5, 10: 5},
     2: {1: 3, 2: 4, 3: 4, 4: 4, 5: 5, 6: 5, 7: 5, 8: 5, 9: 5, 10: 5},
@@ -18,7 +20,7 @@ TO_HIT_CHART_CLOSE_COMBAT = {
 
 TO_HIT_CHART_RANGED = {1: 6, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1, 7: 0, 8: -1, 9: -2, 10: -3}
 
-# rows: unit's strength, columns: target_toughness
+# rows: model's strength, columns: target_toughness
 TO_WOUND_CHART = {
     1: {1: 4, 2: 5, 3: 6, 4: 6, 5: 6, 6: 6, 7: 6, 8: 6, 9: 6, 10: 6},
     2: {1: 3, 2: 4, 3: 5, 4: 6, 5: 6, 6: 6, 7: 6, 8: 6, 9: 6, 10: 6},
@@ -39,25 +41,21 @@ TO_WOUND_CHART = {
 #                Bestiary.ARMOR_HEAVY: 5,
 #                Bestiary.ARMOR_HEAVY_AND_SHIELD: 4}
 
-# keys are the attacking unit's strength
+# keys are the attacking model's strength
 ARMOR_SAVE_MODIFIER = {1: 0, 2: 0, 3: 0, 4: -1, 5: -2, 6: -3, 7: -4, 8: -5, 9: -6, 10: -7}
-
-WARD_SAVES = {Bestiary.WARD_NONE: 7,
-              Bestiary.WARD_SHIELD_CHARMED: 2,  # charmed shield is one use only
-              Bestiary.WARD_SHIELD_ENCHANTED: 7,  # enchanted shield is counted in armor saving throw
-              }
 
 
 class ActionManager:
 
-    def __init__(self, unit, action=None, targets=None):
-        self.__unit = unit
+    def __init__(self, model, action=None, targets=None):
+        self.__model = model
         self.__action = action
         self.__targets = targets
         self.__finished = False  # action is finished
+        self.__texts = []
 
-    def get_unit(self):
-        return self.__unit
+    def get_model(self):
+        return self.__model
 
     def set_action(self, action: str):
         self.__action = action
@@ -79,7 +77,7 @@ class ActionManager:
             # action already finished
             return False
 
-        if self.__unit is not None and self.__action is not None and self.__targets is not None:
+        if self.__model is not None and self.__action is not None and self.__targets is not None:
             # if all parameters are different than None, the action is ready
             return True
         else:
@@ -92,15 +90,18 @@ class ActionManager:
             print("Target hit!")
             return True
         elif roll == 1:
+            self.__add_text_miss(target)
             print("Missed target!")
             return False
         else:
-            ws = self.__unit.get_weapon_skill()
+            ws = self.__model.get_weapon_skill()
             target_ws = target.get_weapon_skill()
             required_roll = TO_HIT_CHART_CLOSE_COMBAT[ws][target_ws]
+            print("Required roll to hit: " + str(required_roll))
             if roll >= required_roll:
                 print("Target hit!")
                 return True
+        self.__add_text_miss(target)
         print("Missed target!")
         return False
 
@@ -113,14 +114,17 @@ class ActionManager:
             print("Target hit!")
             return True
         elif roll == 1:
+            self.__add_text_miss(target)
             print("Missed target!")
             return False
         else:
-            bs = self.__unit.get_ballistic_skill()
+            bs = self.__model.get_ballistic_skill()
             required_roll = TO_HIT_CHART_RANGED[bs]
+            print("Required roll to hit: " + str(required_roll))
             if roll >= required_roll:
                 print("Target hit!")
                 return True
+        self.__add_text_miss(target)
         print("Missed target!")
         return False
 
@@ -132,14 +136,17 @@ class ActionManager:
             return True
         elif roll == 1:
             print("Hit bounced off target!")
+            self.__add_text_blocked(target)
             return False
         else:
-            s = self.__unit.get_strength()
+            s = self.__model.get_strength()
             target_t = target.get_toughness()
             required_roll = TO_WOUND_CHART[s][target_t]
+            print("Required roll to wound: " + str(required_roll))
             if roll >= required_roll:
                 print("Target wounded!")
                 return True
+        self.__add_text_blocked(target)
         print("Hit bounced off target!")
         return False
 
@@ -150,20 +157,29 @@ class ActionManager:
             print("Target armor save throw failed")
             return False
         else:
-            s = self.__unit.get_strength()
+            s = self.__model.get_strength()
             target_armor = target.get_armor()
-            target_wards = target.get_wards()
+            target_shield = target.get_shield()
 
-            # required_roll = ARMOR_SAVES[target_armor]  # the required target roll to be saved by the armor
-            required_roll = self.__unit.get_armor.get_[target_armor]  # the required target roll to be saved by the armor
+            if target_armor is None:
+                armor_req_roll = 7
+            else:
+                armor_req_roll = target_armor.get_required_roll()
 
-            if Bestiary.WARD_SHIELD_ENCHANTED in target_wards:
-                required_roll -= 1
+            if target_shield is None:
+                shield_save_modifier = 0
+            else:
+                shield_save_modifier = target_shield.get_shield_save_modifier()
 
-            armor_modifier = ARMOR_SAVE_MODIFIER[s]
-            roll += armor_modifier  # the stronger the weapon, the lower the chance that the armor will block
+            # the required target roll to be saved by the armor
+            required_roll = armor_req_roll + shield_save_modifier
+            print("Required roll for armor save: " + str(required_roll))
+
+            armor_modifier = ARMOR_SAVE_MODIFIER[s]  # Model/Weapon strength negates the armor save
+            roll += armor_modifier
+            print("Roll + Strength Modifier: " + str(roll))
             if roll >= required_roll:
-                print("Target saved by armor!")
+                self.__add_text_blocked(target)
                 return True
         print("Target armor save throw failed")
         return False
@@ -194,25 +210,25 @@ class ActionManager:
         return False
 
     def perform_action(self):
-        unit_type = self.__unit.get_model_type()
+        model_type = self.__model.get_model_type()
         action = self.get_action()
         print("Perform Action: " + action)
 
         """ ATTACK """
         if action == Bestiary.ACTION_ATTACK:
-            self.__unit.set_action("attack")
+            self.__model.set_action("attack")
 
             """ CLOSE_COMBAT """
-            if unit_type == Bestiary.UNIT_TYPE_MELEE:
+            if model_type == Bestiary.MODEL_TYPE_MELEE:
                 self.close_combat_attacks()
 
-            elif unit_type == Bestiary.UNIT_TYPE_RANGE:
+            elif model_type == Bestiary.MODEL_TYPE_RANGE:
                 self.range_attack()
 
             self.__finished = True
 
     def close_combat_attacks(self):
-        number_of_attacks = self.__unit.get_attacks()
+        number_of_attacks = self.__model.get_attacks()
         for a in range(number_of_attacks):
 
             alive_targets = [x for x in self.__targets if not x.is_killed()]
@@ -235,6 +251,7 @@ class ActionManager:
                         if saved_by_ward:
                             continue
                         else:
+                            self.__add_text_hit(target)
                             target_wounds = target.get_wounds()
                             target.set_wounds(target_wounds - 1)
 
@@ -254,13 +271,14 @@ class ActionManager:
                     if saved_by_ward:
                         return
                     else:
+                        self.__add_text_hit(target)
                         target_wounds = target.get_wounds()
                         target.set_wounds(target_wounds - 1)
 
     def is_finished(self):
         if self.__finished:
-            if self.__unit.is_animation_cycle_done():
-                self.__unit.set_action("idle")
+            if self.__model.is_animation_cycle_done():
+                self.__model.set_action("idle")
 
                 target = self.__targets[0]
 
@@ -274,3 +292,40 @@ class ActionManager:
                     return True
         else:
             return self.__finished
+
+    def __add_text(self, string, text_color, target):
+        target_position = target.get_position()
+        target_size = target.get_size()
+        text = Text(string, (0, 0), text_color, None, 28)
+        text_size = text.get_size()
+
+        # place beside the target
+        # x = target_position[0] - int(text_size[0]) - 10,
+        # y = target_position[1] + int(target_size[1]) / 2 - int(text_size[1]) / 2
+
+        # place below the target
+        x = target_position[0] + int(target_size[0]/2) - text_size[0]/2
+        y = target_position[1] + int(target_size[1]) - int(text_size[1]) / 2
+
+        new_position = (x, y)
+        text.set_position(new_position)
+        self.__texts.append(text)
+
+    def __add_text_miss(self, target):
+        self.__add_text("Miss", GameConstants.BRIGHT_YELLOW, target)
+
+    def __add_text_hit(self, target):
+        self.__add_text("Hit", GameConstants.BRIGHT_YELLOW, target)
+
+    def __add_text_blocked(self, target):
+        self.__add_text("Blocked", GameConstants.BRIGHT_YELLOW, target)
+
+    def set_texts(self, texts):
+        self.__texts = texts
+
+    def get_texts(self):
+        return self.__texts
+
+    def destroy(self):
+        for text in self.__texts:
+            text.kill()

@@ -9,7 +9,7 @@ BLACK = (0, 0, 0)
 # SIZE = (200, 148)
 # ACTION = "bow"
 INTERVAL = .10  # how long one single sprite should be displayed in seconds
-
+WHITE = (255, 255, 255)
 
 class MiniGameEngine:
 
@@ -31,7 +31,7 @@ class MiniGameEngine:
             self.__cycletime += seconds
             if self.__cycletime > INTERVAL:
 
-                self.__screen.fill(BLACK)  # blit the background
+                self.__screen.fill(WHITE)  # blit the background
 
                 # draw single images if any
                 for i in range(len(self.__images)):
