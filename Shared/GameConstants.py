@@ -5,7 +5,9 @@ class GameConstants:
 
     SCREEN_SIZE = (800, 600)
     FPS = 60
-    INTERVAL = .15  # animation interval
+    INTERVAL = .20  # animation interval
+
+    SIZE_RATIO = 1.5
 
     STARTING_SCENE = 0
 
@@ -76,3 +78,10 @@ class GameConstants:
     BRIGHT_GRAY = (128, 128, 128)
     DARK_GRAY = (40, 40, 40)
 
+    """ TARGETING """
+    TARGET_SINGLE_ANY = 0
+    TARGET_SINGLE_FRONT = 1
+    TARGET_SINGLE_BACK = 2
+    TARGET_ALL_ANY = 3
+    TARGET_ALL_FRONT = 4
+    TARGET_ALL_BACK = 5

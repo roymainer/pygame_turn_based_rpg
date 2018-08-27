@@ -1,5 +1,4 @@
-import Rolls
-from Shared import Bestiary
+from Shared import Bestiary, Rolls
 from Shared.GameConstants import GameConstants
 from UI.Text import Text
 
@@ -241,6 +240,8 @@ class ActionManager:
             # target = self.__targets[0]  # 1st target
             target = alive_targets[0]  # get the first remaining alive target
 
+            target.set_action("hurt")
+
             hit = self.get_roll_to_hit_close_combat(target)
             if hit:
                 wound = self.get_roll_to_wound(target)
@@ -261,7 +262,8 @@ class ActionManager:
             return
 
         target = self.__targets[0]  # 1st target
-        hit = self.get_roll_to_hit_close_combat(target)
+        target.set_action("hurt")
+        hit = self.get_roll_to_hit_ranged(target)
         if hit:
             wound = self.get_roll_to_wound(target)
             if wound:
@@ -286,6 +288,8 @@ class ActionManager:
                 for target in self.__targets:
                     if target.is_killed():
                         target.set_action("die")
+                    else:
+                        target.set_action('idle')
 
                 if target.is_animation_cycle_done():
                     self.__finished = False

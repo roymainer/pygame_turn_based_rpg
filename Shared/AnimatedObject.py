@@ -13,7 +13,9 @@ class AnimatedObject(GameObject):
 
         self.__animator = Animator(sprite_sheet_file, sprite_size=size)
         self.__actions_list = self.__animator.get_animations_keys()
-        self.__action = self.__actions_list[0]  # default single animation for objects
+        # self.__action = self.__actions_list[0]  # default single animation for objects
+        self.__action = None
+        self.set_action("idle")  # all animated objects start at idle
         image = self.__animator.get_next_sprite(self.__action)
         super(AnimatedObject, self).__init__(image, position, object_type)
 
@@ -44,10 +46,10 @@ class AnimatedObject(GameObject):
 
     def set_action(self, action):
         if action not in self.get_actions_list():
-            return
+            self.__action = self.__actions_list[0]
         if action != self.__action:
             self.__animator.reset_animation()
-        self.__action = action
+            self.__action = action
 
     def get_action(self):
         return self.__action
@@ -58,8 +60,5 @@ class AnimatedObject(GameObject):
     def get_actions_list(self):
         return self.__animator.get_animations_keys()
 
-    def turn_right(self):
-        self.__animator.unset_flip()
-
-    def turn_left(self):
+    def flip_x(self):
         self.__animator.set_flip()

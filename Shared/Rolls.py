@@ -17,7 +17,7 @@ def get_d6_roll():
     return roll
 
 
-def get_two_d6_roll():
+def get_2d6_roll():
     return get_d6_roll() + get_d6_roll()
 
 

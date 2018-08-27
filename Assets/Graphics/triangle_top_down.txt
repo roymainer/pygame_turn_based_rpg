@@ -1,4 +1,0 @@
-shrink_expand-00 = 0 0 33 59
-shrink_expand-01 = 34 0 33 59
-shrink_expand-02 = 68 0 33 59
-shrink_expand-03 = 0 60 33 59

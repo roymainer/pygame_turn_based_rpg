@@ -1,6 +1,6 @@
-marker_red_sprite_sheet-00 = 0 0 33 59
-marker_red_sprite_sheet-01 = 34 0 33 59
-marker_red_sprite_sheet-02 = 68 0 33 59
-marker_red_sprite_sheet-03 = 0 60 33 59
-marker_red_sprite_sheet-04 = 34 60 33 59
-marker_red_sprite_sheet-05 = 68 60 33 59
+idle-00 = 0 0 33 59
+idle-01 = 34 0 33 59
+idle-02 = 68 0 33 59
+idle-03 = 0 60 33 59
+idle-04 = 34 60 33 59
+idle-05 = 68 60 33 59

@@ -87,7 +87,15 @@ class GameEngine:
             self.__player_sprites.add(sprite)
         return
 
-    def get_sprites_group(self, group_type):
+    def remove_sprite_from_group(self, sprite, group_type=GameConstants.ALL_GAME_OBJECTS):
+        if group_type == GameConstants.ALL_GAME_OBJECTS:
+            self.__all_sprites.remove(sprite)
+        if group_type == GameConstants.PLAYER_GAME_OBJECTS:
+            self.__player_sprites.remove(sprite)
+        if group_type == GameConstants.COMPUTER_GAME_OBJECTS:
+            self.__player_sprites.remove(sprite)
+
+    def get_sprites_group(self, group_type=GameConstants.ALL_GAME_OBJECTS):
         if group_type == GameConstants.ALL_GAME_OBJECTS:
             return self.__all_sprites
         if group_type == GameConstants.PLAYER_GAME_OBJECTS:

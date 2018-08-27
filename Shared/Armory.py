@@ -11,8 +11,9 @@ def get_sprite_sheet_path(file_name):
 
 
 def __get_random_shield():
-    return random.choice([SHIELD0_SPRITE_SHEET, SHIELD1_SPRITE_SHEET, SHIELD2_SPRITE_SHEET,
-                          SHIELD3_SPRITE_SHEET])
+    return random.choice([SHIELD0_SPRITE_SHEET])
+    # return random.choice([SHIELD0_SPRITE_SHEET, SHIELD1_SPRITE_SHEET, SHIELD2_SPRITE_SHEET,
+    #                       SHIELD3_SPRITE_SHEET])
 
 
 # ARMOR_NONE_SPRITE_SHEET = None
@@ -22,7 +23,7 @@ CHAOS_ARMOR_SPRITE_SHEET = get_sprite_sheet_path("armor_chaos_sprite_sheet.png")
 DRAGON_ARMOR_SPRITE_SHEET = get_sprite_sheet_path("armor_dragon_sprite_sheet.png")
 
 # SHIELD_NONE_SPRITE_SHEET = None
-SHIELD0_SPRITE_SHEET = get_sprite_sheet_path("shield0_sprite_sheet.png")
+SHIELD0_SPRITE_SHEET = get_sprite_sheet_path("shield_sprite_sheet.png")
 SHIELD1_SPRITE_SHEET = get_sprite_sheet_path("shield1_sprite_sheet.png")
 SHIELD2_SPRITE_SHEET = get_sprite_sheet_path("shield2_sprite_sheet.png")
 SHIELD3_SPRITE_SHEET = get_sprite_sheet_path("shield3_sprite_sheet.png")

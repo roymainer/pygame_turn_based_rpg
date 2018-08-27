@@ -7,6 +7,8 @@ Created: Jul 30, 2018
 """
 import pygame
 
+from Shared.GameConstants import GameConstants
+
 
 def prepare_animations(spritesheet_file, atlas_file, sprite_size=None):
 
@@ -41,6 +43,10 @@ def prepare_animations(spritesheet_file, atlas_file, sprite_size=None):
 
         if sprite_size is not None:
             sprite = pygame.transform.scale(sprite, sprite_size)
+
+        size = sprite.get_size()
+        new_size = (int(size[0] * GameConstants.SIZE_RATIO), int(size[1] * GameConstants.SIZE_RATIO))
+        sprite = pygame.transform.scale(sprite, new_size)
 
         animation_dictionary[action].append(sprite)  # add to list
 

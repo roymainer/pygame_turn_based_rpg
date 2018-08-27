@@ -1,1 +1,7 @@
-armor_light_sprite_sheet-00 = 0 0 48 42
+attack-00 = 0 0 48 42
+cast-00 = 0 0 48 42
+hit-00 = 0 0 48 42
+hurt-00 = 0 0 48 42
+idle-00 = 0 0 48 42
+run-00 = 0 0 48 42
+die-00 = 0 0 48 42

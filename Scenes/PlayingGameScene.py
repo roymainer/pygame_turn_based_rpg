@@ -17,8 +17,11 @@ class PlayingGameScene(Scene):
         self.load_level()  # 2nd load the level which will populate the turn manager with units
         self.__UI = PlayingGameSceneUI(self)  # 3rd, the UI will be created with units menus
 
-        self.__current_unit = None
+        self.__current_model = None
         self.__current_action = None
+
+        # TODO: delete later
+        self.__prev_sprites_list = []
 
         self.create_background()
 
@@ -47,26 +50,24 @@ class PlayingGameScene(Scene):
             #     print("%%%%%%%%%%%%%%%%%%% Adding Fading Text: " + text.get_string() + " %%%%%%%%%%%%%%%%%%%")
             #     self.get_game().add_sprite_to_group(text, None)
 
-        current_unit = self.__turn_manager.get_current_unit()
-        if current_unit is not None:
-            if current_unit != self.__current_unit:
-                print("Current Unit's turn: {}".format(current_unit.get_name()))
-                self.__UI.update_units_menu()
-                self.__current_unit = current_unit  # store the current unit
-                self.__current_action = ActionManager(current_unit)  # create a new action for the unit
-                self.__UI.add_player_marker(current_unit)  # add a new marker for the unit
-                self.__UI.add_actions_menu(current_unit)  # add new actions menu for the unit
+        current_sprites_list = self.get_game().get_sprites_group().sprites()
+        sprites_diff = set(current_sprites_list) - set(self.__prev_sprites_list)
+        self.__prev_sprites_list = current_sprites_list
+        print("#Sprites: {}, diff sprites: {}".format(str(len(current_sprites_list)), str(sprites_diff)))
 
-                if current_unit in self.__turn_manager.get_all_computer_units():
+        current_model = self.__turn_manager.get_current_model()
+        if current_model is not None:
+            if current_model != self.__current_model:
+                print("Current Unit's turn: {}".format(current_model.get_name()))
+                self.__UI.update_models_menu()
+                self.__current_model = current_model  # store the current unit
+                self.__current_action = ActionManager(current_model)  # create a new action for the unit
+                self.__UI.add_player_marker(current_model)  # add a new marker for the unit
+                self.__UI.add_actions_menu(current_model)  # add new actions menu for the unit
+
+                if current_model in self.__turn_manager.get_all_computer_models():
                     # check if unit is a computer unit
                     self.play_computer_turn()
-        # else:
-        #     # if current unit is none
-        #     # TODO: this code should never be reached, I need to check if there are no more computer/player units
-        #     self.__current_unit = None  # remove the current unit
-        #     self.__current_action.destroy()
-        #     self.__current_action = None  # remove the current action
-        #     self.__UI.remove_actions_menu()  # remove the actions menu
 
         """ Perform Action """
         if self.__current_action.is_ready():
@@ -78,19 +79,23 @@ class PlayingGameScene(Scene):
         if self.__current_action.is_finished():
 
             """ Remove any dead units """
-            for unit in self.__turn_manager.get_all_units_list():
+            for unit in self.__turn_manager.get_all_models_list():
                 if unit.is_killed():
-                    unit.kill()
-                    self.__turn_manager.remove_unit(unit)
+                    # TODO: return the kill call
+                    # unit.kill()
+                    self.__turn_manager.remove_model(unit)
 
             # self.__current_unit.set_action("idle")  # return acting unit to idle
             self.__current_action.destroy()
             self.__current_action = None  # remove the current action
-            self.__current_unit = None  # remove the current unit
-            self.__turn_manager.advance_to_next_unit()  # advance the turn manager to next unit
+            self.__current_model = None  # remove the current unit
+            self.__turn_manager.advance_to_next_model()  # advance the turn manager to next unit
 
     def get_current_action(self):
         return self.__current_action
+
+    def get_current_model(self):
+        return self.__current_model
 
     def get_turn_manager(self):
         return self.__turn_manager
@@ -98,77 +103,47 @@ class PlayingGameScene(Scene):
     def load_level(self):
         # load adventurer
         object_type = GameConstants.PLAYER_GAME_OBJECTS
-        self.load_model(get_empire_archer(), GameConstants.PLAYER_TOP_BACK, object_type)
-        self.load_model(get_empire_archer(), GameConstants.PLAYER_MIDDLE_BACK, object_type)
-        self.load_model(get_empire_archer(), GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
-        self.load_model(get_empire_swordsman(), GameConstants.PLAYER_TOP_FRONT, object_type)
-        self.load_model(get_empire_swordsman(), GameConstants.PLAYER_MIDDLE_FRONT, object_type)
-        self.load_model(get_empire_swordsman(), GameConstants.PLAYER_BOTTOM_FRONT, object_type)
+        # self.load_model(get_empire_archer(), GameConstants.PLAYER_TOP_BACK, object_type)
+        # self.load_model(get_empire_archer(), GameConstants.PLAYER_MIDDLE_BACK, object_type)
+        # self.load_model(get_empire_archer(), GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
+        # self.load_model(get_empire_swordsman(), GameConstants.PLAYER_TOP_FRONT, object_type, flip_x=True)
+        # self.load_model(get_empire_swordsman(), GameConstants.PLAYER_MIDDLE_FRONT, object_type, flip_x=True)
+        # self.load_model(get_empire_swordsman(), GameConstants.PLAYER_BOTTOM_FRONT, object_type, flip_x=True)
+        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_TOP_FRONT, object_type, flip_x=True)
+        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_MIDDLE_FRONT, object_type, flip_x=True)
+        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_BOTTOM_FRONT, object_type, flip_x=True)
 
         object_type = GameConstants.COMPUTER_GAME_OBJECTS
-        self.load_model(get_slime_monster(), GameConstants.COMPUTER_TOP_BACK, object_type)
-        self.load_model(get_slime_monster(), GameConstants.COMPUTER_MIDDLE_BACK, object_type)
-        self.load_model(get_slime_monster(), GameConstants.COMPUTER_BOTTOM_BACK, object_type)
-        self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_TOP_FRONT, object_type, turn_left=True)
-        self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, turn_left=True)
-        self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, turn_left=True)
+        # self.load_model(get_slime_monster(), GameConstants.COMPUTER_TOP_BACK, object_type)
+        # self.load_model(get_slime_monster(), GameConstants.COMPUTER_MIDDLE_BACK, object_type)
+        # self.load_model(get_slime_monster(), GameConstants.COMPUTER_BOTTOM_BACK, object_type)
+        # self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_TOP_FRONT, object_type, flip_x=True)
+        # self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, flip_x=True)
+        # self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, flip_x=True)
+        self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_TOP_FRONT, object_type, flip_x=False)
+        self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, flip_x=False)
+        self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, flip_x=False)
 
         return
 
-    def load_model(self, model, position, object_type, turn_left=False):
+    def load_model(self, model, position, object_type, flip_x=False):
         size = model.get_size()
 
         new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
         model.set_position(new_position)
 
-        if turn_left:
-            model.turn_left()
+        if flip_x:
+            model.flip_x()
 
         # self.add_scene_object(character)  # add to scene objects list
         if object_type == GameConstants.PLAYER_GAME_OBJECTS:
-            self.__turn_manager.add_player_unit(model)
+            self.__turn_manager.add_player_model(model)
         elif object_type == GameConstants.COMPUTER_GAME_OBJECTS:
-            self.__turn_manager.add_computer_unit(model)
-        self.get_game().add_sprite_to_group(model, object_type)  # add to game engine sprites group
+            self.__turn_manager.add_computer_model(model)
+        # self.get_game().add_sprite_to_group(model, object_type)  # add to game engine sprites group
+        for sprite in model.get_sprites():
+            self.get_game().add_sprite_to_group(sprite, object_type)  # add to game engine sprites group
         return
-
-    # def load_level(self):
-    #     # load adventurer
-    #     object_type = GameConstants.PLAYER_GAME_OBJECTS
-    #     self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_TOP_BACK, object_type)
-    #     # self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_MIDDLE_BACK, object_type)
-    #     # self.load_character(Bestiary.ARCHER, GameConstants.PLAYER_BOTTOM_BACK, object_type)  # maintain this order
-    #     # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_TOP_FRONT, object_type)
-    #     # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_MIDDLE_FRONT, object_type)
-    #     # self.load_character(Bestiary.WARRIOR, GameConstants.PLAYER_BOTTOM_FRONT, object_type)
-    #
-    #     object_type = GameConstants.COMPUTER_GAME_OBJECTS
-    #     self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_TOP_BACK, object_type)
-    #     self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_MIDDLE_BACK, object_type)
-    #     self.load_character(Bestiary.SLIME, GameConstants.COMPUTER_BOTTOM_BACK, object_type)
-    #     self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_TOP_FRONT, object_type, turn_left=True)
-    #     self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_MIDDLE_FRONT, object_type, turn_left=True)
-    #     self.load_character(Bestiary.SKELETON, GameConstants.COMPUTER_BOTTOM_FRONT, object_type, turn_left=True)
-    #
-    #     return
-    # def load_character(self, character_attributes, position, object_type, turn_left=False):
-    #     sprite_sheet = character_attributes[Bestiary.SPRITE_SHEET]
-    #     size = character_attributes[Bestiary.SIZE]
-    #     new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
-    #
-    #     character = Model(attributes=character_attributes, spritesheet_file=sprite_sheet, size=size,
-    #                       position=new_position, object_type=object_type)  # init adventurer
-    #
-    #     if turn_left:
-    #         character.turn_left()
-    #
-    #     # self.add_scene_object(character)  # add to scene objects list
-    #     if object_type == GameConstants.PLAYER_GAME_OBJECTS:
-    #         self.__turn_manager.add_player_unit(character)
-    #     elif object_type == GameConstants.COMPUTER_GAME_OBJECTS:
-    #         self.__turn_manager.add_computer_unit(character)
-    #     self.get_game().add_sprite_to_group(character, object_type)  # add to game engine sprites group
-    #     return
 
     def create_background(self):
         surface = pygame.Surface(GameConstants.SCREEN_SIZE)  # create an empty surface
@@ -200,7 +175,7 @@ class PlayingGameScene(Scene):
 
     def play_computer_turn(self):
         self.__current_action.set_action(ACTION_ATTACK)
-        targets = self.__turn_manager.get_all_player_units()
+        targets = self.__turn_manager.get_all_player_models()
         # TODO: improve the target selection process, lowest WS/ lowest wounds/...
         if not any(targets):
             return
