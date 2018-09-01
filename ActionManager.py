@@ -1,6 +1,7 @@
 from Shared import Bestiary, Rolls
+from Shared.Action import *
 from Shared.GameConstants import GameConstants
-from UI.Text import Text
+from UI.TextFloating import TextFloating
 
 """ Key (model_ws) : value (dict : key (enemy_ws) : value (dice roll to hit)) """
 # rows: model's weapon skill, columns: target's weapon skill
@@ -82,6 +83,106 @@ class ActionManager:
         else:
             return False
 
+    def perform_action(self):
+        action = self.get_action()
+        print("Perform Action: " + action.get_name())
+
+        if isinstance(action, Attack):
+            self.close_combat_attacks()
+        elif isinstance(action, RangeAttack):
+            self.range_attack()
+        elif isinstance(action, Spells):
+            self.__model.set_action("cast")
+            self.cast_spell()
+
+        self.__finished = True
+
+    def close_combat_attacks(self):
+        number_of_attacks = self.__model.get_attacks()
+        for a in range(number_of_attacks):
+
+            alive_targets = [x for x in self.__targets if not x.is_killed()]
+
+            if not any(alive_targets):
+                # if all targets eliminated return
+                self.__finished = True
+                return
+            print("---------- ATTACK#{}/{} ----------".format(str(a+1), str(number_of_attacks)))
+
+            self.__model.set_action("attack")
+
+            target = alive_targets[0]  # get the first remaining alive target
+            target.set_action("hurt")
+
+            hit = self.get_roll_to_hit_close_combat(target)
+            if hit:
+                wound = self.get_roll_to_wound(target)
+                if wound:
+                    saved_by_armor = self.get_armor_saving_throw(target)
+                    if not saved_by_armor:
+                        # TODO: return the wards
+                        # saved_by_ward = self.get_ward_saving_throw(target)
+                        saved_by_ward = False
+                        if saved_by_ward:
+                            self.__add_text_saved_by_ward(target)
+                            continue
+                        else:
+                            self.__add_text_hit(target)
+                            target_wounds = target.get_current_wounds()
+                            target.set_wounds(target_wounds - 1)
+                    else:
+                        self.__add_text_blocked(target)
+                else:
+                    self.__add_text_blocked(target)
+            else:
+                self.__add_text_miss(target)
+
+    def range_attack(self):
+        alive_targets = [x for x in self.__targets if not x.is_killed()]
+
+        if not any(alive_targets):
+            # if all targets eliminated return
+            self.__finished = True
+            return
+
+        self.__model.set_action("shoot")
+        target = self.__targets[0]  # 1st target
+        target.set_action("hurt")
+
+        hit = self.get_roll_to_hit_ranged(target)
+        if hit:
+            wound = self.get_roll_to_wound(target)
+            if wound:
+                saved_by_armor = self.get_armor_saving_throw(target)
+                if not saved_by_armor:
+                    # saved_by_ward = self.get_ward_saving_throw(target)
+                    # if saved_by_ward:
+                    #     return
+                    # else:
+                    self.__add_text_hit(target)
+                    target_wounds = target.get_wounds()
+                    target.set_wounds(target_wounds - 1)
+
+    def is_finished(self):
+        if self.__finished:  # if action is finished
+            if self.__model.is_animation_cycle_done():  # if the model finished it's action animation cycle
+                self.__model.set_action("idle")
+
+                target = self.__targets[0]
+
+                """ Animate targets death """
+                for target in self.__targets:
+                    if target.is_killed():
+                        target.set_action("die")
+                    else:
+                        target.set_action('idle')
+
+                if target.is_animation_cycle_done():
+                    self.__finished = False  # reset the finish flag for next action
+                    return True  # return True cause animation also finished
+        else:
+            return self.__finished
+
     def get_roll_to_hit_close_combat(self, target) -> bool:
         print("Rolling to hit:")
         roll = Rolls.get_d6_roll()
@@ -89,7 +190,6 @@ class ActionManager:
             print("Target hit!")
             return True
         elif roll == 1:
-            self.__add_text_miss(target)
             print("Missed target!")
             return False
         else:
@@ -100,7 +200,6 @@ class ActionManager:
             if roll >= required_roll:
                 print("Target hit!")
                 return True
-        self.__add_text_miss(target)
         print("Missed target!")
         return False
 
@@ -113,7 +212,7 @@ class ActionManager:
             print("Target hit!")
             return True
         elif roll == 1:
-            self.__add_text_miss(target)
+            # self.__add_text_miss(target)
             print("Missed target!")
             return False
         else:
@@ -123,7 +222,7 @@ class ActionManager:
             if roll >= required_roll:
                 print("Target hit!")
                 return True
-        self.__add_text_miss(target)
+        # self.__add_text_miss(target)
         print("Missed target!")
         return False
 
@@ -135,7 +234,7 @@ class ActionManager:
             return True
         elif roll == 1:
             print("Hit bounced off target!")
-            self.__add_text_blocked(target)
+            # self.__add_text_blocked(target)
             return False
         else:
             s = self.__model.get_strength()
@@ -145,7 +244,7 @@ class ActionManager:
             if roll >= required_roll:
                 print("Target wounded!")
                 return True
-        self.__add_text_blocked(target)
+        # self.__add_text_blocked(target)
         print("Hit bounced off target!")
         return False
 
@@ -172,13 +271,12 @@ class ActionManager:
 
             # the required target roll to be saved by the armor
             required_roll = armor_req_roll + shield_save_modifier
+
+            required_roll -= ARMOR_SAVE_MODIFIER[s]  # Model/Weapon strength negates the armor save
             print("Required roll for armor save: " + str(required_roll))
 
-            armor_modifier = ARMOR_SAVE_MODIFIER[s]  # Model/Weapon strength negates the armor save
-            roll += armor_modifier
-            print("Roll + Strength Modifier: " + str(roll))
             if roll >= required_roll:
-                self.__add_text_blocked(target)
+                # self.__add_text_blocked(target)
                 return True
         print("Target armor save throw failed")
         return False
@@ -208,108 +306,30 @@ class ActionManager:
         print("Target save throw failed")
         return False
 
-    def perform_action(self):
-        model_type = self.__model.get_model_type()
-        action = self.get_action()
-        print("Perform Action: " + action)
-
-        """ ATTACK """
-        if action == Bestiary.ACTION_ATTACK:
-            self.__model.set_action("attack")
-
-            """ CLOSE_COMBAT """
-            if model_type == Bestiary.MODEL_TYPE_MELEE:
-                self.close_combat_attacks()
-
-            elif model_type == Bestiary.MODEL_TYPE_RANGE:
-                self.range_attack()
-
-            self.__finished = True
-
-    def close_combat_attacks(self):
-        number_of_attacks = self.__model.get_attacks()
-        for a in range(number_of_attacks):
-
-            alive_targets = [x for x in self.__targets if not x.is_killed()]
-
-            if not any(alive_targets):
-                # if all targets eliminated return
-                self.__finished = True
-                return
-
-            # target = self.__targets[0]  # 1st target
-            target = alive_targets[0]  # get the first remaining alive target
-
-            target.set_action("hurt")
-
-            hit = self.get_roll_to_hit_close_combat(target)
-            if hit:
-                wound = self.get_roll_to_wound(target)
-                if wound:
-                    saved_by_armor = self.get_armor_saving_throw(target)
-                    if not saved_by_armor:
-                        saved_by_ward = self.get_ward_saving_throw(target)
-                        if saved_by_ward:
-                            continue
-                        else:
-                            self.__add_text_hit(target)
-                            target_wounds = target.get_wounds()
-                            target.set_wounds(target_wounds - 1)
-
-    def range_attack(self):
-        if not any(self.__targets):
-            # if all targets eliminated return
-            return
-
-        target = self.__targets[0]  # 1st target
-        target.set_action("hurt")
-        hit = self.get_roll_to_hit_ranged(target)
-        if hit:
-            wound = self.get_roll_to_wound(target)
-            if wound:
-                saved_by_armor = self.get_armor_saving_throw(target)
-                if not saved_by_armor:
-                    saved_by_ward = self.get_ward_saving_throw(target)
-                    if saved_by_ward:
-                        return
-                    else:
-                        self.__add_text_hit(target)
-                        target_wounds = target.get_wounds()
-                        target.set_wounds(target_wounds - 1)
-
-    def is_finished(self):
-        if self.__finished:
-            if self.__model.is_animation_cycle_done():
-                self.__model.set_action("idle")
-
-                target = self.__targets[0]
-
-                """ Animate targets death """
-                for target in self.__targets:
-                    if target.is_killed():
-                        target.set_action("die")
-                    else:
-                        target.set_action('idle')
-
-                if target.is_animation_cycle_done():
-                    self.__finished = False
-                    return True
-        else:
-            return self.__finished
-
     def __add_text(self, string, text_color, target):
         target_position = target.get_position()
         target_size = target.get_size()
-        text = Text(string, (0, 0), text_color, None, 28)
+        text = TextFloating(string, (0, 0), text_color, None, 28)
         text_size = text.get_size()
 
         # place beside the target
         # x = target_position[0] - int(text_size[0]) - 10,
         # y = target_position[1] + int(target_size[1]) / 2 - int(text_size[1]) / 2
 
-        # place below the target
-        x = target_position[0] + int(target_size[0]/2) - text_size[0]/2
-        y = target_position[1] + int(target_size[1]) - int(text_size[1]) / 2
+        # place below the target or below previous text
+        # x = target_position[0] + int(target_size[0]/2) - text_size[0]/
+        if target_position[0] > int(GameConstants.SCREEN_SIZE[0]/2):
+            x = target_position[0] - text_size[0] - 2
+        else:
+            x = target_position[0] + target_size[0] + 2
+
+        if any(self.__texts):
+            prev_text = self.__texts[-1]  # get previous text
+            y = prev_text.get_position()[1]
+            height = prev_text.get_size()[1]
+            y = y + height + 10
+        else:
+            y = target_position[1] + int(target_size[1]) - int(text_size[1]) / 2
 
         new_position = (x, y)
         text.set_position(new_position)

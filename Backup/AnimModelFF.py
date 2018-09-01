@@ -1,6 +1,7 @@
 """
-ModelFF class is an extension of the AnimatedObject class
+AnimModelFF class is an extension of the AnimatedObject class
 It's based on Final Fantasy style models
+it supports weapons which are animated sprites!
 it supports more actions (animations), character attributes and sounds (need to add)
 Required Actions:
 idle
@@ -99,16 +100,34 @@ class ModelFF(AnimAttrObject):
     #     # TODO: need to complete the models wards
     #     return []
 
+    def get_sprites(self):
+        sprites = []
+        if self.__weapons is not None:
+            for weapon in self.__weapons:
+                sprites.append(weapon)  # background layer
+                sprites.append(self)
+        else:
+            sprites.append(self)
+        if self.__shield is not None:
+            sprites.append(self.__shield)
+        return sprites
+
+    def set_action(self, action):
+        # if self.__armor is not None:
+        #     self.__armor.set_action(action)
+        if self.__weapons is not None:
+            for weapon in self.__weapons:
+                weapon.set_action(action)
+        if self.__shield is not None:
+            self.__shield.set_action(action)
+        super(ModelFF, self).set_action(action)
+        return
+
     def add_action(self, new_action):
         for action in self.__actions_list:
             if type(action) == type(new_action):
                 return
         self.__actions_list.append(new_action)
-
-    def set_action(self, action):
-        if action == "die":
-            self.set_last_animation()
-        super(ModelFF, self).set_action(action)
 
     def get_actions_list(self):
         return self.__actions_list
@@ -145,12 +164,40 @@ class ModelFF(AnimAttrObject):
     def get_items_list(self):
         return self.__items_list
 
+    def flip_x(self):
+        # if self.__armor is not None:
+        #     self.__armor.set_action(action)
+        if self.__weapons is not None:
+            for weapon in self.__weapons:
+                weapon.flip_x()
+        if self.__shield is not None:
+            self.__shield.flip_x()
+        super(ModelFF, self).flip_x()
+
+    def set_position(self, position):
+        if self.__weapons is not None:
+            for weapon in self.__weapons:
+                weapon.set_position(position)
+        if self.__shield is not None:
+            self.__shield.set_position(position)
+        super(ModelFF, self).set_position(position)
+
     def is_front_row(self):
         position = self.get_position()
         if position[0] == GameConstants.PLAYERS_FRONT_COLUMN or position[0] == GameConstants.COMPUTER_FRONT_COLUMN:
             return True
         else:
             return False
+
+    def kill(self):
+        if self.__armor is not None:
+            self.__armor.kill()
+        if self.__weapons is not None:
+            for weapon in self.__weapons:
+                weapon.kill()
+        if self.__shield is not None:
+            self.__shield.kill()
+        super(ModelFF, self).kill()
 
     def is_killed(self):
         return self.get_current_wounds() <= 0

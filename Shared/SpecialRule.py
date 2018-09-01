@@ -1,11 +1,12 @@
 from Shared.Rolls import *
 
 
-class SpecialRules:
+class SpecialRule:
 
     def __init__(self, name=""):
         self.__name = name
         self.__targets = []
+        self.__to_remove = False
 
     def get_name(self):
         return self.__name
@@ -23,11 +24,26 @@ class SpecialRules:
     def re_roll_to_wound(self, target):
         return False
 
+    def get_strength_bonus(self):
+        return 0
+
     def pass_fear_ld_test(self):
         return False
 
+    def set_to_remove(self, to_remove: bool):
+        self.__to_remove = to_remove
 
-class AccusationSR(SpecialRules):
+    def get_to_remove(self):
+        return self.__to_remove
+
+
+# ------------------- General Special Rules ------------------- #
+class AlwaysStrikesLast(SpecialRule):
+    def __init__(self):
+        super(AlwaysStrikesLast, self).__init__("Always Strikes Last")
+
+
+class AccusationSR(SpecialRule):
     def __init__(self, target):
         super(AccusationSR, self).__init__("Accusation")
         self.__target = target
@@ -44,7 +60,7 @@ class AccusationSR(SpecialRules):
             return False
 
 
-class GrimResolveSR(SpecialRules):
+class GrimResolveSR(SpecialRule):
     def __init__(self):
         super(GrimResolveSR, self).__init__(name="Grim Resolve")
 
@@ -61,7 +77,7 @@ class GrimResolveSR(SpecialRules):
         return False
 
 
-class ToolsOfJudgmentSR(SpecialRules):
+class ToolsOfJudgmentSR(SpecialRule):
     """
     Empire 8ed p.38
     When attacking wizards, or models with the Undead, Nehekharan Undead
@@ -78,11 +94,46 @@ class ToolsOfJudgmentSR(SpecialRules):
         return False
 
 
-class Undead(SpecialRules):
+class Hatred(SpecialRule):
+    """
+    Warhammer Fantasy Rule Book P.71
+    on first attack, re-roll all close combat to hit misses
+    """
+    def __init__(self):
+        super(Hatred, self).__init__(name="Hatred")
+
+    def re_roll_to_hit(self, target):
+        self.set_to_remove(True)
+        return True
+
+
+class AncestralGrudge(Hatred):
+    """
+    Dwarfs Army Book p.32
+    Rolling a D6 to determine is pointless, just add Hatred
+    """
+    def __init__(self):
+        super(AncestralGrudge, self).__init__(name="Ancestral Grudge")
+
+
+class Resolute(SpecialRule):
+    """
+    Dwarfs Army Book p.32
+    +1 Strength during first turn of combat
+    """
+    def __init__(self):
+        super(Resolute, self).__init__(name="Resolute")
+
+    def get_strength_bonus(self):
+        self.set_to_remove(True)
+        return 1
+
+
+class Undead(SpecialRule):
     def __init__(self):
         super(Undead, self).__init__(name="Undead")
 
 
-class Demonic(SpecialRules):
+class Demonic(SpecialRule):
     def __init__(self):
         super(Demonic, self).__init__(name="Demonic")

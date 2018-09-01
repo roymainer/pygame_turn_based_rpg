@@ -93,7 +93,7 @@ class PlayingGameSceneUI:
         menu_size = (GameConstants.SCREEN_SIZE[0] - player_menu_size[0] - computer_menu_size[0],
                      player_menu_size[1])
 
-        menu_actions_list = get_model_actions(model)
+        menu_actions_list = model.get_actions_list()
 
         menu_position = (self.__menus[PLAYER_MODELS_MENU].get_rect().right, GameConstants.BATTLE_AREA_BOTTOM)
         menu = Menu(UIConstants.SPRITE_BLUE_MENU, menu_size, menu_actions_list, menu_position)
@@ -135,10 +135,7 @@ class PlayingGameSceneUI:
 
     def add_skills_menu(self, model):
         skills_list = model.get_skills_list()
-        skills_list_strings = []
-        for skill in skills_list:
-            skills_list_strings.append(skill.get_name())
-        self.__add_menu(SKILLS_MENU, skills_list_strings)
+        self.__add_menu(SKILLS_MENU, skills_list)
 
     def add_spells_menu(self, model):
         spells_list = model.get_spells_list()
@@ -209,19 +206,24 @@ class PlayingGameSceneUI:
             self.set_focused_menu(menu=self.__menus[ACTIONS_MENU])
         return
 
-    def add_menu_selection_to_current_action(self):
+    def menu_item_pressed(self):
         focused_menu = self.get_focused_menu()
         focused_menu.get_selected_item().mark_string()  # mark the selected text
+        current_model = self.scene.get_current_model()
         current_action = self.scene.get_current_action()  # get current_action object from the scene
+
         if self.__menus[ACTIONS_MENU].is_focused():
             action_string = focused_menu.get_selected_item().get_string()  # get selected action string
 
-            if action_string == ACTION_ATTACK:
-                current_action.set_action(action_string)  # action is a string
-                self.set_focused_menu(self.__menus[COMPUTER_MODELS_MENU])
-                tm = self.scene.get_turn_manager()
-                # return the first computer unit and mark it
-                self.add_computer_markers(tm.get_computer_model(self.__menus[COMPUTER_MODELS_MENU].get_index()))
+            if action_string == ACTION_ATTACK or action_string == ACTION_SHOOT:
+                if action_string == ACTION_SHOOT:
+                    weapon = current_model.get_ranged_weapon()
+                else:
+                    weapon = current_model.get_melee_weapon()
+
+                action = weapon.get_action()
+                valid_targets = weapon.get_valid_targets(current_model)
+                self.set_action_and_select_targets(action, current_action, valid_targets)
 
             elif action_string == ACTION_SKILLS:
                 # current_action.set_action(action_string)
@@ -233,35 +235,49 @@ class PlayingGameSceneUI:
                 # TODO: add this
                 pass
 
+        elif self.__menus[SKILLS_MENU] is not None:
+            if self.__menus[SKILLS_MENU].is_focused():
+                skill = focused_menu.get_selected_item()  # get the selected skill
+                self.set_action_and_select_targets(skill, current_action)
+
+        # Computer Menu: select targets
         elif self.__menus[COMPUTER_MODELS_MENU].is_focused():
             # targets = self.__menus[COMPUTER_UNITS_MENU].get_selected_item()
             targets = self.__menus[COMPUTER_MODELS_MENU].get_selectd_model()
             current_action.set_targets(targets)
             self.remove_computer_markers()
             self.set_focused_menu(self.__menus[ACTIONS_MENU])
+
+        # Player Menu: select targets
         elif self.__menus[PLAYER_MODELS_MENU].is_focused():
             targets = self.__menus[PLAYER_MODELS_MENU].get_selected_item()
             if type(targets) is not list:
                 targets = [targets]
             current_action.set_targets(targets)
 
+    def set_action_and_select_targets(self, action, current_action, valid_targets):
+        current_action.set_action(action)  # action is a string
+        self.set_focused_menu(self.__menus[COMPUTER_MODELS_MENU])
+        tm = self.scene.get_turn_manager()
+        # TODO: need to mark valid targets
+        # return the first computer unit and mark it
+        self.add_computer_markers(tm.get_computer_model(self.__menus[COMPUTER_MODELS_MENU].get_index()))
+
     def __add_marker(self, unit, green=True):
 
         if green:
             marker_spritesheet = UIConstants.MARKER_GREEN_SPRITE_SHEET
-            marker_size = UIConstants.MARKER_GREEN_SIZE
         else:
             marker_spritesheet = UIConstants.MARKER_RED_SPRITE_SHEET
-            marker_size = UIConstants.MARKER_RED_SIZE
 
-        rect = pygame.Rect((0, 0), marker_size)  # create a temp rect
+        marker = AnimatedObject(marker_spritesheet, None,
+                                position=(0, 0),
+                                object_type=GameConstants.ALL_GAME_OBJECTS)
+
+        rect = pygame.Rect((0, 0), marker.get_size())  # create a temp rect
         rect.top = unit.get_rect().top - int(rect.height)
         rect.left = unit.get_rect().centerx - int(rect.width / 2)
-        position = rect.topleft  # draw the marker right above the focused_sprite
-
-        marker = AnimatedObject(marker_spritesheet, marker_size,
-                                position=position,
-                                object_type=GameConstants.ALL_GAME_OBJECTS)
+        marker.set_position(rect.topleft)  # draw the marker right above the focused_sprite
 
         # add to game engine sprites group
         game_engine = self.scene.get_game()

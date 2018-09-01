@@ -1,16 +1,31 @@
-import random
-
+# TODO: weapon need to be a GameObject
+import os
 from Shared.Action import Attack, RangeAttack
+from Shared.AnimAttrObject import AnimAttrObject
 from Shared.GameConstants import GameConstants
-from Shared.Attributes import Attributes
 from Shared.SpecialRule import AlwaysStrikesLast
 
 
-class Weapon(Attributes):
+def get_sprite_sheet_path(file_name):
+    return os.path.join("Assets", "Graphics", "Armory", file_name)
 
-    def __init__(self, name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0,
+
+# WEAPON_NONE_SPRITE_SHEET = None
+SWORD_SPRITE_SHEET = get_sprite_sheet_path("weapon_sword_sprite_sheet.png")
+MACE_SPRITE_SHEET = get_sprite_sheet_path("weapon_mace_sprite_sheet.png")
+CLUB_SPRITE_SHEET = get_sprite_sheet_path("weapon_club_sprite_sheet.png")
+HALBERD_SPRITE_SHEET = get_sprite_sheet_path("weapon_halberd_sprite_sheet.png")
+GREAT_SWORD_SPRITE_SHEET = get_sprite_sheet_path("weapon_great_sword_sprite_sheet.png")
+BOW_SPRITE_SHEET = get_sprite_sheet_path("weapon_bow_sprite_sheet.png")
+
+
+class AnimatedWeapon(AnimAttrObject):
+
+    def __init__(self, sprite_sheet_file, size=None, position=(0, 0), object_type=GameConstants.ALL_GAME_OBJECTS,
+                 name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0,
                  to_hit_re_roll=0, wounds_bonus=0, armor_piercing=False, great_weapon=False, ranged_weapon=False):
-        super(Weapon, self).__init__(name, m, ws, bs, s, t, w, i, a, ld)
+        super(AnimatedWeapon, self).__init__(sprite_sheet_file, size, position, object_type,
+                                             name, m, ws, bs, s, t, w, i, a, ld)
 
         self.__to_hit_re_roll = to_hit_re_roll
         self.__wounds_bonus = wounds_bonus
@@ -63,11 +78,14 @@ class Weapon(Attributes):
         return targets
 
 
-class RangeWeapon(Weapon):
-    def __init__(self, name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0,
+class RangeWeapon(AnimatedWeapon):
+    def __init__(self, sprite_sheet_file, size=None, position=(0, 0), object_type=GameConstants.ALL_GAME_OBJECTS,
+                 name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0,
                  to_hit_re_roll=0, wounds_bonus=0, armor_piercing=False):
-        super(RangeWeapon, self).__init__(name, m, ws, bs, s, t, w, i, a, ld, to_hit_re_roll, wounds_bonus,
-                                          armor_piercing, great_weapon=False, ranged_weapon=True)
+        super(RangeWeapon, self).__init__(sprite_sheet_file, size, position, object_type,
+                                          name, m, ws, bs, s, t, w, i, a, ld,
+                                          to_hit_re_roll, wounds_bonus, armor_piercing, great_weapon=False,
+                                          ranged_weapon=True)
 
     def get_valid_targets(self, model):
         targets = GameConstants.TARGET_PLAYER_SINGLE_ANY
@@ -77,41 +95,32 @@ class RangeWeapon(Weapon):
         return targets
 
 
-def get_hand_weapon(): return random.choice([Sword()])
-
-
-class Sword(Weapon):
+class Sword(AnimatedWeapon):
     def __init__(self):
-        super(Sword, self).__init__(name="Sword")
+        super(Sword, self).__init__(sprite_sheet_file=SWORD_SPRITE_SHEET, name="Sword")
 
 
-class Mace(Weapon):
+class Mace(AnimatedWeapon):
     def __init__(self):
-        super(Mace, self).__init__(name="Mace")
+        super(Mace, self).__init__(sprite_sheet_file=MACE_SPRITE_SHEET, name="Mace")
 
 
-class Club(Weapon):
+class Club(AnimatedWeapon):
     def __init__(self):
-        super(Club, self).__init__(name="Mace")
+        super(Club, self).__init__(sprite_sheet_file=CLUB_SPRITE_SHEET, name="Mace")
 
 
-class Halberd(Weapon):
+class Halberd(AnimatedWeapon):
     def __init__(self):
-        super(Halberd, self).__init__(name="Halberd", s=1, great_weapon=True)
+        super(Halberd, self).__init__(sprite_sheet_file=HALBERD_SPRITE_SHEET, name="Halberd", s=1, great_weapon=True)
 
 
-class GreatSword(Weapon):
+class GreatSword(AnimatedWeapon):
     def __init__(self):
-        super(GreatSword, self).__init__(name="Great Sword", s=2, great_weapon=True)
-        self.add_special_rule(AlwaysStrikesLast)
+        super(GreatSword, self).__init__(sprite_sheet_file=GREAT_SWORD_SPRITE_SHEET, name="Great Sword", s=2,
+                                         great_weapon=True, special_rules=AlwaysStrikesLast)
 
 
 class Bow(RangeWeapon):
     def __init__(self):
-        super(Bow, self).__init__(name="Bow")
-        
-        
-class Pistol(RangeWeapon):
-    def __init__(self):
-        super(Pistol, self).__init__(name="Pistol", s=4, armor_piercing=True)
-
+        super(Bow, self).__init__(sprite_sheet_file=BOW_SPRITE_SHEET, name="Bow")

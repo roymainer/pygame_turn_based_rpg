@@ -40,34 +40,28 @@ class PlayingGameScene(Scene):
                     self.__UI.move_pointer_down()
                     # need to add move computer marker down
                 if event.key == pygame.K_RETURN:
-                    self.__UI.add_menu_selection_to_current_action()
+                    self.__UI.menu_item_pressed()
 
     def update(self):
 
-        # if self.__current_action is not None:
-            # texts = [x for x in self.__current_action.get_texts() if x.get_alpha() == 255]
-            # for text in texts:
-            #     print("%%%%%%%%%%%%%%%%%%% Adding Fading Text: " + text.get_string() + " %%%%%%%%%%%%%%%%%%%")
-            #     self.get_game().add_sprite_to_group(text, None)
-
-        current_sprites_list = self.get_game().get_sprites_group().sprites()
-        sprites_diff = set(current_sprites_list) - set(self.__prev_sprites_list)
-        self.__prev_sprites_list = current_sprites_list
-        print("#Sprites: {}, diff sprites: {}".format(str(len(current_sprites_list)), str(sprites_diff)))
+        # current_sprites_list = self.get_game().get_sprites_group().sprites()
+        # sprites_diff = set(current_sprites_list) - set(self.__prev_sprites_list)
+        # self.__prev_sprites_list = current_sprites_list
+        # print("#Sprites: {}, diff sprites: {}".format(str(len(current_sprites_list)), str(sprites_diff)))
 
         current_model = self.__turn_manager.get_current_model()
         if current_model is not None:
             if current_model != self.__current_model:
                 print("Current Unit's turn: {}".format(current_model.get_name()))
                 self.__UI.update_models_menu()
-                self.__current_model = current_model  # store the current unit
-                self.__current_action = ActionManager(current_model)  # create a new action for the unit
-                self.__UI.add_player_marker(current_model)  # add a new marker for the unit
-                self.__UI.add_actions_menu(current_model)  # add new actions menu for the unit
+                self.__current_model = current_model  # store the current model
+                self.__current_action = ActionManager(current_model)  # create a new action for the model
+                self.__UI.add_player_marker(current_model)  # add a new marker for the model
+                self.__UI.add_actions_menu(current_model)  # add new actions menu for the model
 
                 if current_model in self.__turn_manager.get_all_computer_models():
-                    # check if unit is a computer unit
-                    self.play_computer_turn()
+                    # check if model is a computer model
+                    self.play_computer_turn(current_model)
 
         """ Perform Action """
         if self.__current_action.is_ready():
@@ -79,17 +73,16 @@ class PlayingGameScene(Scene):
         if self.__current_action.is_finished():
 
             """ Remove any dead units """
-            for unit in self.__turn_manager.get_all_models_list():
-                if unit.is_killed():
-                    # TODO: return the kill call
-                    # unit.kill()
-                    self.__turn_manager.remove_model(unit)
+            for model in self.__turn_manager.get_all_models_list():
+                if model.is_killed():
+                    model.kill()
+                    self.__turn_manager.remove_model(model)
 
-            # self.__current_unit.set_action("idle")  # return acting unit to idle
+            # self.__current_unit.set_action("idle")  # return acting model to idle
             self.__current_action.destroy()
             self.__current_action = None  # remove the current action
-            self.__current_model = None  # remove the current unit
-            self.__turn_manager.advance_to_next_model()  # advance the turn manager to next unit
+            self.__current_model = None  # remove the current model
+            self.__turn_manager.advance_to_next_model()  # advance the turn manager to next model
 
     def get_current_action(self):
         return self.__current_action
@@ -109,9 +102,9 @@ class PlayingGameScene(Scene):
         # self.load_model(get_empire_swordsman(), GameConstants.PLAYER_TOP_FRONT, object_type, flip_x=True)
         # self.load_model(get_empire_swordsman(), GameConstants.PLAYER_MIDDLE_FRONT, object_type, flip_x=True)
         # self.load_model(get_empire_swordsman(), GameConstants.PLAYER_BOTTOM_FRONT, object_type, flip_x=True)
-        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_TOP_FRONT, object_type, flip_x=True)
-        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_MIDDLE_FRONT, object_type, flip_x=True)
-        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_BOTTOM_FRONT, object_type, flip_x=True)
+        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_TOP_FRONT, object_type)
+        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_MIDDLE_FRONT, object_type)
+        self.load_model(get_empire_witch_hunter(), GameConstants.PLAYER_BOTTOM_FRONT, object_type)
 
         object_type = GameConstants.COMPUTER_GAME_OBJECTS
         # self.load_model(get_slime_monster(), GameConstants.COMPUTER_TOP_BACK, object_type)
@@ -120,10 +113,12 @@ class PlayingGameScene(Scene):
         # self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_TOP_FRONT, object_type, flip_x=True)
         # self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, flip_x=True)
         # self.load_model(get_undead_skeleton_halberd(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, flip_x=True)
-        self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_TOP_FRONT, object_type, flip_x=False)
-        self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, flip_x=False)
-        self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, flip_x=False)
-
+        # self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_TOP_FRONT, object_type, flip_x=False)
+        # self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, flip_x=False)
+        # self.load_model(get_empire_swordsman(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, flip_x=False)
+        self.load_model(get_dwarf_hero(), GameConstants.COMPUTER_TOP_FRONT, object_type, flip_x=True)
+        self.load_model(get_dwarf_hero(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, flip_x=True)
+        self.load_model(get_dwarf_hero(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, flip_x=True)
         return
 
     def load_model(self, model, position, object_type, flip_x=False):
@@ -140,9 +135,7 @@ class PlayingGameScene(Scene):
             self.__turn_manager.add_player_model(model)
         elif object_type == GameConstants.COMPUTER_GAME_OBJECTS:
             self.__turn_manager.add_computer_model(model)
-        # self.get_game().add_sprite_to_group(model, object_type)  # add to game engine sprites group
-        for sprite in model.get_sprites():
-            self.get_game().add_sprite_to_group(sprite, object_type)  # add to game engine sprites group
+        self.get_game().add_sprite_to_group(model, object_type)  # add to game engine sprites group
         return
 
     def create_background(self):
@@ -173,8 +166,12 @@ class PlayingGameScene(Scene):
         self.get_game().set_background(surface)
         return
 
-    def play_computer_turn(self):
-        self.__current_action.set_action(ACTION_ATTACK)
+    def play_computer_turn(self, model):
+        model_actions_list = model.get_actions_list()
+        for action in model_actions_list:
+            if type(action) == Attack or type(action) == RangeAttack:
+                break
+        self.__current_action.set_action(action)
         targets = self.__turn_manager.get_all_player_models()
         # TODO: improve the target selection process, lowest WS/ lowest wounds/...
         if not any(targets):

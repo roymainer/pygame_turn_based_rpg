@@ -18,6 +18,8 @@ class AnimAttrObject(AnimatedObject):
         self.__A = a
         self.__LD = ld
 
+        self.__special_rules_list = []  # both models and weapons/armor have special rules
+
     def get_name(self):
         return self.__name
 
@@ -47,3 +49,9 @@ class AnimAttrObject(AnimatedObject):
 
     def get_leadership(self):
         return self.__LD
+
+    def get_special_rules_list(self):
+        return self.__special_rules_list
+
+    def add_special_rule(self, special_rule):
+        self.__special_rules_list.append(special_rule)

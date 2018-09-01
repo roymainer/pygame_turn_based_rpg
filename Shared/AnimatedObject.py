@@ -12,7 +12,7 @@ class AnimatedObject(GameObject):
     def __init__(self, sprite_sheet_file, size, position, object_type):
 
         self.__animator = Animator(sprite_sheet_file, sprite_size=size)
-        self.__actions_list = self.__animator.get_animations_keys()
+        self.__animations_list = self.__animator.get_animations_keys()
         # self.__action = self.__actions_list[0]  # default single animation for objects
         self.__action = None
         self.set_action("idle")  # all animated objects start at idle
@@ -26,17 +26,12 @@ class AnimatedObject(GameObject):
 
     # def update(self, seconds):
     def update(self):
+
+        if self.get_action() == "die" and self.is_animation_cycle_done():
+            # if the model died and finished the animation cycle, don't update image to next sprite
+            return
+
         self.image = self.__animator.get_next_sprite(self.__action)
-
-        if self.__speed[0] < 0:  # move left
-            self.__animator.set_flip()
-        elif self.__speed[0] > 0:
-            self.__animator.unset_flip()
-
-        x = self.rect.x
-        y = self.rect.y
-
-        self.set_position((x + self.__speed[0], y + self.__speed[1]))  # update position
 
     def set_speed(self, speed):
         self.__speed = speed
@@ -45,8 +40,8 @@ class AnimatedObject(GameObject):
         return self.__speed
 
     def set_action(self, action):
-        if action not in self.get_actions_list():
-            self.__action = self.__actions_list[0]
+        if action not in self.get_animations_list():
+            self.__action = self.__animations_list[0]
         if action != self.__action:
             self.__animator.reset_animation()
             self.__action = action
@@ -57,7 +52,10 @@ class AnimatedObject(GameObject):
     def is_animation_cycle_done(self):
         return self.__animator.is_animation_cycle_done()
 
-    def get_actions_list(self):
+    def set_last_animation(self):
+        self.__animator.set_last_animation()
+
+    def get_animations_list(self):
         return self.__animator.get_animations_keys()
 
     def flip_x(self):

@@ -1,7 +1,6 @@
 class Attributes:
 
     def __init__(self, name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0):
-
         self.__name = name
         self.__M = m
         self.__WS = ws
@@ -12,6 +11,11 @@ class Attributes:
         self.__I = i
         self.__A = a
         self.__LD = ld
+
+        self.__special_rules_list = []  # both models and weapons/armor have special rules
+
+    def __repr__(self):
+        return self.__name
 
     def get_name(self):
         return self.__name
@@ -37,8 +41,14 @@ class Attributes:
     def get_initiative(self):
         return self.__I
 
-    def get_attack(self):
+    def get_attacks(self):
         return self.__A
 
     def get_leadership(self):
         return self.__LD
+
+    def get_special_rules_list(self):
+        return self.__special_rules_list
+
+    def add_special_rule(self, special_rule):
+        self.__special_rules_list.append(special_rule)

@@ -1,13 +1,11 @@
-from Shared.AnimAttrObject import AnimAttrObject
-from Shared.GameConstants import GameConstants
+from Shared.Attributes import Attributes
 
 
-class Shield(AnimAttrObject):
+class Shield(Attributes):
 
-    def __init__(self, sprite_sheet_file, size=None, position=(0, 0), object_type=GameConstants.ALL_GAME_OBJECTS,
-                 name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0,
-                 save_modifier=0, to_hit_re_roll=0):
-        super(Shield, self).__init__(sprite_sheet_file, size, position, object_type, name, m, ws, bs, s, t, w, i, a, ld)
+    def __init__(self, name="Shield", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0,
+                 save_modifier=-1, to_hit_re_roll=0):
+        super(Shield, self).__init__(name, m, ws, bs, s, t, w, i, a, ld)
 
         self.__save_modifier = save_modifier
         self.__to_hit_re_roll = to_hit_re_roll

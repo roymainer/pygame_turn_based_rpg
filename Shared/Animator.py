@@ -61,6 +61,7 @@ class Animator(object):
         self.__sprite_index = 0     # index of current sprite in animation list of sprites
         self.__flip = False  # flip the image
         self.__animation_cycle_finished = False
+        self.__last_animation = False
 
     def get_animations_keys(self) -> []:
         return list(self.__animation_dict.keys())
@@ -97,7 +98,10 @@ class Animator(object):
             self.__sprite_index += 1
             if self.__sprite_index == len(self.__animation_dict[self.__animation_key]):
                 self.__animation_cycle_finished = True
-                self.__sprite_index = 0
+                if self.__last_animation:
+                    self.__sprite_index = len(self.__animation_dict[self.__animation_key]) - 1  # freeze the last image
+                else:
+                    self.__sprite_index = 0  # restart animation cycle
 
         _image = self.__animation_dict[self.__animation_key][self.__sprite_index]
 
@@ -106,13 +110,8 @@ class Animator(object):
 
         return _image
 
-    def get_last_sprite(self) -> pygame.Surface:
-        """
-        Returns the last sprite in sprite list
-        For example, if character died
-        :return: surface
-        """
-        return self.__animation_dict[self.__animation_key][-1]
+    def set_last_animation(self):
+        self.__last_animation = True
 
     def set_flip(self):
         self.__flip = True

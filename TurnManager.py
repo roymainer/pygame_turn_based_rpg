@@ -1,5 +1,3 @@
-from Shared.Model import MODEL_TYPE_MELEE, MODEL_TYPE_RANGE
-
 
 class TurnManager:
 
@@ -21,11 +19,9 @@ class TurnManager:
 
     def __add_model(self, models_list, new_model):
 
-        model_type = new_model.get_model_type()
-
-        if model_type == MODEL_TYPE_MELEE:
+        if new_model.is_front_row():
             models_list.insert(0, new_model)  # Melee models are lower indexed (front line)
-        elif model_type == MODEL_TYPE_RANGE:
+        else:
             models_list.append(new_model)
 
         self.__sort_all_models_list()  # sort the models each time we add another one
