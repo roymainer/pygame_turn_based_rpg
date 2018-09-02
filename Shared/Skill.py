@@ -11,6 +11,10 @@ class Skill:
     def get_name(self):
         return self.__name
 
+    def get_menu_item_string(self):
+        # returns a string to be shown as a menu item
+        return self.__name
+
     def __repr__(self):
         return self.__name
 

@@ -88,16 +88,18 @@ class ActionManager:
         print("Perform Action: " + action.get_name())
 
         if isinstance(action, Attack):
-            self.close_combat_attacks()
+            self.__close_combat_attacks()
         elif isinstance(action, RangeAttack):
-            self.range_attack()
+            self.__range_attack()
         elif isinstance(action, Spells):
             self.__model.set_action("cast")
             self.cast_spell()
 
+        self.__clear_special_rules()  # clear any used up special rules
+
         self.__finished = True
 
-    def close_combat_attacks(self):
+    def __close_combat_attacks(self):
         number_of_attacks = self.__model.get_attacks()
         for a in range(number_of_attacks):
 
@@ -114,11 +116,28 @@ class ActionManager:
             target = alive_targets[0]  # get the first remaining alive target
             target.set_action("hurt")
 
-            hit = self.get_roll_to_hit_close_combat(target)
+            hit = self.__get_roll_to_hit_close_combat(target)
+            if not hit:
+                # look for any re-roll to hit special rule the model has
+                print(self.__model.get_special_rules_list())
+                for sr in self.__model.get_special_rules_list():
+                    if sr.re_roll_to_hit(target):
+                        hit = self.__get_roll_to_hit_close_combat(target)
+                        if hit:
+                            print("Successfully re-rolled to hit with: {}".format(sr.get_name()))
+                            break
             if hit:
-                wound = self.get_roll_to_wound(target)
+                wound = self.__get_roll_to_wound(target)
+                if not wound:
+                    # look for an re-roll to wound special rule the model has
+                    for sr in self.__model.get_special_rules_list():
+                        if sr.re_roll_to_wound(target):
+                            wound = self.__get_roll_to_wound(target)
+                            if wound:
+                                print("Successfully re-rolled to wound with: {}".format(sr.get_name()))
+                                break
                 if wound:
-                    saved_by_armor = self.get_armor_saving_throw(target)
+                    saved_by_armor = self.__get_armor_saving_throw(target)
                     if not saved_by_armor:
                         # TODO: return the wards
                         # saved_by_ward = self.get_ward_saving_throw(target)
@@ -137,7 +156,7 @@ class ActionManager:
             else:
                 self.__add_text_miss(target)
 
-    def range_attack(self):
+    def __range_attack(self):
         alive_targets = [x for x in self.__targets if not x.is_killed()]
 
         if not any(alive_targets):
@@ -149,11 +168,11 @@ class ActionManager:
         target = self.__targets[0]  # 1st target
         target.set_action("hurt")
 
-        hit = self.get_roll_to_hit_ranged(target)
+        hit = self.__get_roll_to_hit_ranged(target)
         if hit:
-            wound = self.get_roll_to_wound(target)
+            wound = self.__get_roll_to_wound(target)
             if wound:
-                saved_by_armor = self.get_armor_saving_throw(target)
+                saved_by_armor = self.__get_armor_saving_throw(target)
                 if not saved_by_armor:
                     # saved_by_ward = self.get_ward_saving_throw(target)
                     # if saved_by_ward:
@@ -183,7 +202,7 @@ class ActionManager:
         else:
             return self.__finished
 
-    def get_roll_to_hit_close_combat(self, target) -> bool:
+    def __get_roll_to_hit_close_combat(self, target) -> bool:
         print("Rolling to hit:")
         roll = Rolls.get_d6_roll()
         if roll == 6:
@@ -204,7 +223,7 @@ class ActionManager:
         return False
 
     # noinspection PyUnusedLocal
-    def get_roll_to_hit_ranged(self, target) -> bool:
+    def __get_roll_to_hit_ranged(self, target) -> bool:
         # TODO: target might be behind cover
         print("Rolling to hit:")
         roll = Rolls.get_d6_roll()
@@ -226,7 +245,7 @@ class ActionManager:
         print("Missed target!")
         return False
 
-    def get_roll_to_wound(self, target) -> bool:
+    def __get_roll_to_wound(self, target) -> bool:
         print("Rolling to wound:")
         roll = Rolls.get_d6_roll()
         if roll == 6:
@@ -238,6 +257,9 @@ class ActionManager:
             return False
         else:
             s = self.__model.get_strength()
+            for sr in self.__model.get_special_rules_list():
+                # get any strength bonus special rule the model has
+                s += sr.get_strength_bonus()
             target_t = target.get_toughness()
             required_roll = TO_WOUND_CHART[s][target_t]
             print("Required roll to wound: " + str(required_roll))
@@ -248,7 +270,7 @@ class ActionManager:
         print("Hit bounced off target!")
         return False
 
-    def get_armor_saving_throw(self, target) -> bool:
+    def __get_armor_saving_throw(self, target) -> bool:
         print("Target rolling to armor save:")
         roll = Rolls.get_d6_roll()
         if roll == 1:
@@ -282,7 +304,7 @@ class ActionManager:
         return False
 
     # noinspection PyMethodMayBeStatic
-    def get_ward_saving_throw(self, target) -> bool:
+    def __get_ward_saving_throw(self, target) -> bool:
         print("Target rolling to ward save:")
         roll = Rolls.get_d6_roll()
         if roll == 1:
@@ -353,3 +375,9 @@ class ActionManager:
     def destroy(self):
         for text in self.__texts:
             text.kill()
+
+    def __clear_special_rules(self):
+        self.__model.clear_used_up_special_rules()
+        for target in self.__targets:
+            target.clear_used_up_special_rules()
+

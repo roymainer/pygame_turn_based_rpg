@@ -70,8 +70,8 @@ def get_empire_witch_hunter():
 
     model.add_skill(AccusationSkill())
     model.add_skill(SniperSkill())
-    model.add_special_rules(GrimResolveSR())
-    model.add_special_rules(ToolsOfJudgmentSR())
+    model.add_special_rule(GrimResolveSR())
+    model.add_special_rule(ToolsOfJudgmentSR())
     # TODO: model.add_special_rule(MagicResistanceSR(2))
 
     return model
@@ -85,10 +85,10 @@ def get_dwarf_hero():
     model.add_weapon(Sword())
 
     # TODO: add special skills
-    model.add_skill(AncestralGrudge())
-    # model.add_skill(Relentless())  # irrelevant
-    model.add_skill(Resolute())
-    # model.add_skill(UndergroundAdvance())  # irrelevant
+    model.add_special_rule(AncestralGrudge())
+    # model.add_special_rule(Relentless())  # irrelevant
+    model.add_special_rule(Resolute())
+    # model.add_special_rule(UndergroundAdvance())  # irrelevant
     # model.add_special_rule(MagicResistanceSR(2))
 
     return model

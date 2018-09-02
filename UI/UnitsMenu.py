@@ -15,12 +15,12 @@ class ModelsMenu(Menu):
     def __init__(self, image_path, image_size, models_list, position):
 
         self.__models_list = models_list
-        menu_options_list = []
-        for model in self.__models_list:
-            string = get_string(model)
-            menu_options_list.append(string)
+        # menu_options_list = []
+        # for model in self.__models_list:
+        #     string = get_string(model)
+        #     menu_options_list.append(string)
 
-        super(ModelsMenu, self).__init__(image_path, image_size, menu_options_list, position)
+        super(ModelsMenu, self).__init__(image_path, image_size, self.__models_list, position)
         self.unset_focused()
 
     def __repr__(self):
@@ -44,7 +44,7 @@ class ModelsMenu(Menu):
 
         # populate menu with new strings
         for model in self.__models_list:
-            string = get_string(model)
+            string = model.get_menu_item_string()
             self.add_text_to_menu(string)
 
         for i in range(self.get_menu_items_count()):
@@ -53,6 +53,6 @@ class ModelsMenu(Menu):
         return
 
     def kill(self):
-        for model_text_obj in self.__models_list:
-            model_text_obj.kill()
+        #
+
         super(ModelsMenu, self).kill()

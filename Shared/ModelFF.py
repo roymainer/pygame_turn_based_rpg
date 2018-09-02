@@ -10,6 +10,7 @@ run
 hurt
 die
 """
+from Shared.UIConstants import UIConstants
 from Shared.AnimAttrObject import AnimAttrObject
 from Shared.GameConstants import GameConstants
 from Shared.SpecialRule import AlwaysStrikesLast
@@ -51,6 +52,13 @@ class ModelFF(AnimAttrObject):
 
     def __repr__(self):
         return self.get_name()
+
+    def get_menu_item_string(self):
+        string = self.get_name() + "_" + "HP:" + str(self.get_current_wounds()) + "/" + str(self.get_wounds())
+        num_chars = len(string)
+        delta_chars = UIConstants.MENU_MAX_CHARS - num_chars
+        string = string.replace("_", " " * delta_chars)
+        return string
 
     def set_wounds(self, wounds):
         self.__current_wounds = wounds
@@ -144,13 +152,6 @@ class ModelFF(AnimAttrObject):
 
     def get_items_list(self):
         return self.__items_list
-
-    def is_front_row(self):
-        position = self.get_position()
-        if position[0] == GameConstants.PLAYERS_FRONT_COLUMN or position[0] == GameConstants.COMPUTER_FRONT_COLUMN:
-            return True
-        else:
-            return False
 
     def is_killed(self):
         return self.get_current_wounds() <= 0

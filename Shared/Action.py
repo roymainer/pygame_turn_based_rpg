@@ -9,6 +9,9 @@ class Action:
     def get_name(self):
         return self.__name
 
+    def get_menu_item_string(self):
+        return self.__name
+
     def __repr__(self):
         return self.__name
 

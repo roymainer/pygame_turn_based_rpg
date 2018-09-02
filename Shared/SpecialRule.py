@@ -6,7 +6,7 @@ class SpecialRule:
     def __init__(self, name=""):
         self.__name = name
         self.__targets = []
-        self.__to_remove = False
+        self.__used_up = False
 
     def get_name(self):
         return self.__name
@@ -30,11 +30,11 @@ class SpecialRule:
     def pass_fear_ld_test(self):
         return False
 
-    def set_to_remove(self, to_remove: bool):
-        self.__to_remove = to_remove
+    def set_used_up(self, to_remove: bool):
+        self.__used_up = to_remove
 
-    def get_to_remove(self):
-        return self.__to_remove
+    def is_used_up(self):
+        return self.__used_up
 
 
 # ------------------- General Special Rules ------------------- #
@@ -87,8 +87,7 @@ class ToolsOfJudgmentSR(SpecialRule):
         super(ToolsOfJudgmentSR, self).__init__(name="Tools Of Judgment")
 
     def re_roll_to_wound(self, target):
-        target_special_rules_list = target.get_special_rules_list
-        for sr in target_special_rules_list:
+        for sr in target.get_special_rules_list():
             if isinstance(sr, Undead) or isinstance(sr, Demonic):
                 return True
         return False
@@ -103,17 +102,21 @@ class Hatred(SpecialRule):
         super(Hatred, self).__init__(name="Hatred")
 
     def re_roll_to_hit(self, target):
-        self.set_to_remove(True)
+        self.set_used_up(True)
         return True
 
 
-class AncestralGrudge(Hatred):
+class AncestralGrudge(SpecialRule):
     """
     Dwarfs Army Book p.32
     Rolling a D6 to determine is pointless, just add Hatred
     """
     def __init__(self):
         super(AncestralGrudge, self).__init__(name="Ancestral Grudge")
+
+    def re_roll_to_hit(self, target):
+        self.set_used_up(True)
+        return True
 
 
 class Resolute(SpecialRule):
@@ -125,7 +128,8 @@ class Resolute(SpecialRule):
         super(Resolute, self).__init__(name="Resolute")
 
     def get_strength_bonus(self):
-        self.set_to_remove(True)
+        print("Got +1 Strength using Resolute Special Rule")
+        self.set_used_up(True)
         return 1
 
 

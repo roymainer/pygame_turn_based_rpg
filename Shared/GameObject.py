@@ -47,3 +47,20 @@ class GameObject(Sprite):
 
     def get_type(self):
         return self.__object_type
+
+    def is_front_row(self):
+        position = self.get_position()
+        size = self.get_size()
+        center_posx = position[0] + size[0]/2
+        if center_posx in [GameConstants.PLAYERS_FRONT_COLUMN, GameConstants.COMPUTER_FRONT_COLUMN]:
+            return True
+        else:
+            return False
+
+    def is_valid_target(self, valid_targets):
+        if valid_targets in [GameConstants.TARGET_COMPUTER_SINGLE_ANY, GameConstants.TARGET_COMPUTER_ALL]:
+            return True
+        elif valid_targets in [GameConstants.TARGET_COMPUTER_SINGLE_FRONT, GameConstants.TARGET_COMPUTER_ALL_FRONT]:
+            return self.is_front_row()
+        elif valid_targets in [GameConstants.TARGET_COMPUTER_SINGLE_BACK, GameConstants.TARGET_COMPUTER_ALL_BACK]:
+            return not self.is_front_row()

@@ -23,6 +23,10 @@ class AnimAttrObject(AnimatedObject):
     def get_name(self):
         return self.__name
 
+    def get_menu_item_string(self):
+        # returns a string to be shown as a menu item
+        return self.__name
+
     def get_move(self):
         return self.__M
 
@@ -55,3 +59,8 @@ class AnimAttrObject(AnimatedObject):
 
     def add_special_rule(self, special_rule):
         self.__special_rules_list.append(special_rule)
+
+    def clear_used_up_special_rules(self):
+        # remove all special rules that are one times and were used in the previous action phase
+        srl = [x for x in self.__special_rules_list if not x.is_used_up()]
+        self.__special_rules_list = srl

@@ -23,12 +23,14 @@ class PlayingGameSceneUI:
 
     def __init__(self, scene):
         self.scene = scene
-        self.__menus = {PLAYER_MODELS_MENU: self.__add_player_units_menu(),
-                        COMPUTER_MODELS_MENU: self.__add_computers_units_menu(),
+        self.__menus = {PLAYER_MODELS_MENU: None,
+                        COMPUTER_MODELS_MENU: None,
                         ACTIONS_MENU: None,
                         SKILLS_MENU: None,
                         SPELLS_MENU: None,
                         ITEMS_MENU: None}
+        self.__add_player_units_menu()
+        self.__add_computers_units_menu()
         self.__player_markers = []
         self.__computer_markers = []
         self.__pointer = MenuPointer()
@@ -43,6 +45,10 @@ class PlayingGameSceneUI:
         self.__menus[COMPUTER_MODELS_MENU].update_menu(self.scene.get_game(), computer_units)
 
     def __add_player_units_menu(self):
+        if self.__menus[PLAYER_MODELS_MENU] is not None:
+            self.__menus[PLAYER_MODELS_MENU].kill()
+            self.__menus[PLAYER_MODELS_MENU] = None
+
         menu_size = (GameConstants.PLAYER_UNITS_MENU_WIDTH,
                      GameConstants.SCREEN_SIZE[1] - GameConstants.BATTLE_AREA_BOTTOM)
 
@@ -60,18 +66,25 @@ class PlayingGameSceneUI:
         for i in range(menu.get_menu_items_count()):
             self.scene.get_game().add_sprite_to_group(menu.get_item_from_menu(i))
         # self.get_game().add_sprite_to_group(menu.get_pointer())
-        return menu
+        self.__menus[PLAYER_MODELS_MENU] = menu
 
-    def __add_computers_units_menu(self):
+    def __add_computers_units_menu(self, valid_targets=GameConstants.TARGET_COMPUTER_ALL):
+        if self.__menus[COMPUTER_MODELS_MENU] is not None:
+            self.__menus[COMPUTER_MODELS_MENU].kill()
+            self.__menus[COMPUTER_MODELS_MENU] = None
+
         menu_size = (GameConstants.COMPUTER_UNITS_MENU_WIDTH,
                      GameConstants.SCREEN_SIZE[1] - GameConstants.BATTLE_AREA_BOTTOM)
 
         characters_list = []
         tm = self.scene.get_turn_manager()
         computer_units = tm.get_all_computer_models()
-        for scene_object in computer_units:
-            if scene_object.get_type() == GameConstants.COMPUTER_GAME_OBJECTS:
-                characters_list.append(scene_object)
+        # for scene_object in computer_units:
+        #     if scene_object.get_type() == GameConstants.COMPUTER_GAME_OBJECTS:
+        #         characters_list.append(scene_object)
+        for model in computer_units:
+            if model.is_valid_target(valid_targets):
+                characters_list.append(model)
         menu_position = (GameConstants.COMPUTER_FRONT_COLUMN - GameConstants.PADX, GameConstants.BATTLE_AREA_BOTTOM)
         menu = ModelsMenu(UIConstants.SPRITE_BLUE_MENU, menu_size, characters_list, menu_position)
 
@@ -80,7 +93,7 @@ class PlayingGameSceneUI:
         for i in range(menu.get_menu_items_count()):
             self.scene.get_game().add_sprite_to_group(menu.get_item_from_menu(i))
         # self.get_game().add_sprite_to_group(menu.get_pointer())
-        return menu
+        self.__menus[COMPUTER_MODELS_MENU] = menu
 
     def add_actions_menu(self, model):
         if self.__menus[ACTIONS_MENU] is not None:
@@ -165,7 +178,7 @@ class PlayingGameSceneUI:
         self.__pointer.assign_pointer_to_menu(menu)
         return
 
-    def get_focused_menu(self):
+    def get_focused_menu(self) -> Menu:
         focused_menu = self.__menus[ACTIONS_MENU]  # default
         for menu in self.__menus.values():
             if menu is None:
@@ -257,6 +270,7 @@ class PlayingGameSceneUI:
 
     def set_action_and_select_targets(self, action, current_action, valid_targets):
         current_action.set_action(action)  # action is a string
+        self.__add_computers_units_menu(valid_targets)
         self.set_focused_menu(self.__menus[COMPUTER_MODELS_MENU])
         tm = self.scene.get_turn_manager()
         # TODO: need to mark valid targets

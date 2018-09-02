@@ -53,7 +53,7 @@ class PlayingGameScene(Scene):
         if current_model is not None:
             if current_model != self.__current_model:
                 print("Current Unit's turn: {}".format(current_model.get_name()))
-                self.__UI.update_models_menu()
+                self.__UI.update_models_menu()  # remove killed models from menus
                 self.__current_model = current_model  # store the current model
                 self.__current_action = ActionManager(current_model)  # create a new action for the model
                 self.__UI.add_player_marker(current_model)  # add a new marker for the model
@@ -126,6 +126,7 @@ class PlayingGameScene(Scene):
 
         new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate
         model.set_position(new_position)
+        model.set_type(object_type)
 
         if flip_x:
             model.flip_x()

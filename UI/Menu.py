@@ -71,7 +71,8 @@ class Menu(UIObject):
 
     def add_menu_items(self, menu_items):
         for item in menu_items:
-            self.add_text_to_menu(item.get_name())
+            # self.add_text_to_menu(item.get_name())
+            self.add_text_to_menu(item.get_menu_item_string())
 
     def get_selected_item(self):
         return self.get_item_from_menu(self.__index)
