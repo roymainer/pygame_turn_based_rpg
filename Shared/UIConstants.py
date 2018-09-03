@@ -5,6 +5,7 @@ class UIConstants:
 
     ARCADE_CLASSIC_FONT = os.path.join("Assets", "Graphics", "joystix monospace.ttf")
     TEXT_SIZE_SMALL = 11
+    TEXT_SIZE_TINY = 9
     MENU_MAX_CHARS = 26
 
     SPRITE_BLUE_MENU = os.path.join("Assets", "Graphics", "UI", "blue_menu.png")

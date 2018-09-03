@@ -17,11 +17,17 @@ class SpecialRule:
     def get_targets(self) -> list:
         return self.__targets
 
+    def set_targets(self, targets: list) -> None:
+        self.__targets = targets
+
+    def add_target(self, target) -> None:
+        self.__targets.append(target)
+
     # noinspection PyMethodMayBeStatic
     def re_roll_to_hit(self, target) -> bool:
         return False
 
-    def re_roll_to_wound(self, target)  -> bool:
+    def re_roll_to_wound(self, target) -> bool:
         return False
 
     def get_strength_bonus(self) -> int:
@@ -30,10 +36,10 @@ class SpecialRule:
     def pass_fear_ld_test(self) -> bool:
         return False
 
-    def pass_terror_ld_test(self) -> bool:
+    def pass_terror_ld_test(self, ld) -> bool:
         return False
 
-    def do_killing_blow(self, target=None) -> bool:
+    def do_killing_blow(self, target) -> bool:
         return False
 
     def set_used_up(self, to_remove: bool) -> None:
@@ -53,7 +59,7 @@ class AccusationSR(SpecialRule):
 
     def __init__(self, target):
         super(AccusationSR, self).__init__("Accusation")
-        self.__target = target
+        self.set_targets([target])
 
     def re_roll_to_hit(self, target) -> bool:
         if target == self.get_targets():
@@ -61,7 +67,7 @@ class AccusationSR(SpecialRule):
         return False
 
     def do_killing_blow(self, target) -> bool:
-        if target == self.__target:
+        if target == self.get_targets()[0]:
             return True
         else:
             return False

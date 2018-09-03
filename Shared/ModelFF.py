@@ -13,6 +13,7 @@ die
 from Shared.UIConstants import UIConstants
 from Shared.AnimAttrObject import AnimAttrObject
 from Shared.SpecialRule import AlwaysStrikesLast
+from UI.Text import Text
 
 SPRITE_SHEET = "Sprite_Sheet"
 SIZE = "Size"
@@ -43,6 +44,8 @@ class ModelFF(AnimAttrObject):
         self.__spells_list = []
         self.__items_list = []
 
+        self.__texts = []
+
         super(ModelFF, self).__init__(sprite_sheet_file, size, position, object_type, name, m, ws, bs, s, t, w, i, a,
                                       ld)
 
@@ -51,6 +54,48 @@ class ModelFF(AnimAttrObject):
 
     def __repr__(self) -> str:
         return self.get_name()
+
+    def special_rules_to_texts(self) -> None:
+        for sr in self.get_special_rules_list():
+            text = Text(string=sr.get_name(),
+                        position=(0, 0),
+                        font_size=UIConstants.TEXT_SIZE_TINY)
+
+            text_size = text.get_size()
+
+            for target in sr.get_targets():
+                # if the special rules applies for specific target like accusation, print near target
+                target_position = target.get_position()
+                target_size = target.get_size()
+
+                # if any(self.__texts):
+                #     position = (self.__texts[-1].get_position()[0],
+                #                 self.__texts[-1].get_position()[1] - text_size[1] - 2)
+                # else:
+                position = (target_position[0] - text_size[0] - 5, target_position[1] + target_size[1] - 2)
+                text.set_position(position)
+                self.__texts.append(text)
+            else:
+                # if the special rule applies for the model itself, show near model
+                model_position = self.get_position()
+                model_size = self.get_size()
+                if any(self.__texts):
+                    position = (self.__texts[-1].get_position()[0],
+                                self.__texts[-1].get_position()[1] - text_size[1] - 2)
+                else:
+                    position = (model_position[0] + model_size[0] + 5, model_position[1] + model_size[1] - 2)
+
+                text.set_position(position)
+                self.__texts.append(text)
+
+    def get_texts(self) -> list:
+        return self.__texts
+
+    def hide_models_special_rules(self):
+        for text in self.__texts:
+            text.kill()
+
+        self.__texts = []
 
     def get_menu_item_string(self) -> str:
         string = self.get_name() + "_" + "HP:" + str(self.get_current_wounds()) + "/" + str(self.get_wounds())

@@ -79,8 +79,8 @@ def get_empire_witch_hunter() -> ModelFF:
 
 def get_dwarf_hero() -> ModelFF:
     model = ModelFF(sprite_sheet_file=DWARF_HERO_SPRITE_SHEET,
-                    # name="Dwarf Hero", m=3, ws=4, bs=3, s=3, t=4, w=1, i=2, a=2, ld=9)
-                    name="Dwarf Hero", m=3, ws=1, bs=3, s=3, t=4, w=9, i=2, a=2, ld=9)
+                    name="Dwarf Hero", m=3, ws=4, bs=3, s=3, t=4, w=1, i=2, a=2, ld=9)
+                    # name="Dwarf Hero", m=3, ws=1, bs=3, s=3, t=4, w=9, i=2, a=2, ld=9)
 
     model.set_armor(HeavyArmor())
     model.add_weapon(Sword())

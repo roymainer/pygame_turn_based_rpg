@@ -66,6 +66,14 @@ class PlayingGameScene(Scene):
                 self.__UI.add_player_marker(current_model)  # add a new marker for the model
                 self.__UI.add_actions_menu(current_model)  # add new actions menu for the model
 
+                """ Display Special Rules """
+                for model in self.__turn_manager.get_all_models_list():
+                    model.hide_models_special_rules()
+                current_model.special_rules_to_texts()
+                for text in current_model.get_texts():
+                    game = self.get_game()
+                    game.add_sprite_to_group(text, None, 0)
+
                 if current_model in self.__turn_manager.get_all_computer_models():
                     # check if model is a computer model
                     self.play_computer_turn(current_model)
