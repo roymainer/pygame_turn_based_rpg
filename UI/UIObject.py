@@ -11,6 +11,7 @@ class UIObject(Sprite):
     """
 
     def __init__(self, image, position):
+        self.__name = "UIObject"
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = position[0]
@@ -19,7 +20,13 @@ class UIObject(Sprite):
         super(UIObject, self).__init__()  # call the Sprite class
 
     def __repr__(self):
-        return "UIObject"
+        return self.__name
+
+    def set_name(self, string: str) -> None:
+        self.__name = string
+
+    def get_name(self) -> str:
+        return self.__name
 
     def get_image(self) -> pygame.Surface:
         return self.image

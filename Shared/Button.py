@@ -18,11 +18,11 @@ class Button(UIObject):
 
         super(Button, self).__init__(image=pygame.transform.scale(image, size), position=position)
 
-    def set_focused(self):
+    def set_focused(self) -> None:
         self.image = self.__button_focused_image
 
-    def set_pressed(self):
+    def set_pressed(self) -> None:
         self.image = self.__button_pressed_image
 
-    def unset_button(self):
+    def unset_button(self) -> None:
         self.image = self.__button_image

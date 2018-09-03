@@ -1,4 +1,3 @@
-import os
 import pygame
 
 SCREEN_SIZE = (480, 320)
@@ -10,6 +9,7 @@ BLACK = (0, 0, 0)
 # ACTION = "bow"
 INTERVAL = .10  # how long one single sprite should be displayed in seconds
 WHITE = (255, 255, 255)
+
 
 class MiniGameEngine:
 

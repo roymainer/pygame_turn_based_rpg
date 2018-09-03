@@ -18,21 +18,21 @@ class Weapon(Attributes):
         self.__great_weapon = great_weapon
         self.__ranged_weapon = ranged_weapon
 
-    def get_to_hit_re_roll(self):
+    def get_to_hit_re_roll(self) -> bool:
         # if the weapon grants a re-roll bonus to hit
         return self.__to_hit_re_roll
 
-    def get_to_wound(self):
+    def get_to_wound(self) -> int:
         # if the weapon grants a wounds bonus
         return self.__wounds_bonus
 
-    def is_armor_piercing(self):
+    def is_armor_piercing(self) -> bool:
         return self.__armor_piercing
 
-    def is_great_weapon(self):
+    def is_great_weapon(self) -> bool:
         return self.__great_weapon
 
-    def is_ranged_weapon(self):
+    def is_ranged_weapon(self) -> bool:
         return self.__ranged_weapon
 
     def get_action(self):
@@ -40,7 +40,7 @@ class Weapon(Attributes):
             return RangeAttack()
         return Attack()
 
-    def get_valid_targets(self, model):
+    def get_valid_targets(self, model) -> int:
 
         if model.is_front_row():
             if self.__great_weapon:
@@ -77,7 +77,8 @@ class RangeWeapon(Weapon):
         return targets
 
 
-def get_hand_weapon(): return random.choice([Sword()])
+def get_hand_weapon():
+    return random.choice([Sword()])
 
 
 class Sword(Weapon):

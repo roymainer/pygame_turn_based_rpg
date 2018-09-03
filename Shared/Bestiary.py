@@ -7,7 +7,7 @@ from Shared.Skill import *
 from Shared.SpecialRule import *
 
 
-def get_sprite_sheet_path(file_name):
+def get_sprite_sheet_path(file_name) -> str:
     return os.path.join("Assets", "Graphics", "Models", file_name)
 
 
@@ -34,7 +34,7 @@ SLIME_SPRITE_SHEET = get_sprite_sheet_path("slime_sprite_sheet.png")
 # SLIME_SIZE = (100 * 1, 74 * 1)
 
 
-def get_empire_archer():
+def get_empire_archer() -> ModelFF:
     model = ModelFF(sprite_sheet_file=EMPIRE_ARCHER_SPRITE_SHEET,
                     name="Empire Archer", m=4, ws=3, bs=3, s=3, t=3, w=1, i=3, a=1, ld=7)
 
@@ -44,12 +44,12 @@ def get_empire_archer():
     return model
 
 
-def get_warrior():
+def get_warrior() -> ModelFF:
     return ModelFF(sprite_sheet_file=EMPIRE_SWORDSMAN_SPRITE_SHEET,
                    name="Warrior", m=4, ws=4, bs=3, s=3, t=3, w=1, i=3, a=1, ld=7)
 
 
-def get_empire_swordsman():
+def get_empire_swordsman() -> ModelFF:
     model = ModelFF(sprite_sheet_file=EMPIRE_SWORDSMAN_SPRITE_SHEET,
                     name="Empire Swordsman", m=4, ws=4, bs=3, s=3, t=3, w=1, i=3, a=1, ld=7)
 
@@ -60,7 +60,7 @@ def get_empire_swordsman():
     return model
 
 
-def get_empire_witch_hunter():
+def get_empire_witch_hunter() -> ModelFF:
     model = ModelFF(sprite_sheet_file=WITCH_HUNTER_SPRITE_SHEET,
                     name="Empire Witch Hunter", m=4, ws=4, bs=4, s=4, t=4, w=2, i=4, a=2, ld=8)
 
@@ -77,9 +77,10 @@ def get_empire_witch_hunter():
     return model
 
 
-def get_dwarf_hero():
+def get_dwarf_hero() -> ModelFF:
     model = ModelFF(sprite_sheet_file=DWARF_HERO_SPRITE_SHEET,
-                    name="Dwarf Hero", m=3, ws=4, bs=3, s=3, t=4, w=1, i=2, a=2, ld=9)
+                    # name="Dwarf Hero", m=3, ws=4, bs=3, s=3, t=4, w=1, i=2, a=2, ld=9)
+                    name="Dwarf Hero", m=3, ws=1, bs=3, s=3, t=4, w=9, i=2, a=2, ld=9)
 
     model.set_armor(HeavyArmor())
     model.add_weapon(Sword())
@@ -94,7 +95,7 @@ def get_dwarf_hero():
     return model
 
 
-def get_undead_skeleton_halberd():
+def get_undead_skeleton_halberd() -> ModelFF:
     model = ModelFF(sprite_sheet_file=UNDEAD_SKELETON_HALBERD_SPRITE_SHEET,
                     name="Undead Halberd", m=4, ws=2, bs=2, s=3, t=3, w=1, i=2, a=1, ld=3)
 
@@ -107,5 +108,5 @@ def get_undead_skeleton_halberd():
     return model
 
 
-def get_slime_monster():
+def get_slime_monster() -> ModelFF:
     return ModelFF(sprite_sheet_file=SLIME_SPRITE_SHEET, name="Slime", m=4, ws=4, bs=3, s=3, t=3, w=1, i=3, a=1, ld=7)

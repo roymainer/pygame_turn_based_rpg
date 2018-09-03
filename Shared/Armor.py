@@ -9,10 +9,10 @@ class Armor(Attributes):
         self.__armor_save_req_roll = req_roll
         self.__to_hit_re_roll = to_hit_re_roll
 
-    def get_required_roll(self):
+    def get_required_roll(self) -> int:
         return self.__armor_save_req_roll
 
-    def get_to_hit_re_roll(self):
+    def get_to_hit_re_roll(self) -> bool:
         # if the weapon grants a re-roll bonus to hit
         return self.__to_hit_re_roll
 

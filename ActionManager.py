@@ -1,6 +1,7 @@
-from Shared import Bestiary, Rolls
+from Shared import Rolls
 from Shared.Action import *
 from Shared.GameConstants import GameConstants
+from Shared.Skill import Skill
 from UI.TextFloating import TextFloating
 
 """ Key (model_ws) : value (dict : key (enemy_ws) : value (dice roll to hit)) """
@@ -91,6 +92,8 @@ class ActionManager:
             self.__close_combat_attacks()
         elif isinstance(action, RangeAttack):
             self.__range_attack()
+        elif isinstance(action, Skill):
+            self.__skill()
         elif isinstance(action, Spells):
             self.__model.set_action("cast")
             self.cast_spell()
@@ -98,6 +101,36 @@ class ActionManager:
         self.__clear_special_rules()  # clear any used up special rules
 
         self.__finished = True
+
+    def is_finished(self):
+        if self.__finished:  # if action is finished
+            if self.__model.is_animation_cycle_done():  # if the model finished it's action animation cycle
+                self.__model.set_action("idle")
+
+                target = self.__targets[0]
+
+                """ Animate targets death """
+                for target in self.__targets:
+                    if target.is_killed():
+                        target.set_action("die")
+                    else:
+                        target.set_action('idle')
+
+                if target.is_animation_cycle_done():
+                    self.__finished = False  # reset the finish flag for next action
+                    return True  # return True cause animation also finished
+        else:
+            return self.__finished
+
+    def set_texts(self, texts):
+        self.__texts = texts
+
+    def get_texts(self):
+        return self.__texts
+
+    def destroy(self):
+        for text in self.__texts:
+            text.kill()
 
     def __close_combat_attacks(self):
         number_of_attacks = self.__model.get_attacks()
@@ -127,16 +160,25 @@ class ActionManager:
                             print("Successfully re-rolled to hit with: {}".format(sr.get_name()))
                             break
             if hit:
-                wound = self.__get_roll_to_wound(target)
+                wound, killing_blow = self.__get_roll_to_wound(target)
                 if not wound:
                     # look for an re-roll to wound special rule the model has
                     for sr in self.__model.get_special_rules_list():
                         if sr.re_roll_to_wound(target):
-                            wound = self.__get_roll_to_wound(target)
+                            wound, killing_blow = self.__get_roll_to_wound(target)
                             if wound:
                                 print("Successfully re-rolled to wound with: {}".format(sr.get_name()))
                                 break
-                if wound:
+                if wound and killing_blow:
+                    # saved_by_ward = self.get_ward_saving_throw(target)
+                    saved_by_ward = False
+                    if saved_by_ward:
+                        self.__add_text_saved_by_ward(target)
+                        continue
+                    else:
+                        target.set_wounds(0)
+                        self.__add_text("Killing Blow!", GameConstants.BRIGHT_RED, target)
+                elif wound:
                     saved_by_armor = self.__get_armor_saving_throw(target)
                     if not saved_by_armor:
                         # TODO: return the wards
@@ -170,8 +212,16 @@ class ActionManager:
 
         hit = self.__get_roll_to_hit_ranged(target)
         if hit:
-            wound = self.__get_roll_to_wound(target)
-            if wound:
+            wound, killing_blow = self.__get_roll_to_wound(target)
+            if wound and killing_blow:
+                saved_by_ward = self.__get_ward_saving_throw(target)
+                if saved_by_ward:
+                    return
+                else:
+                    # killing blow ignores any armor save BUT NOT WARD SAVES
+                    target.set_wounds(0)
+                    self.__add_text("Killing Blow!", GameConstants.BRIGHT_RED, target)
+            elif wound:
                 saved_by_armor = self.__get_armor_saving_throw(target)
                 if not saved_by_armor:
                     # saved_by_ward = self.get_ward_saving_throw(target)
@@ -182,25 +232,9 @@ class ActionManager:
                     target_wounds = target.get_wounds()
                     target.set_wounds(target_wounds - 1)
 
-    def is_finished(self):
-        if self.__finished:  # if action is finished
-            if self.__model.is_animation_cycle_done():  # if the model finished it's action animation cycle
-                self.__model.set_action("idle")
-
-                target = self.__targets[0]
-
-                """ Animate targets death """
-                for target in self.__targets:
-                    if target.is_killed():
-                        target.set_action("die")
-                    else:
-                        target.set_action('idle')
-
-                if target.is_animation_cycle_done():
-                    self.__finished = False  # reset the finish flag for next action
-                    return True  # return True cause animation also finished
-        else:
-            return self.__finished
+    def __skill(self):
+        skill = self.__action
+        skill.on_click(self.__model, self.__targets)
 
     def __get_roll_to_hit_close_combat(self, target) -> bool:
         print("Rolling to hit:")
@@ -245,16 +279,20 @@ class ActionManager:
         print("Missed target!")
         return False
 
-    def __get_roll_to_wound(self, target) -> bool:
+    def __get_roll_to_wound(self, target) -> (bool, bool):
         print("Rolling to wound:")
         roll = Rolls.get_d6_roll()
         if roll == 6:
             print("Target wounded!")
-            return True
+            for sr in self.__model.get_special_rules_list():
+                if sr.do_killing_blow(target):
+                    print("Killing Blow!")
+                    return True, True
+            return True, False
         elif roll == 1:
             print("Hit bounced off target!")
             # self.__add_text_blocked(target)
-            return False
+            return False, False
         else:
             s = self.__model.get_strength()
             for sr in self.__model.get_special_rules_list():
@@ -265,10 +303,10 @@ class ActionManager:
             print("Required roll to wound: " + str(required_roll))
             if roll >= required_roll:
                 print("Target wounded!")
-                return True
+                return True, False
         # self.__add_text_blocked(target)
         print("Hit bounced off target!")
-        return False
+        return False, False
 
     def __get_armor_saving_throw(self, target) -> bool:
         print("Target rolling to armor save:")
@@ -306,27 +344,32 @@ class ActionManager:
     # noinspection PyMethodMayBeStatic
     def __get_ward_saving_throw(self, target) -> bool:
         print("Target rolling to ward save:")
-        roll = Rolls.get_d6_roll()
-        if roll == 1:
-            print("Target save throw failed")
-            return False
-        else:
-            target_wards = target.get_wards()  # always roll on the best ward, they don't accumulate
-            # TODO: wards should be objects
-            for ward in target_wards:
-                if "ARMOR" in ward or "SHIELD" in ward or "TALISMAN" in ward:
 
-                    if Bestiary.WARD_SHIELD_CHARMED in ward:
-                        # charmed shield is single use only
-                        target.remove_ward(ward)
-
-                    required_roll = WARD_SAVES[ward]
-                    if roll >= required_roll:
-                        print("Target saved by armor!")
-                        return True
-
-        print("Target save throw failed")
+        # TODO: finish ward saving throw
+        print("Incomplete code!")
         return False
+
+        # roll = Rolls.get_d6_roll()
+        # if roll == 1:
+        #     print("Target save throw failed")
+        #     return False
+        # else:
+        #     target_wards = target.get_wards()  # always roll on the best ward, they don't accumulate
+        #     # TODO: wards should be objects
+        #     for ward in target_wards:
+        #         if "ARMOR" in ward or "SHIELD" in ward or "TALISMAN" in ward:
+        #
+        #             if Bestiary.WARD_SHIELD_CHARMED in ward:
+        #                 # charmed shield is single use only
+        #                 target.remove_ward(ward)
+        #
+        #             required_roll = WARD_SAVES[ward]
+        #             if roll >= required_roll:
+        #                 print("Target saved by armor!")
+        #                 return True
+        #
+        # print("Target save throw failed")
+        # return False
 
     def __add_text(self, string, text_color, target):
         target_position = target.get_position()
@@ -366,18 +409,10 @@ class ActionManager:
     def __add_text_blocked(self, target):
         self.__add_text("Blocked", GameConstants.BRIGHT_YELLOW, target)
 
-    def set_texts(self, texts):
-        self.__texts = texts
-
-    def get_texts(self):
-        return self.__texts
-
-    def destroy(self):
-        for text in self.__texts:
-            text.kill()
+    def __add_text_saved_by_ward(self, target):
+        self.__add_text("Saved by ward", GameConstants.BRIGHT_YELLOW, target)
 
     def __clear_special_rules(self):
         self.__model.clear_used_up_special_rules()
         for target in self.__targets:
             target.clear_used_up_special_rules()
-

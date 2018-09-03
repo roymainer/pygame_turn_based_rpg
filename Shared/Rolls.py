@@ -11,13 +11,13 @@ Used both by Models and units alike
 from random import choice
 
 
-def get_d6_roll():
+def get_d6_roll() -> int:
     roll = choice([1, 2, 3, 4, 5, 6])
     print("Rolled: " + str(roll))
     return roll
 
 
-def get_2d6_roll():
+def get_2d6_roll() -> int:
     return get_d6_roll() + get_d6_roll()
 
 
@@ -42,15 +42,15 @@ def get_d7_plus_roll(to_hit):
         return False
 
 
-def get_artillery_dice_roll():
+def get_artillery_dice_roll() -> int:
     return choice([0, 2, 4, 6, 8, 10])  # 0 == misfire
 
 
-def get_scatter_dice_roll():
+def get_scatter_dice_roll() -> int:
     return choice(["UP", "DOWN", "LEFT", "RIGHT", "HIT"])
 
 
-def get_roll_for_winds_of_magic():
+def get_roll_for_winds_of_magic() -> int:
     r1 = get_d6_roll()
     r2 = get_d6_roll()
     power_pool = r1 + r2
@@ -58,7 +58,7 @@ def get_roll_for_winds_of_magic():
     return power_pool, dispel_pool
 
 
-def get_channeling_power_roll(number_of_wizards):
+def get_channeling_power_roll(number_of_wizards) -> int:
     """For each wizard the player has, he can channel more power from the winds of magic into the power pool"""
     power = 0
     for _ in range(number_of_wizards):

@@ -30,10 +30,10 @@ class Menu(UIObject):
 
         self.__index = 0  # index of selected menu item
 
-    def __repr__(self):
-        return "Menu"
+    def __repr__(self) -> str:
+        return self.get_name()
 
-    def add_text_to_menu(self, string):
+    def add_text_to_menu(self, string: str) -> None:
 
         # calc item position
         if any(self.__menu_items_list):
@@ -49,7 +49,7 @@ class Menu(UIObject):
 
         self.__menu_items_list.append(menu_item)
 
-    def move_pointer_up(self):
+    def move_pointer_up(self) -> None:
         # only change the index, the pointer will update it's position accordingly
         if self.__index == 0:
             # if pointing at top menu item, overlap to bottom item
@@ -57,27 +57,27 @@ class Menu(UIObject):
         else:
             self.__index -= 1
 
-    def move_pointer_down(self):
+    def move_pointer_down(self) -> None:
         # only change the index, the pointer will update it's position accordingly
         if self.__index == len(self.__menu_items_list) - 1:  # if pointing to the last menu item
             self.__index = 0
         else:
             self.__index += 1
 
-    def get_index(self):
+    def get_index(self) -> int:
         if self.__index not in range(self.get_menu_items_count()):
             self.__index = 0
         return self.__index
 
-    def add_menu_items(self, menu_items):
+    def add_menu_items(self, menu_items) -> None:
         for item in menu_items:
             # self.add_text_to_menu(item.get_name())
             self.add_text_to_menu(item.get_menu_item_string())
 
-    def get_selected_item(self):
+    def get_selected_item(self) -> Text:
         return self.get_item_from_menu(self.__index)
 
-    def get_menu_items_count(self):
+    def get_menu_items_count(self) -> int:
         return len(self.__menu_items_list)
 
     def get_item_from_menu(self, index):
@@ -85,24 +85,24 @@ class Menu(UIObject):
             index = 0
         return self.__menu_items_list[index]
 
-    def remove_item_from_menu(self, index):
+    def remove_item_from_menu(self, index) -> None:
         item = self.__menu_items_list[index]
         item.kill()
         self.__menu_items_list.remove(item)
 
-    def is_focused(self):
+    def is_focused(self) -> bool:
         return self.__focused
 
-    def set_focused(self):
+    def set_focused(self) -> None:
         self.__focused = True
 
-    def unset_focused(self):
+    def unset_focused(self) -> None:
         self.__focused = False
 
-    def update(self):
+    def update(self) -> None:
         pass
     
-    def kill(self):
+    def kill(self) -> None:
         for item in self.__menu_items_list:
             item.kill()
             

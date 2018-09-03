@@ -21,7 +21,7 @@ class AnimatedObject(GameObject):
 
         self.__speed = (0, 0)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "AnimatedObject"
 
     # def update(self, seconds):
@@ -33,30 +33,30 @@ class AnimatedObject(GameObject):
 
         self.image = self.__animator.get_next_sprite(self.__action)
 
-    def set_speed(self, speed):
-        self.__speed = speed
+    # def set_speed(self, speed) -> int:
+    #     self.__speed = speed
+    #
+    # def get_speed(self):
+    #     return self.__speed
 
-    def get_speed(self):
-        return self.__speed
-
-    def set_action(self, action):
+    def set_action(self, action) -> None:
         if action not in self.get_animations_list():
             self.__action = self.__animations_list[0]
         if action != self.__action:
             self.__animator.reset_animation()
             self.__action = action
 
-    def get_action(self):
+    def get_action(self) -> str:
         return self.__action
 
-    def is_animation_cycle_done(self):
+    def is_animation_cycle_done(self) -> bool:
         return self.__animator.is_animation_cycle_done()
 
-    def set_last_animation(self):
+    def set_last_animation(self) -> None:
         self.__animator.set_last_animation()
 
-    def get_animations_list(self):
+    def get_animations_list(self) -> list:
         return self.__animator.get_animations_keys()
 
-    def flip_x(self):
+    def flip_x(self) -> None:
         self.__animator.set_flip()

@@ -58,7 +58,7 @@ class GameConstants:
 
     """ Menus """
     PLAYER_UNITS_MENU_WIDTH = PLAYERS_FRONT_COLUMN + 1 * PADX
-    COMPUTER_UNITS_MENU_WIDTH = SCREEN_SIZE[0] - COMPUTER_FRONT_COLUMN + PADX
+    COMPUTER_MODELS_MENU_WIDTH = SCREEN_SIZE[0] - COMPUTER_FRONT_COLUMN + PADX
 
     """ SPRITES """
     DARK_LAIR = os.path.join("Assets", "Graphics", "dark_lair.png")

@@ -26,13 +26,13 @@ class Text(UIObject):
 
         super(Text, self).__init__(image=self.image, position=self.rect.topleft)  # init the Sprite object
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Text"
 
-    def get_string(self):
+    def get_string(self) -> str:
         return self.__string
 
-    def set_string(self, string):
+    def set_string(self, string) -> None:
         self.__string = string  # update text string
 
         # font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
@@ -44,7 +44,7 @@ class Text(UIObject):
         self.rect = self.image.get_rect()  # create a new rect
         self.rect.topleft = topleft  # update new rects position
 
-    def mark_string(self):
+    def mark_string(self) -> None:
         # font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
         font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
 
@@ -54,7 +54,7 @@ class Text(UIObject):
         self.rect = self.image.get_rect()  # create a new rect
         self.rect.topleft = topleft  # update new rects position
 
-    def unmark_string(self):
+    def unmark_string(self) -> None:
         # font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
         font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
 

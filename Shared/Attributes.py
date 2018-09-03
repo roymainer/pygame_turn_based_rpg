@@ -14,41 +14,41 @@ class Attributes:
 
         self.__special_rules_list = []  # both models and weapons/armor have special rules
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__name
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.__name
 
-    def get_move(self):
+    def get_move(self) -> int:
         return self.__M
 
-    def get_weapon_skill(self):
+    def get_weapon_skill(self) -> int:
         return self.__WS
 
-    def get_ballistic_skill(self):
+    def get_ballistic_skill(self) -> int:
         return self.__BS
 
-    def get_strength(self):
+    def get_strength(self) -> int:
         return self.__S
 
-    def get_toughness(self):
+    def get_toughness(self) -> int:
         return self.__T
 
-    def get_wounds(self):
+    def get_wounds(self) -> int:
         return self.__W
 
-    def get_initiative(self):
+    def get_initiative(self) -> int:
         return self.__I
 
-    def get_attacks(self):
+    def get_attacks(self) -> int:
         return self.__A
 
-    def get_leadership(self):
+    def get_leadership(self) -> int:
         return self.__LD
 
-    def get_special_rules_list(self):
+    def get_special_rules_list(self) -> list:
         return self.__special_rules_list
 
-    def add_special_rule(self, special_rule):
+    def add_special_rule(self, special_rule) -> None:
         self.__special_rules_list.append(special_rule)

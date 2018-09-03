@@ -18,13 +18,13 @@ class MenuPointer(UIObject):
         # self.__index = 0  # index of pointed menu item
         # self.set_position(self.__pointer_positions[0])  # update position to point the first menu item
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "MenuPointer"
 
-    def __get_pointer_positions(self):
+    def __set_pointer_positions(self) -> None:
         """
         Creates a list of every pointer position so it would point to each of the menu items
-        :return: pointer positions list
+        :return: None
         """
 
         self.__set_pointer_size()
@@ -45,7 +45,7 @@ class MenuPointer(UIObject):
 
         self.__pointer_positions = positions
 
-    def __set_pointer_size(self):
+    def __set_pointer_size(self) -> None:
         menu_item = self.__menu.get_item_from_menu(0)  # get first item
         menu_item_size = menu_item.get_size()
 
@@ -56,22 +56,13 @@ class MenuPointer(UIObject):
 
         self.set_size(new_size)
 
-    def assign_pointer_to_menu(self, menu):
+    def assign_pointer_to_menu(self, menu) -> None:
         self.__menu = menu
-        self.__get_pointer_positions()
+        self.__set_pointer_positions()
 
-    def update(self):
+    def update(self) -> None:
         if self.__menu is None or self.__pointer_positions is None:
             return
 
         self.set_position(self.__pointer_positions[self.__menu.get_index()])
         return
-
-    # def move_up(self):
-    #     self.set_position(self.__pointer_positions[self.__index])
-    #
-    # def move_down(self):
-    #     self.set_position(self.__pointer_positions[self.__index])
-
-    # def get_pointer_index(self):
-    #     return self.__index

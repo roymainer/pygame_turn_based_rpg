@@ -24,7 +24,7 @@ class ModelsMenu(Menu):
         self.unset_focused()
 
     def __repr__(self):
-        return "ModelsMenu"
+        return self.get_name()
 
     def get_model_by_index(self, index):
         return self.__models_list[index]

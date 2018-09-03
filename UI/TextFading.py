@@ -20,7 +20,7 @@ class TextFading(Text):
         self.__index = TextFading.counter
         TextFading.counter += 1
 
-    def update(self):
+    def update(self) -> None:
         text_size = self.get_size()  # get the original text size
         surface = pygame.Surface(text_size, pygame.SRCALPHA)  # create a new surface with the same size
         text_image = self.__original_image
@@ -35,10 +35,10 @@ class TextFading(Text):
 
         print("TextFading Object #"+str(self.__index) + ", Alpha: " + str(self.__alpha))
 
-    def get_alpha(self):
+    def get_alpha(self) -> int:
         return self.__alpha
 
-    def kill(self):
+    def kill(self) -> None:
         print("Killing: " + self.__repr__())
         TextFading.counter -= 1
         print("TextFading Counter: " + str(TextFading.counter))

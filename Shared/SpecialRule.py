@@ -8,32 +8,38 @@ class SpecialRule:
         self.__targets = []
         self.__used_up = False
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.__name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.get_name()
 
-    def get_targets(self):
+    def get_targets(self) -> list:
         return self.__targets
 
     # noinspection PyMethodMayBeStatic
-    def re_roll_to_hit(self, target):
+    def re_roll_to_hit(self, target) -> bool:
         return False
 
-    def re_roll_to_wound(self, target):
+    def re_roll_to_wound(self, target)  -> bool:
         return False
 
-    def get_strength_bonus(self):
+    def get_strength_bonus(self) -> int:
         return 0
 
-    def pass_fear_ld_test(self):
+    def pass_fear_ld_test(self) -> bool:
         return False
 
-    def set_used_up(self, to_remove: bool):
+    def pass_terror_ld_test(self) -> bool:
+        return False
+
+    def do_killing_blow(self, target=None) -> bool:
+        return False
+
+    def set_used_up(self, to_remove: bool) -> None:
         self.__used_up = to_remove
 
-    def is_used_up(self):
+    def is_used_up(self) -> bool:
         return self.__used_up
 
 
@@ -44,16 +50,17 @@ class AlwaysStrikesLast(SpecialRule):
 
 
 class AccusationSR(SpecialRule):
+
     def __init__(self, target):
         super(AccusationSR, self).__init__("Accusation")
         self.__target = target
 
-    def re_roll_to_hit(self, target):
+    def re_roll_to_hit(self, target) -> bool:
         if target == self.get_targets():
             return True
         return False
 
-    def do_killing_blow(self, target):
+    def do_killing_blow(self, target) -> bool:
         if target == self.__target:
             return True
         else:
@@ -64,11 +71,11 @@ class GrimResolveSR(SpecialRule):
     def __init__(self):
         super(GrimResolveSR, self).__init__(name="Grim Resolve")
 
-    def pass_fear_ld_test(self):
+    def pass_fear_ld_test(self) -> bool:
         return True
 
     # noinspection PyMethodMayBeStatic
-    def pass_terror_ld_test(self, ld):
+    def pass_terror_ld_test(self, ld) -> bool:
         roll = get_2d6_roll()
 
         if roll == 2 or roll <= ld:
@@ -86,7 +93,7 @@ class ToolsOfJudgmentSR(SpecialRule):
     def __init__(self):
         super(ToolsOfJudgmentSR, self).__init__(name="Tools Of Judgment")
 
-    def re_roll_to_wound(self, target):
+    def re_roll_to_wound(self, target) -> bool:
         for sr in target.get_special_rules_list():
             if isinstance(sr, Undead) or isinstance(sr, Demonic):
                 return True
@@ -101,7 +108,7 @@ class Hatred(SpecialRule):
     def __init__(self):
         super(Hatred, self).__init__(name="Hatred")
 
-    def re_roll_to_hit(self, target):
+    def re_roll_to_hit(self, target) -> bool:
         self.set_used_up(True)
         return True
 
@@ -114,7 +121,7 @@ class AncestralGrudge(SpecialRule):
     def __init__(self):
         super(AncestralGrudge, self).__init__(name="Ancestral Grudge")
 
-    def re_roll_to_hit(self, target):
+    def re_roll_to_hit(self, target) -> bool:
         self.set_used_up(True)
         return True
 
@@ -127,7 +134,7 @@ class Resolute(SpecialRule):
     def __init__(self):
         super(Resolute, self).__init__(name="Resolute")
 
-    def get_strength_bonus(self):
+    def get_strength_bonus(self) -> int:
         print("Got +1 Strength using Resolute Special Rule")
         self.set_used_up(True)
         return 1

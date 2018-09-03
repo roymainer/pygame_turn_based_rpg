@@ -10,9 +10,9 @@ class Shield(Attributes):
         self.__save_modifier = save_modifier
         self.__to_hit_re_roll = to_hit_re_roll
 
-    def get_shield_save_modifier(self):
+    def get_shield_save_modifier(self) -> int:
         return self.__save_modifier
 
-    def get_to_hit_re_roll(self):
+    def get_to_hit_re_roll(self) -> int:
         # if the weapon grants a re-roll bonus to hit
         return self.__to_hit_re_roll

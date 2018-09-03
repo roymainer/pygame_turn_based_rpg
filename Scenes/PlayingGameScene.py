@@ -40,6 +40,9 @@ class PlayingGameScene(Scene):
                     self.__UI.move_pointer_down()
                     # need to add move computer marker down
                 if event.key == pygame.K_RETURN:
+                    current_model = self.__turn_manager.get_current_model()
+                    if current_model.get_type() == GameConstants.COMPUTER_GAME_OBJECTS:
+                        return
                     self.__UI.menu_item_pressed()
 
     def update(self):
@@ -48,6 +51,10 @@ class PlayingGameScene(Scene):
         # sprites_diff = set(current_sprites_list) - set(self.__prev_sprites_list)
         # self.__prev_sprites_list = current_sprites_list
         # print("#Sprites: {}, diff sprites: {}".format(str(len(current_sprites_list)), str(sprites_diff)))
+
+        # focused_menu = self.__UI.get_focused_menu()
+        # if focused_menu is not None:
+        #     print("Focused Menu: {}".format(focused_menu.get_name()))
 
         current_model = self.__turn_manager.get_current_model()
         if current_model is not None:

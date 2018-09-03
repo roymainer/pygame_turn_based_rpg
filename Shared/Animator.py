@@ -6,11 +6,10 @@ Created: Jul 30, 2018
 @author: Roy Mainer
 """
 import pygame
-
 from Shared.GameConstants import GameConstants
 
 
-def prepare_animations(spritesheet_file, atlas_file, sprite_size=None):
+def prepare_animations(spritesheet_file, atlas_file, sprite_size=None) -> dict:
 
     if spritesheet_file is None:
         return {}
@@ -66,13 +65,13 @@ class Animator(object):
     def get_animations_keys(self) -> []:
         return list(self.__animation_dict.keys())
 
-    def get_animation_key(self):
+    def get_animation_key(self) -> str:
         return self.__animation_key
 
-    def get_sprite_index(self):
+    def get_sprite_index(self) -> int:
         return self.__sprite_index
 
-    def get_next_sprite_index(self):
+    def get_next_sprite_index(self) -> int:
 
         if self.__animation_key == "":
             return 0
@@ -110,16 +109,16 @@ class Animator(object):
 
         return _image
 
-    def set_last_animation(self):
+    def set_last_animation(self) -> None:
         self.__last_animation = True
 
-    def set_flip(self):
+    def set_flip(self) -> None:
         self.__flip = True
 
-    def unset_flip(self):
+    def unset_flip(self) -> None:
         self.__flip = False
 
-    def flip_sprites_ver(self):
+    def flip_sprites_ver(self) -> None:
         """
         Flips the x axis of the sprites in the animation dict
         """
@@ -129,10 +128,10 @@ class Animator(object):
                 self.__animation_dict[action_key][i] = pygame.transform.flip(sprite, True, False)
         return self.__animation_dict
 
-    def is_animation_cycle_done(self):
+    def is_animation_cycle_done(self) -> bool:
         return self.__animation_cycle_finished
 
-    def reset_animation(self):
+    def reset_animation(self) -> None:
         self.__sprite_index = 0
         self.__animation_cycle_finished = False
 

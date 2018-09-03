@@ -21,7 +21,7 @@ class GameObject(Sprite):
 
         super(GameObject, self).__init__()  # call the parent class
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "GameObject"
 
     # def update(self, seconds):
@@ -33,7 +33,7 @@ class GameObject(Sprite):
     def get_rect(self) -> pygame.Rect:
         return self.rect
 
-    def set_position(self, position):
+    def set_position(self, position) -> None:
         self.rect.topleft = position
 
     def get_position(self) -> Tuple:
@@ -42,13 +42,13 @@ class GameObject(Sprite):
     def get_size(self) -> Tuple:
         return self.rect.size
 
-    def set_type(self, object_type):
+    def set_type(self, object_type) -> None:
         self.__object_type = object_type
 
-    def get_type(self):
+    def get_type(self) -> int:
         return self.__object_type
 
-    def is_front_row(self):
+    def is_front_row(self) -> bool:
         position = self.get_position()
         size = self.get_size()
         center_posx = position[0] + size[0]/2
@@ -57,7 +57,7 @@ class GameObject(Sprite):
         else:
             return False
 
-    def is_valid_target(self, valid_targets):
+    def is_valid_target(self, valid_targets) -> bool:
         if valid_targets in [GameConstants.TARGET_COMPUTER_SINGLE_ANY, GameConstants.TARGET_COMPUTER_ALL]:
             return True
         elif valid_targets in [GameConstants.TARGET_COMPUTER_SINGLE_FRONT, GameConstants.TARGET_COMPUTER_ALL_FRONT]:
