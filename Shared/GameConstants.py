@@ -77,6 +77,7 @@ class GameConstants:
     YELLOW = (155, 155, 0)
     BRIGHT_GRAY = (128, 128, 128)
     DARK_GRAY = (40, 40, 40)
+    CYAN = (0, 255, 255)
 
     """ TARGETING """
     TARGET_PLAYER_SINGLE_ANY = 0

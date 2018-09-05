@@ -22,10 +22,19 @@ class Skill:
     def get_valid_targets(self) -> int:
         return self.__valid_targets
 
+    # noinspection PyMethodMayBeStatic
     def get_action(self):
         return Skills()
 
     def on_click(self, model, targets) -> None:
+        pass
+
+
+class SniperSkill(Skill):
+    def __init__(self):
+        super(SniperSkill, self).__init__("Snipe", valid_targets=GameConstants.TARGET_COMPUTER_SINGLE_ANY)
+
+    def on_click(self, model, targets):
         pass
 
 
@@ -49,11 +58,3 @@ class AccusationSkill(Skill):
         self.__model = model  # set model
         self.__model.remove_special_rule(self.get_name())  # remove previous accusation special rule from model
         self.__model.add_special_rules(AccusationSR(target))
-
-
-class SniperSkill(Skill):
-    def __init__(self):
-        super(SniperSkill, self).__init__("Snipe", valid_targets=GameConstants.TARGET_COMPUTER_SINGLE_ANY)
-
-    def on_click(self, model, targets):
-        pass

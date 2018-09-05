@@ -104,7 +104,13 @@ class Halberd(Weapon):
 class GreatSword(Weapon):
     def __init__(self):
         super(GreatSword, self).__init__(name="Great Sword", s=2, great_weapon=True)
-        self.add_special_rule(AlwaysStrikesLast)
+        self.add_special_rule(AlwaysStrikesLast())
+
+
+class WarHammer(Weapon):
+    def __init__(self):
+        super(WarHammer, self).__init__(name="War Hammer", s=2, great_weapon=True)
+        self.add_special_rule(AlwaysStrikesLast())
 
 
 class Bow(RangeWeapon):

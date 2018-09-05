@@ -10,9 +10,9 @@ run
 hurt
 die
 """
+from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
 from Shared.AnimAttrObject import AnimAttrObject
-from Shared.SpecialRule import AlwaysStrikesLast
 from UI.Text import Text
 
 SPRITE_SHEET = "Sprite_Sheet"
@@ -25,8 +25,8 @@ MODEL_TYPE_MAGIC = 2
 ACTION_ATTACK = "Attack"
 ACTION_SHOOT = "Shoot"
 ACTION_SKILLS = "Skills"
+ACTION_SPELLS = "Spells"
 ACTION_ITEMS = "Items"
-ACTION_SPELLS = "Magic"
 
 
 class ModelFF(AnimAttrObject):
@@ -112,8 +112,7 @@ class ModelFF(AnimAttrObject):
 
     def get_initiative(self) -> int:
         for sr in self.get_special_rules_list():
-            if isinstance(sr, AlwaysStrikesLast):
-                # if a unit has the always strikes last special rule, modify the initiative
+            if sr.get_name() == "Always Strikes Last":
                 return 0
         return super(ModelFF, self).get_initiative()
 
@@ -178,10 +177,10 @@ class ModelFF(AnimAttrObject):
         for sr in special_rules:
             self.add_special_rule(sr)
 
-    def remove_special_rule(self, special_rule_name) -> None:
+    def remove_special_rule(self, special_rule_name: str) -> None:
         for i, o in enumerate(self.get_special_rules_list()):
             if o.get_name() == special_rule_name:
-                del self.__special_rules_list[i]
+                del self.get_special_rules_list()[i]
                 break
 
     def add_spell(self, spell) -> None:
@@ -197,5 +196,24 @@ class ModelFF(AnimAttrObject):
     def get_items_list(self) -> list:
         return self.__items_list
 
+    def is_frenzied(self) -> bool:
+        for sr in self.get_special_rules_list():
+            if sr.get_name() == "Frenzied":
+                return True
+        return False
+
     def is_killed(self) -> bool:
         return self.get_current_wounds() <= 0
+
+    def kill(self, tm):
+        for text in self.__texts:
+            text.kill()
+
+        if self.get_type() == GameConstants.PLAYER_GAME_OBJECTS:
+            unit = tm.get_all_player_models()
+            enemy_unit = tm.get_all_computer_models()
+        else:
+            unit = tm.get_all_computer_models()
+            enemy_unit = tm.get_all_player_models()
+        for sr in self.get_special_rules_list():
+            sr.on_kill(self, unit, enemy_unit)

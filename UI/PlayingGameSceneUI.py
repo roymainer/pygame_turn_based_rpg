@@ -3,6 +3,7 @@ import pygame
 from Shared.AnimatedObject import AnimatedObject
 from Shared.GameConstants import GameConstants
 from Shared.ModelFF import *
+from Shared.UIConstants import UIConstants
 from UI.Menu import Menu
 from UI.MenuPointer import MenuPointer
 from UI.ModelsMenu import ModelsMenu
@@ -228,12 +229,14 @@ class PlayingGameSceneUI:
             self.add_computer_markers(model)
 
     def return_to_previous_menu(self):
-        if self.__menus[COMPUTER_MODELS_MENU].is_focused() or self.__menus[PLAYER_MODELS_MENU].is_focused():
-            self.set_focused_menu(menu=self.__menus[ACTIONS_MENU])
-        elif self.__menus[SKILLS_MENU].is_focused():
-            self.set_focused_menu(menu=self.__menus[ACTIONS_MENU])
-        elif self.__menus[SPELLS_MENU].is_focused():
-            self.set_focused_menu(menu=self.__menus[SPELLS_MENU])
+
+        # focused_menu = self.get_focused_menu()
+        # if focused_menu in [self.__menus[COMPUTER_MODELS_MENU], focused_menu == self.__menus[PLAYER_MODELS_MENU]]:
+        #     self.set_focused_menu(menu=self.__menus[ACTIONS_MENU])
+        # elif focused_menu in [self.__menus[SKILLS_MENU], self.__menus[SPELLS_MENU]]:
+        #     self.set_focused_menu(menu=self.__menus[ACTIONS_MENU])
+
+        self.set_focused_menu(menu=self.__menus[ACTIONS_MENU])
         self.__remove_sub_menus()
         return
 
@@ -241,7 +244,7 @@ class PlayingGameSceneUI:
         focused_menu = self.get_focused_menu()
         focused_menu.get_selected_item().mark_string()  # mark the selected text
         current_model = self.scene.get_current_model()
-        current_action = self.scene.get_current_action()  # get current_action object from the scene
+        current_action = self.scene.get_action_manager()  # get current_action object from the scene
 
         # ----------------- ACTIONS MENU ----------------- #
         if focused_menu == self.__menus[ACTIONS_MENU]:
@@ -258,27 +261,33 @@ class PlayingGameSceneUI:
                 self.set_action_and_select_targets(action, current_action, valid_targets)
 
             elif action_string == ACTION_SKILLS:
-                current_model = self.scene.get_current_model()
+                # current_model = self.scene.get_current_model()
                 self.add_skills_menu(current_model)
                 self.set_focused_menu(self.__menus[SKILLS_MENU])
 
             elif action_string == ACTION_SPELLS:
-                # TODO: add this
+                # current_model = self.scene.get_current_model()
+                self.add_spells_menu(current_model)
+                self.set_focused_menu(self.__menus[SPELLS_MENU])
                 pass
 
-        # ----------------- SKILLS MENU ----------------- #
-        if focused_menu == self.__menus[SKILLS_MENU]:
+        # ----------------- SKILLS/SPELLS MENU ----------------- #
+        if focused_menu == self.__menus[SKILLS_MENU] or focused_menu == self.__menus[SPELLS_MENU]:
+            if focused_menu == self.__menus[SKILLS_MENU]:
+                items_list = current_model.get_skills_list()
+            elif focused_menu == self.__menus[SPELLS_MENU]:
+                items_list = current_model.get_spells_list()
 
-                skill_string = focused_menu.get_selected_item().get_string()  # get the selected skill string
+            string = focused_menu.get_selected_item().get_string()  # get the selected skill string
 
-                # get the models selected skill
-                for skill in current_model.get_skills_list():
-                    if skill.get_name() == skill_string:
-                        break
+            # get the models selected skill
+            for item in items_list:
+                if item.get_name() == string:
+                    break
 
-                valid_targets = skill.get_valid_targets()  # get valid targets from skill
+            valid_targets = item.get_valid_targets()  # get valid targets from skill
 
-                self.set_action_and_select_targets(skill, current_action, valid_targets)
+            self.set_action_and_select_targets(item, current_action, valid_targets)
 
         # ----------------- COMPUTER MODELS MENU ----------------- #
         if focused_menu == self.__menus[COMPUTER_MODELS_MENU]:

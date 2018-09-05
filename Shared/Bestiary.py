@@ -1,6 +1,7 @@
 import os
 from Shared.Armor import *
 from Shared.Shield import Shield
+from Shared.Spell import HammerOfSigmar, ShieldOfFaith, Soulfire
 from Shared.Weapon import *
 from Shared.ModelFF import ModelFF
 from Shared.Skill import *
@@ -20,6 +21,7 @@ EMPIRE_SWORDSMAN_SPRITE_SHEET = get_sprite_sheet_path("empire_swordsman_sprite_s
 WARRIOR_SPRITE_SHEET = get_sprite_sheet_path("warrior_sprite_sheet.png")
 # WARRIOR_SIZE = (50 * 3, 37 * 3)
 WITCH_HUNTER_SPRITE_SHEET = get_sprite_sheet_path("witch_hunter_sprite_sheet.png")
+WARRIOR_PRIEST_SPRITE_SHEET = get_sprite_sheet_path("warrior_priest_sprite_sheet.png")
 DWARF_HERO_SPRITE_SHEET = get_sprite_sheet_path("dwarf_hero_sprite_sheet.png")
 
 
@@ -62,17 +64,32 @@ def get_empire_swordsman() -> ModelFF:
 
 def get_empire_witch_hunter() -> ModelFF:
     model = ModelFF(sprite_sheet_file=WITCH_HUNTER_SPRITE_SHEET,
-                    name="Empire Witch Hunter", m=4, ws=4, bs=4, s=4, t=4, w=2, i=4, a=2, ld=8)
+                    name="Witch Hunter", m=4, ws=4, bs=4, s=4, t=4, w=2, i=4, a=2, ld=8)
 
     model.set_armor(LightArmor())
     model.add_weapon(get_hand_weapon())
     model.add_weapon(Pistol())
 
     model.add_skill(AccusationSkill())
-    model.add_skill(SniperSkill())
+    # model.add_skill(SniperSkill())  # not sure if it's relevant
     model.add_special_rule(GrimResolveSR())
     model.add_special_rule(ToolsOfJudgmentSR())
     # TODO: model.add_special_rule(MagicResistanceSR(2))
+
+    return model
+
+
+def get_warrior_priest() -> ModelFF:
+    model = ModelFF(sprite_sheet_file=WARRIOR_PRIEST_SPRITE_SHEET, name="Warrior Priest",
+                    m=4, ws=4, bs=4, s=4, t=4, w=2, i=4, a=2, ld=8)
+    model.set_armor(HeavyArmor())
+    model.add_weapon(WarHammer())
+
+    # model.add_skill(Dispel())  # TODO: create dispel
+    model.add_special_rule(RighteousFury())
+    model.add_spell(HammerOfSigmar())
+    model.add_spell(ShieldOfFaith())
+    model.add_spell(Soulfire())
 
     return model
 

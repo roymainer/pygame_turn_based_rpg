@@ -1,4 +1,5 @@
 from Shared.Attributes import Attributes
+from Shared.SpecialRule import Parry
 
 
 class Shield(Attributes):
@@ -9,6 +10,7 @@ class Shield(Attributes):
 
         self.__save_modifier = save_modifier
         self.__to_hit_re_roll = to_hit_re_roll
+        self.add_special_rule(Parry())
 
     def get_shield_save_modifier(self) -> int:
         return self.__save_modifier

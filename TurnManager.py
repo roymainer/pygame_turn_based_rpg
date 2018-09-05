@@ -1,3 +1,5 @@
+from Shared.ModelFF import ModelFF
+
 
 class TurnManager:
 
@@ -33,7 +35,7 @@ class TurnManager:
     def add_computer_model(self, new_model):
         self.__add_model(self.__computer_models, new_model)
 
-    def get_current_model(self):
+    def get_current_model(self) -> ModelFF:
         if self.__current_model not in range(len(self.__all_models_sorted)):
             self.advance_to_next_model()
         return self.__all_models_sorted[self.__current_model]
@@ -55,7 +57,7 @@ class TurnManager:
     def get_player_model(self, index):
         return self.__player_models[index]
 
-    def get_all_player_models(self):
+    def get_all_player_models(self) -> list:
         return self.__player_models
 
     def get_computer_model(self, index):
@@ -63,6 +65,24 @@ class TurnManager:
 
     def get_all_computer_models(self):
         return self.__computer_models
+
+    def get_current_model_unit(self) -> list:
+        current_model = self.get_current_model()
+        if current_model in self.__player_models:
+            unit = self.get_all_player_models()
+        elif current_model in self.__computer_models:
+            unit = self.get_all_computer_models()
+
+        return unit
+
+    def get_opponent_unit(self) -> list:
+        current_model = self.get_current_model()
+        if current_model in self.__player_models:
+            unit = self.get_all_computer_models()
+        elif current_model in self.__computer_models:
+            unit = self.get_all_player_models()
+
+        return unit
 
     def remove_model(self, model):
 

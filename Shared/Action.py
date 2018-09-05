@@ -24,8 +24,20 @@ class Action:
 
 class Attack(Action):
 
+    ATTACK_TYPE_NORMAL = 0
+    ATTACK_TYPE_STOMP = 1
+    ATTACK_TYPE_THUNDERSTOMP = 2
+    ATTACK_TYPE_BREATH = 3
+
     def __init__(self):
         super(Attack, self).__init__("Attack")
+        self.__attack_type = Attack.ATTACK_TYPE_NORMAL
+
+    def get_attack_type(self):
+        return self.__attack_type
+
+    def set_attack_type(self, attack_type):
+        self.__attack_type = attack_type
 
     def get_next_menu(self) -> int:
         return COMPUTER_MODELS_MENU
