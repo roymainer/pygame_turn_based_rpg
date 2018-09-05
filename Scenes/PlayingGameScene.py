@@ -88,7 +88,7 @@ class PlayingGameScene(Scene):
             """ Remove any dead units """
             for model in self.__turn_manager.get_all_models_list():
                 if model.is_killed():
-                    model.kill(self.__turn_manager)  # TODO: I don't like passing TM as argument when a model is killed
+                    model.destroy(self.__turn_manager)  # TODO: I don't like passing TM as argument when a model is killed
                     self.__turn_manager.remove_model(model)
 
             # self.__current_unit.set_action("idle")  # return acting model to idle

@@ -285,7 +285,13 @@ class ActionManager:
                         else:
                             self.__add_text_hit(target)
                             target_wounds = target.get_current_wounds()
-                            target.set_wounds(target_wounds - 1)
+                            weapon = current_model.get_melee_weapon()
+                            double_damage = self.__is_double_damage(current_model, weapon, target)
+                            if double_damage:
+                                target.set_wounds(target_wounds - 2)
+                            else:
+                                target.set_wounds(target_wounds - 1)
+
                     else:
                         self.__add_text_blocked(target)
                 else:
@@ -326,7 +332,12 @@ class ActionManager:
                     # else:
                     self.__add_text_hit(target)
                     target_wounds = target.get_wounds()
-                    target.set_wounds(target_wounds - 1)
+                    weapon = current_model.get_range_weapon()
+                    double_damage = self.__is_double_damage(current_model, weapon, target)
+                    if double_damage:
+                        target.set_wounds(target_wounds - 2)
+                    else:
+                        target.set_wounds(target_wounds - 1)
 
     def __skill(self):
 
@@ -530,3 +541,23 @@ class ActionManager:
         current_model.clear_used_up_special_rules()
         for target in self.__targets:
             target.clear_used_up_special_rules()
+
+    def __is_double_damage(self, model, weapon, target):
+
+        flaming_attack = False
+        flammable = False
+
+        for sr in model.get_special_rules_list():
+            if sr.is_flaming_attack():
+                flaming_attack = True
+
+        for sr in weapon.get_special_rules_list():
+            if sr.is_flaming_attack():
+                flaming_attack = True
+
+        for sr in target.get_special_rules_list():
+            if sr.is_flammable():
+                flammable = True
+
+        if flaming_attack and flammable:
+            return True

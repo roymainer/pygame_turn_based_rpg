@@ -205,7 +205,7 @@ class ModelFF(AnimAttrObject):
     def is_killed(self) -> bool:
         return self.get_current_wounds() <= 0
 
-    def kill(self, tm):
+    def destroy(self, tm):
         for text in self.__texts:
             text.kill()
 
@@ -217,3 +217,5 @@ class ModelFF(AnimAttrObject):
             enemy_unit = tm.get_all_player_models()
         for sr in self.get_special_rules_list():
             sr.on_kill(self, unit, enemy_unit)
+
+        super(ModelFF, self).kill()

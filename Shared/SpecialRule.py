@@ -58,6 +58,9 @@ class SpecialRule:
     def is_flaming_attack(self) -> bool:
         return False
 
+    def is_flammable(self):
+        return False
+
     def is_undead(self) -> bool:
         return False
 
