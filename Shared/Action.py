@@ -1,4 +1,4 @@
-from UI.PlayingGameSceneUI import COMPUTER_MODELS_MENU, SKILLS_MENU, SPELLS_MENU, ITEMS_MENU
+# from Managers.UIManager import COMPUTER_MODELS_MENU, SKILLS_MENU, SPELLS_MENU, ITEMS_MENU, PLAYER_MODELS_MENU
 
 
 class Action:
@@ -26,7 +26,7 @@ class Attack(Action):
 
     ATTACK_TYPE_NORMAL = 0
     ATTACK_TYPE_STOMP = 1
-    ATTACK_TYPE_THUNDERSTOMP = 2
+    ATTACK_TYPE_THUNDER_STOMP = 2
     ATTACK_TYPE_BREATH = 3
 
     def __init__(self):
@@ -39,8 +39,8 @@ class Attack(Action):
     def set_attack_type(self, attack_type):
         self.__attack_type = attack_type
 
-    def get_next_menu(self) -> int:
-        return COMPUTER_MODELS_MENU
+    # def get_next_menu(self) -> int:
+    #     return COMPUTER_MODELS_MENU
     
     
 class RangeAttack(Action):
@@ -48,8 +48,8 @@ class RangeAttack(Action):
     def __init__(self):
         super(RangeAttack, self).__init__("Shoot")
 
-    def get_next_menu(self) -> int:
-        return COMPUTER_MODELS_MENU
+    # def get_next_menu(self) -> int:
+    #     return COMPUTER_MODELS_MENU
 
 
 class Skills(Action):
@@ -57,8 +57,8 @@ class Skills(Action):
     def __init__(self):
         super(Skills, self).__init__("Skills")
 
-    def get_next_menu(self) -> int:
-        return SKILLS_MENU
+    # def get_next_menu(self) -> int:
+    #     return SKILLS_MENU
 
 
 class Spells(Action):
@@ -66,8 +66,8 @@ class Spells(Action):
     def __init__(self):
         super(Spells, self).__init__("Spells")
 
-    def get_next_menu(self) -> int:
-        return SPELLS_MENU
+    # def get_next_menu(self) -> int:
+    #     return SPELLS_MENU
 
 
 class Items(Action):
@@ -75,5 +75,17 @@ class Items(Action):
     def __init__(self):
         super(Items, self).__init__("Items")
 
-    def get_next_menu(self) -> int:
-        return ITEMS_MENU
+    # def get_next_menu(self) -> int:
+    #     return ITEMS_MENU
+
+
+class Skip(Action):
+    """
+    Skip action is used to pass the turn to the next model.
+    For example on Magic Phase if the player doesn't want to cast a spell
+    """
+    def __init__(self):
+        super(Skip, self).__init__("Skip")
+
+    # def get_next_menu(self) -> int:
+    #     return PLAYER_MODELS_MENU

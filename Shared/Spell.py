@@ -1,11 +1,11 @@
 from Shared.Action import Spells
-from Shared.GameConstants import GameConstants
+from Shared.GameConstants import TARGET_COMPUTER_ALL
 from Shared.SpecialRule import HammerOfSigmarSR, ShieldOfFaithSR, SoulfireSR
 
 
 class Spell:
 
-    def __init__(self, name="", valid_targets=GameConstants.TARGET_COMPUTER_ALL):
+    def __init__(self, name="", valid_targets=TARGET_COMPUTER_ALL):
         self.__name = name
         self.__valid_targets = valid_targets
 
@@ -29,7 +29,7 @@ class Spell:
     def get_action(self):
         return Spells()
 
-    def on_click(self, turn_manager) -> None:
+    def on_click(self, action_manager) -> None:
         pass
 
 
@@ -39,12 +39,13 @@ class HammerOfSigmar(Spell):
     The Warrior Priest and his unit re-roll all failed To Wound rolls in close combat until the start of the next
     friendly Magic phase.
     """
+
     def __init__(self):
         super(HammerOfSigmar, self).__init__("Hammer Of Sigmar")
 
-    def on_click(self, turn_manager):
-
-        unit = turn_manager.get_current_model_unit()
+    def on_click(self, action_manager):
+        turn_manager = action_manager.get_turn_manager()
+        unit = turn_manager.get_model_unit(model=turn_manager.get_current_model())
 
         for character in unit:
             character.add_special_rule(HammerOfSigmarSR())
@@ -56,11 +57,13 @@ class ShieldOfFaith(Spell):
     The Warrior Priest and his unit have a 5+ ward save against all wounds inflicted in close combat
     until the start of the next friendly Magic phase.
     """
+
     def __init__(self):
         super(ShieldOfFaith, self).__init__("Shield Of Faith")
 
-    def on_click(self, turn_manager):
-        unit = turn_manager.get_current_model_unit()
+    def on_click(self, action_manager):
+        turn_manager = action_manager.get_turn_manager()
+        unit = turn_manager.get_model_unit(model=turn_manager.get_current_model())
 
         for character in unit:
             character.add_special_rule(ShieldOfFaithSR())
@@ -73,15 +76,16 @@ class Soulfire(Spell):
     phase. In addition, when cast, all enemy models suffer a Strength 4 hit. Undead and units with Daemonic special rule
     suffer Strength 5 hit instead, with no armour saves allowed.
     """
+
     def __init__(self):
         super(Soulfire, self).__init__(name="Soulfire")
 
-    def on_click(self, action_mananger):
+    def on_click(self, action_manager):
 
-        turn_manager = action_mananger.get_turn_manager()
+        turn_manager = action_manager.get_turn_manager()
 
         # assign soulfire to all models in current models unit
-        unit = turn_manager.get_current_model_unit()
+        unit = turn_manager.get_model_unit()
         for character in unit:
             character.add_special_rule(SoulfireSR())
 
@@ -94,8 +98,10 @@ class Soulfire(Spell):
             for sr in target.get_special_rules_list():
                 if sr.is_undead() or sr.is_daemonic():
                     strength = 5
-                if sr.is_flamable():
+                if sr.is_flammable():
                     double_effect = True
-            action_mananger.wound_target(target, strength=strength, armor_saves_allowed=False, double_effect=double_effect)
+            action_manager.wound_target(target, strength=strength,
+                                        armor_saves_allowed=False,
+                                        double_effect=double_effect)
 
         return

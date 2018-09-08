@@ -5,14 +5,14 @@ Object Class is an extension to the Sprite Class
 import pygame
 from pygame.sprite import Sprite
 from typing import Tuple
-from Shared.GameConstants import GameConstants
+from Shared.GameConstants import *
 
 
 class GameObject(Sprite):
 
     # image = []  # a list of all images
 
-    def __init__(self, image, position, object_type=GameConstants.ALL_GAME_OBJECTS):
+    def __init__(self, image, position, object_type=GAME_OBJECT):
         self.image = image  # must get an image not a string (Example: to support Animator...)
         self.rect = self.image.get_rect()
         self.rect.x = position[0]
@@ -52,15 +52,15 @@ class GameObject(Sprite):
         position = self.get_position()
         size = self.get_size()
         center_posx = position[0] + size[0]/2
-        if center_posx in [GameConstants.PLAYERS_FRONT_COLUMN, GameConstants.COMPUTER_FRONT_COLUMN]:
+        if center_posx in [PLAYERS_FRONT_COLUMN, COMPUTER_FRONT_COLUMN]:
             return True
         else:
             return False
 
     def is_valid_target(self, valid_targets) -> bool:
-        if valid_targets in [GameConstants.TARGET_COMPUTER_SINGLE_ANY, GameConstants.TARGET_COMPUTER_ALL]:
+        if valid_targets in [TARGET_COMPUTER_SINGLE_ANY, TARGET_COMPUTER_ALL]:
             return True
-        elif valid_targets in [GameConstants.TARGET_COMPUTER_SINGLE_FRONT, GameConstants.TARGET_COMPUTER_ALL_FRONT]:
+        elif valid_targets in [TARGET_COMPUTER_SINGLE_FRONT, TARGET_COMPUTER_ALL_FRONT]:
             return self.is_front_row()
-        elif valid_targets in [GameConstants.TARGET_COMPUTER_SINGLE_BACK, GameConstants.TARGET_COMPUTER_ALL_BACK]:
+        elif valid_targets in [TARGET_COMPUTER_SINGLE_BACK, TARGET_COMPUTER_ALL_BACK]:
             return not self.is_front_row()

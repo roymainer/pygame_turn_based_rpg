@@ -109,7 +109,7 @@ class Parry(SpecialRule):
 
     def get_ward_save(self, attack, model):
         attack_type = attack.get_attack_type()
-        if attack_type in [Attack.ATTACK_TYPE_STOMP, Attack.ATTACK_TYPE_THUNDERSTOMP]:
+        if attack_type in [Attack.ATTACK_TYPE_STOMP, Attack.ATTACK_TYPE_THUNDER_STOMP]:
             return False
 
         if model.is_frenzied():
@@ -120,6 +120,14 @@ class Parry(SpecialRule):
             return True
         else:
             return False
+
+
+class Flammable(SpecialRule):
+    def __init__(self):
+        super(Flammable, self).__init__("Flammable")
+
+    def is_flammable(self):
+        return True
 
 
 class Frenzied(SpecialRule):

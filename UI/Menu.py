@@ -1,7 +1,6 @@
 import pygame
 
-from Shared.GameConstants import GameConstants
-from Shared.MiniGameEngine import MiniGameEngine
+from Shared.GameConstants import WHITE
 from Shared.UIConstants import UIConstants
 from UI.Text import Text
 from UI.UIObject import UIObject
@@ -23,6 +22,7 @@ class Menu(UIObject):
         super(Menu, self).__init__(self.image, position)
 
         self.__menu_items_list = []
+        self.__menu_objects_list = []  # save the objects as reference
         self.add_menu_items(menu_options)
 
         self.__menu_item_selected = None  # the selected menu item
@@ -33,7 +33,7 @@ class Menu(UIObject):
     def __repr__(self) -> str:
         return self.get_name()
 
-    def add_text_to_menu(self, string: str) -> None:
+    def add_text_to_menu(self, item) -> None:
 
         # calc item position
         if any(self.__menu_items_list):
@@ -45,9 +45,10 @@ class Menu(UIObject):
             # if there are no items in the list (this is the new item added)
             position = (self.get_position()[0] + self.__padx, self.get_position()[1] + self.__pady)
 
-        menu_item = Text(string, position, GameConstants.WHITE, None, UIConstants.TEXT_SIZE_SMALL)
+        menu_item = Text(item.get_menu_item_string(), position, WHITE, None, UIConstants.TEXT_SIZE_SMALL)
 
         self.__menu_items_list.append(menu_item)
+        self.__menu_objects_list.append(item)
 
     def move_pointer_up(self) -> None:
         # only change the index, the pointer will update it's position accordingly
@@ -72,23 +73,38 @@ class Menu(UIObject):
     def add_menu_items(self, menu_items) -> None:
         for item in menu_items:
             # self.add_text_to_menu(item.get_name())
-            self.add_text_to_menu(item.get_menu_item_string())
+            self.add_text_to_menu(item)
 
     def get_selected_item(self) -> Text:
         return self.get_item_from_menu(self.__index)
+
+    def get_selected_object(self):
+        return self.get_object_from_menu(self.__index)
 
     def get_menu_items_count(self) -> int:
         return len(self.__menu_items_list)
 
     def get_item_from_menu(self, index):
+        if not any(self.__menu_items_list):
+            # if list is empty
+            return None
+
         if index not in range(self.get_menu_items_count()):
             index = 0
         return self.__menu_items_list[index]
+
+    def get_object_from_menu(self, index):
+        if index not in range(self.get_menu_items_count()):
+            index = 0
+        return self.__menu_objects_list[index]
 
     def remove_item_from_menu(self, index) -> None:
         item = self.__menu_items_list[index]
         item.kill()
         self.__menu_items_list.remove(item)
+
+        obj = self.__menu_objects_list[index]
+        self.__menu_objects_list.remove(obj)
 
     def is_focused(self) -> bool:
         return self.__focused
@@ -107,28 +123,3 @@ class Menu(UIObject):
             item.kill()
             
         super(Menu, self).kill()
-
-
-if __name__ == "__main__":
-
-    SCREEN_SIZE = (480, 320)
-    FPS = 60
-    BLACK = (0, 0, 0)
-    INTERVAL = .10  # how long one single sprite should be displayed in seconds
-
-    menu_image = pygame.image.load(UIConstants.SPRITE_BLUE_MENU)
-    menu_size = (120, 120)
-    _menu_options = ["Attack", "Magic", "Defend", "Item"]
-    menu_position = (SCREEN_SIZE[0]/4-menu_size[0]/2, SCREEN_SIZE[1]/4-menu_size[1]/2)
-
-    mini_game_engine = MiniGameEngine()
-
-    menu = Menu(menu_image, menu_size, _menu_options, menu_position)
-
-    mini_game_engine.add_sprite(menu)  # add menu to engine
-    for i in range(menu.get_menu_items_count()):
-        mini_game_engine.add_sprite(menu.get_item_from_menu(i))
-
-    # mini_game_engine.add_sprite(menu.get_pointer())
-
-    mini_game_engine.start()

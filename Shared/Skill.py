@@ -1,5 +1,5 @@
 from Shared.Action import Skills
-from Shared.GameConstants import GameConstants
+from Shared.GameConstants import TARGET_COMPUTER_SINGLE_ANY
 from Shared.SpecialRule import AccusationSR
 
 
@@ -26,15 +26,17 @@ class Skill:
     def get_action(self):
         return Skills()
 
-    def on_click(self, model, targets) -> None:
+    # def on_click(self, model, targets) -> None:
+    def on_click(self, action_manager) -> None:
         pass
 
 
 class SniperSkill(Skill):
     def __init__(self):
-        super(SniperSkill, self).__init__("Snipe", valid_targets=GameConstants.TARGET_COMPUTER_SINGLE_ANY)
+        super(SniperSkill, self).__init__("Snipe", valid_targets=TARGET_COMPUTER_SINGLE_ANY)
 
-    def on_click(self, model, targets):
+    # def on_click(self, model, targets):
+    def on_click(self, action_manager):
         pass
 
 
@@ -47,14 +49,20 @@ class AccusationSkill(Skill):
     """
 
     def __init__(self):
-        super(AccusationSkill, self).__init__("Accusation", valid_targets=GameConstants.TARGET_COMPUTER_SINGLE_ANY)
+        super(AccusationSkill, self).__init__("Accusation", valid_targets=TARGET_COMPUTER_SINGLE_ANY)
         self.__model = None
 
-    def on_click(self, model, targets) -> None:
+    # def on_click(self, model, targets) -> None:
+    def on_click(self, action_manager) -> None:
+
+        turn_manager = action_manager.get_turn_manager()
+        current_model = turn_manager.get_current_model()
+        targets = current_model.get_targets()
+
         if type(targets) is list:
             target = targets[0]
         else:
             target = targets
-        self.__model = model  # set model
+        self.__model = current_model  # set model
         self.__model.remove_special_rule(self.get_name())  # remove previous accusation special rule from model
         self.__model.add_special_rules(AccusationSR(target))

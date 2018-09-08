@@ -1,5 +1,6 @@
 import pygame
-from Shared.GameConstants import GameConstants
+
+from Shared.GameConstants import WHITE, BRIGHT_GREEN
 from Shared.UIConstants import UIConstants
 from UI.UIObject import UIObject
 
@@ -7,10 +8,9 @@ from UI.UIObject import UIObject
 class TextFloating(UIObject):
 
     def __init__(self, string, position,
-                 text_color=GameConstants.WHITE,
+                 text_color=WHITE,
                  background_color=None,
                  font_size=UIConstants.TEXT_SIZE_SMALL):
-
         self.__text_color = text_color
         self.__background_color = background_color
         self.__font_size = font_size
@@ -31,13 +31,13 @@ class TextFloating(UIObject):
 
     def update(self, *args) -> None:
         position = self.get_position()
-        new_position = (position[0], position[1]-10)
+        new_position = (position[0], position[1] - 10)
         self.set_position(new_position)
 
     def get_string(self) -> str:
         return self.__string
 
-    def set_string(self, string:str) -> None:
+    def set_string(self, string: str) -> None:
         self.__string = string  # update text string
 
         # font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
@@ -53,7 +53,7 @@ class TextFloating(UIObject):
         # font_obj = pygame.font.Font(None, self.__font_size)  # create a new font object
         font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
 
-        self.image = font_obj.render(self.__string, False, GameConstants.BRIGHT_GREEN, self.__background_color)
+        self.image = font_obj.render(self.__string, False, BRIGHT_GREEN, self.__background_color)
 
         topleft = self.rect.topleft  # save previous position
         self.rect = self.image.get_rect()  # create a new rect
@@ -68,4 +68,3 @@ class TextFloating(UIObject):
         topleft = self.rect.topleft  # save previous position
         self.rect = self.image.get_rect()  # create a new rect
         self.rect.topleft = topleft  # update new rects position
-

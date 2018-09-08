@@ -11,7 +11,7 @@ class Scene:
         # self.__buttons = []  # a list of buttons
         self.__scene_objects = []
 
-    def get_game(self):
+    def get_game_engine(self):
         return self.__game_engine
 
     def handle_events(self):

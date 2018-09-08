@@ -1,10 +1,23 @@
 from Shared.AnimatedObject import AnimatedObject
 
+# Troop Types key
+TT_IN = "Infantry"
+TT_WB = "War Beast"
+TT_CA = "Cavalry"
+TT_MI = "Monstrous Infantry"
+TT_MB = "Monstrous Beast"
+TT_MC = "Monstrous Cavalry"
+TT_MO = "Monster"
+TT_CH = "Chariot"
+TT_SW = "Swarms"
+TT_UN = "Unique"
+TT_WM = "War Machine"
+
 
 class AnimAttrObject(AnimatedObject):
     
     def __init__(self, sprite_sheet_file=None, size=None, position=None, object_type=None,
-                 name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0):
+                 name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0, tt=TT_IN):
         super(AnimAttrObject, self).__init__(sprite_sheet_file, size, position, object_type)
 
         self.__name = name
@@ -17,6 +30,7 @@ class AnimAttrObject(AnimatedObject):
         self.__I = i
         self.__A = a
         self.__LD = ld
+        self.__TT = tt
 
         self.__special_rules_list = []  # both models and weapons/armor have special rules
 
@@ -53,6 +67,9 @@ class AnimAttrObject(AnimatedObject):
 
     def get_leadership(self) -> int:
         return self.__LD
+
+    def get_troop_type(self) -> str:
+        return self.__TT
 
     def get_special_rules_list(self) -> list:
         return self.__special_rules_list

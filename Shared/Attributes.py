@@ -51,4 +51,6 @@ class Attributes:
         return self.__special_rules_list
 
     def add_special_rule(self, special_rule) -> None:
+        if special_rule in self.__special_rules_list:
+            return
         self.__special_rules_list.append(special_rule)

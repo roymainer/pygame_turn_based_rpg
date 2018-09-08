@@ -50,7 +50,7 @@ def get_scatter_dice_roll() -> int:
     return choice(["UP", "DOWN", "LEFT", "RIGHT", "HIT"])
 
 
-def get_roll_for_winds_of_magic() -> int:
+def get_roll_for_winds_of_magic() -> (int, int):
     r1 = get_d6_roll()
     r2 = get_d6_roll()
     power_pool = r1 + r2

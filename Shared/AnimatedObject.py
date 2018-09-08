@@ -13,10 +13,9 @@ class AnimatedObject(GameObject):
 
         self.__animator = Animator(sprite_sheet_file, sprite_size=size)
         self.__animations_list = self.__animator.get_animations_keys()
-        # self.__action = self.__actions_list[0]  # default single animation for objects
-        self.__action = None
-        self.set_action("idle")  # all animated objects start at idle
-        image = self.__animator.get_next_sprite(self.__action)
+        self.__animation = None
+        self.set_animation("idle")  # all animated objects start at idle
+        image = self.__animator.get_next_sprite(self.__animation)
         super(AnimatedObject, self).__init__(image, position, object_type)
 
         self.__speed = (0, 0)
@@ -27,11 +26,11 @@ class AnimatedObject(GameObject):
     # def update(self, seconds):
     def update(self):
 
-        if self.get_action() == "die" and self.is_animation_cycle_done():
+        if self.get_animation() == "die" and self.is_animation_cycle_done():
             # if the model died and finished the animation cycle, don't update image to next sprite
             return
 
-        self.image = self.__animator.get_next_sprite(self.__action)
+        self.image = self.__animator.get_next_sprite(self.__animation)
 
     # def set_speed(self, speed) -> int:
     #     self.__speed = speed
@@ -39,15 +38,15 @@ class AnimatedObject(GameObject):
     # def get_speed(self):
     #     return self.__speed
 
-    def set_action(self, action) -> None:
-        if action not in self.get_animations_list():
-            self.__action = self.__animations_list[0]
-        if action != self.__action:
+    def set_animation(self, animation) -> None:
+        if animation not in self.get_animations_list():
+            self.__animation = self.__animations_list[0]
+        if animation != self.__animation:
             self.__animator.reset_animation()
-            self.__action = action
+            self.__animation = animation
 
-    def get_action(self) -> str:
-        return self.__action
+    def get_animation(self) -> str:
+        return self.__animation
 
     def is_animation_cycle_done(self) -> bool:
         return self.__animator.is_animation_cycle_done()

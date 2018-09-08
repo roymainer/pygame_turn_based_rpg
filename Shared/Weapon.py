@@ -1,15 +1,16 @@
 import random
 
 from Shared.Action import Attack, RangeAttack
-from Shared.GameConstants import GameConstants
 from Shared.Attributes import Attributes
+from Shared.GameConstants import TARGET_PLAYER_SINGLE_ANY, TARGET_PLAYER_SINGLE_FRONT, PLAYER_OBJECT, \
+    TARGET_COMPUTER_SINGLE_ANY
 from Shared.SpecialRule import AlwaysStrikesLast
 
 
 class Weapon(Attributes):
 
     def __init__(self, name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0,
-                 to_hit_re_roll=0, wounds_bonus=0, armor_piercing=False, great_weapon=False, ranged_weapon=False):
+                 to_hit_re_roll=False, wounds_bonus=0, armor_piercing=False, great_weapon=False, ranged_weapon=False):
         super(Weapon, self).__init__(name, m, ws, bs, s, t, w, i, a, ld)
 
         self.__to_hit_re_roll = to_hit_re_roll
@@ -45,20 +46,20 @@ class Weapon(Attributes):
         if model.is_front_row():
             if self.__great_weapon:
                 # front row models with great weapons can hit any single enemy model
-                targets = GameConstants.TARGET_PLAYER_SINGLE_ANY
+                targets = TARGET_PLAYER_SINGLE_ANY
             else:
                 # front row models with smaller weapons can only hit the front row
-                targets = GameConstants.TARGET_PLAYER_SINGLE_FRONT
+                targets = TARGET_PLAYER_SINGLE_FRONT
         else:
             if self.__great_weapon:
                 # back row models with great weapons can hit enemy models at the front row
-                targets = GameConstants.TARGET_PLAYER_SINGLE_FRONT
+                targets = TARGET_PLAYER_SINGLE_FRONT
             else:
                 targets = None
 
-        if targets is not None and model.get_type() == GameConstants.PLAYER_GAME_OBJECTS:
+        if targets is not None and model.get_type() == PLAYER_OBJECT:
             # add offset to return computer models as targets
-            targets += (GameConstants.TARGET_COMPUTER_SINGLE_ANY - GameConstants.TARGET_PLAYER_SINGLE_ANY)
+            targets += (TARGET_COMPUTER_SINGLE_ANY - TARGET_PLAYER_SINGLE_ANY)
 
         return targets
 
@@ -70,10 +71,10 @@ class RangeWeapon(Weapon):
                                           armor_piercing, great_weapon=False, ranged_weapon=True)
 
     def get_valid_targets(self, model):
-        targets = GameConstants.TARGET_PLAYER_SINGLE_ANY
-        if targets is not None and model.get_type() == GameConstants.PLAYER_GAME_OBJECTS:
+        targets = TARGET_PLAYER_SINGLE_ANY
+        if targets is not None and model.get_type() == PLAYER_OBJECT:
             # add offset to return computer models as targets
-            targets += (GameConstants.TARGET_COMPUTER_SINGLE_ANY - GameConstants.TARGET_PLAYER_SINGLE_ANY)
+            targets += (TARGET_COMPUTER_SINGLE_ANY - TARGET_PLAYER_SINGLE_ANY)
         return targets
 
 
@@ -121,4 +122,3 @@ class Bow(RangeWeapon):
 class Pistol(RangeWeapon):
     def __init__(self):
         super(Pistol, self).__init__(name="Pistol", s=4, armor_piercing=True)
-

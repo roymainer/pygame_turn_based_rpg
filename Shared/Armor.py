@@ -3,7 +3,7 @@ from Shared.Attributes import Attributes
 
 class Armor(Attributes):
 
-    def __init__(self, name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0, req_roll=7, to_hit_re_roll=0):
+    def __init__(self, name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0, req_roll=7, to_hit_re_roll=False):
         super(Armor, self).__init__(name, m, ws, bs, s, t, w, i, a, ld)
 
         self.__armor_save_req_roll = req_roll

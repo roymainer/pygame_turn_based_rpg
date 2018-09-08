@@ -44,8 +44,7 @@ class ModelsMenu(Menu):
 
         # populate menu with new strings
         for model in self.__models_list:
-            string = model.get_menu_item_string()
-            self.add_text_to_menu(string)
+            self.add_text_to_menu(model)
 
         for i in range(self.get_menu_items_count()):
             game.add_sprite_to_group(self.get_item_from_menu(i))
