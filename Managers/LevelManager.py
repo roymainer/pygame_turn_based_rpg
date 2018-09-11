@@ -1,11 +1,12 @@
+from Managers.Manager import Manager, LEVEL_MANAGER
 from Shared.Bestiary import *
 from Shared.GameConstants import *
 
 
-class LevelManager:
+class LevelManager(Manager):
     
     def __init__(self, scene):
-        self.__scene = scene
+        super(LevelManager, self).__init__(scene, LEVEL_MANAGER)
     
     def load_level(self):
 
@@ -21,7 +22,7 @@ class LevelManager:
         self.set_model(get_dwarf_hero(), COMPUTER_MIDDLE_FRONT, object_type, flip_x=True)
         self.set_model(get_dwarf_hero(), COMPUTER_BOTTOM_FRONT, object_type, flip_x=True)
 
-        mm = self.__scene.get_models_manager()
+        mm = self.get_models_manager()
         mm.apply_special_rules_on_models()
 
         return
@@ -46,9 +47,9 @@ class LevelManager:
         if flip_x:
             model.flip_x()
 
-        models_manager = self.__scene.get_models_manager()
+        models_manager = self.get_models_manager()
         models_manager.add_model(model)
 
-        game_engine = self.__scene.get_game_engine()
+        game_engine = self.get_game_engine()
         game_engine.add_sprite_to_group(model)  # add to game engine sprites group
         return

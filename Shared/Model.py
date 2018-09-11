@@ -280,8 +280,8 @@ class Model(AnimAttrObject):
     def destroy(self, model_unit, opponent_unit):
         self.clear_action_results_texts()
 
-        self.clear_action_results_texts()
         for sr in self.get_special_rules_list():
             sr.on_kill(self, model_unit, opponent_unit)
+        self.clear_special_rules_texts()
 
         super(Model, self).kill()

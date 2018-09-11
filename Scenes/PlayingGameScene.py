@@ -15,8 +15,8 @@ class PlayingGameScene(Scene):
         super(PlayingGameScene, self).__init__(game_engine)
 
         self.__level_manager = LevelManager(self)  # level manager loads the level and models
-        self.__phase_manager = PhaseManager(self)
-        self.__models_manager = ModelsManager()  # models manager handles the scenes models
+        self.__phase_manager = PhaseManager(self)  # Phase manager handles turn phases (Magic/Shooting/Close Combat)
+        self.__models_manager = ModelsManager(self)  # models manager handles the scenes models
         self.__turn_manager = TurnManager(self)  # handles the Turn (Phases and models turns)
         self.__action_manager = ActionManager(self)  # action manager handles each models action
         self.__ui_manager = UIManager(self)  # UI manager handles the battle menus
@@ -54,11 +54,11 @@ class PlayingGameScene(Scene):
         self.__turn_manager.update()
         self.__phase_manager.update()
 
-    def get_action_manager(self):
+    def get_action_manager(self) -> ActionManager:
         return self.__action_manager
 
-    # def get_current_model(self):
-    #     return self.__turn_manager.get_current_model()
+    def get_level_manager(self) -> LevelManager:
+        return self.__level_manager
 
     def get_models_manager(self) -> ModelsManager:
         return self.__models_manager

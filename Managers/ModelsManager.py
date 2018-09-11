@@ -1,3 +1,4 @@
+from Managers.Manager import Manager, MODELS_MANAGER
 from Shared.GameConstants import TARGET_COMPUTER_ALL, TARGET_COMPUTER_ALL_FRONT, TARGET_COMPUTER_ALL_BACK, \
     TARGET_PLAYER_ALL, TARGET_PLAYER_ALL_FRONT, TARGET_PLAYER_ALL_BACK
 
@@ -21,9 +22,9 @@ def get_sorted_models_list(_list, sort_parameter: str = 'get_initiative') -> lis
     return _list
 
 
-class ModelsManager:
+class ModelsManager(Manager):
 
-    def __init__(self):
+    def __init__(self, scene):
         # TODO: could replace lists with pygame.sprite.OrderedUpdates(), sprite.kill() will remove from all lists!
         self.__player_wizards_list = []  # player wizards
         self.__player_shooter_list = []  # player shooters
@@ -34,6 +35,8 @@ class ModelsManager:
         self.__computer_all_models_list = []  # used to keep computer models in formation
 
         self.__current_model_index = 0  # index to current turn's model
+        
+        super(ModelsManager, self).__init__(scene, MODELS_MANAGER)
 
     def add_model(self, model) -> None:
         if model.is_player_model():

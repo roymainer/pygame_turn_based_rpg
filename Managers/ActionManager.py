@@ -1,3 +1,4 @@
+from Managers.Manager import Manager, ACTION_MANAGER
 from Shared import Rolls
 from Shared.Action import Attack, RangeAttack, Skip
 from Shared.GameConstants import *
@@ -60,13 +61,13 @@ def is_double_damage(model, weapon, target):
         return True
 
 
-class ActionManager:
+class ActionManager(Manager):
 
     def __init__(self, scene):
-        self.__scene = scene
+        super(ActionManager, self).__init__(scene, ACTION_MANAGER)
 
     def get_current_model(self):
-        return self.__scene.get_turn_manager().get_current_model()
+        return self.get_turn_manager().get_current_model()
 
     def perform_action(self, model):
 
@@ -155,8 +156,8 @@ class ActionManager:
         target.set_wounds(target_wounds - wounds)
         return
 
-    def get_turn_manager(self):
-        return self.__scene.get_turn_manager()
+    # def get_turn_manager(self):
+    #     return self.__scene.get_turn_manager()
 
     def __close_combat_attacks(self, model):
         current_model = model
@@ -437,6 +438,7 @@ class ActionManager:
         # return False
 
     # -------- Texts -------- #
+    # noinspection PyMethodMayBeStatic
     def __add_text(self, string, text_color, target):
         target.add_action_results_text(string, text_color)
 

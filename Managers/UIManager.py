@@ -1,5 +1,4 @@
-import pygame
-
+from Managers.Manager import Manager, UI_MANAGER
 from Shared.Action import Skip
 from Shared.AnimatedObject import AnimatedObject
 from Shared.GameConstants import *
@@ -21,10 +20,9 @@ DOWN = 1
 
 
 # noinspection PyTypeChecker,PyUnboundLocalVariable
-class UIManager:
+class UIManager(Manager):
 
     def __init__(self, scene):
-        self.__scene = scene
         self.__menus = {PLAYER_MODELS_MENU: None,
                         COMPUTER_MODELS_MENU: None,
                         ACTIONS_MENU: None,
@@ -36,24 +34,19 @@ class UIManager:
         self.__computer_markers = []
         self.__pointer = MenuPointer()
 
+        super(UIManager, self).__init__(scene, UI_MANAGER)
+
     def on_init(self):
         self.__add_player_models_menu()
         self.__add_computers_models_menu()
         self.set_focus_on_player_menu()
 
-    # def update(self):
-    #     turn_manager = self.__scene.get_turn_manager()
-    #
-    #     current_model = turn_manager.get_current_model()
-    #     self.__add_marker(current_model)
-
     # -------- Menus -------- #
     def menu_item_pressed(self):
-        mm = self.__scene.get_models_manager()
+        mm = self.get_models_manager()
 
         focused_menu = self.__get_focused_menu()
-        focused_menu.get_selected_item().mark_string()  # mark the selected text
-        # current_model = self.__scene.get_turn_manager().get_current_model()
+        focused_menu.mark_selected_item()  # mark the selected text
         current_model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
 
         # ----------------- ACTIONS MENU ----------------- #
@@ -133,19 +126,21 @@ class UIManager:
         return
 
     def update_all_menus(self):
-        phase_manager = self.__scene.get_phase_manager()
+        phase_manager = self.get_phase_manager()
 
         if self.__menus[PLAYER_MODELS_MENU] is None:
             self.__add_player_models_menu()
         else:
             player_models = phase_manager.get_current_phase_player_models_list()
-            self.__menus[PLAYER_MODELS_MENU].update_menu(self.__scene.get_game_engine(), player_models)
+            self.__menus[PLAYER_MODELS_MENU].update_menu(self.get_game_engine(), player_models)
+            model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
+            self.add_player_marker(model)
 
         if self.__menus[COMPUTER_MODELS_MENU] is None:
             self.__add_computers_models_menu()
         else:
             computer_models = phase_manager.get_current_phase_computer_models_list()
-            self.__menus[COMPUTER_MODELS_MENU].update_menu(self.__scene.get_game_engine(), computer_models)
+            self.__menus[COMPUTER_MODELS_MENU].update_menu(self.get_game_engine(), computer_models)
 
         self.add_actions_menu()
         self.set_focus_on_player_menu()
@@ -163,12 +158,12 @@ class UIManager:
         menu_size = (SCREEN_SIZE[0] - player_menu_size[0] - computer_menu_size[0],
                      player_menu_size[1])
 
-        menu_actions_list = self.__scene.get_phase_manager().get_current_phase_actions_list()
+        menu_actions_list = self.get_phase_manager().get_current_phase_actions_list()
 
         menu_position = (self.__menus[PLAYER_MODELS_MENU].get_rect().right, BATTLE_AREA_BOTTOM)
         menu = Menu(UIConstants.SPRITE_BLUE_MENU, menu_size, menu_actions_list, menu_position)
 
-        game_engine = self.__scene.get_game_engine()
+        game_engine = self.get_game_engine()
         # add menu,  menu items and pointer to game engine sprites group
         game_engine.add_sprite_to_group(menu)
         for i in range(menu.get_menu_items_count()):
@@ -215,7 +210,7 @@ class UIManager:
 
         menu = Menu(UIConstants.SPRITE_BLUE_MENU, menu_size, menu_items_list, menu_position)
 
-        game_engine = self.__scene.get_game_engine()
+        game_engine = self.get_game_engine()
         game_engine.add_sprite_to_group(menu)
         for i in range(menu.get_menu_items_count()):
             game_engine.add_sprite_to_group(menu.get_item_from_menu(i))
@@ -234,13 +229,14 @@ class UIManager:
                 _menu.unset_focused()
 
         menu.set_focused()
-        selected_item = menu.get_selected_item()
-        if selected_item is None:
-            return
+        menu.unmark_selected_item()  # unmark selected option text
+        # selected_item = menu.get_selected_item()
+        # if selected_item is None:
+        #     return
+        # selected_item.unmark_string()
 
-        selected_item.unmark_string()  # unmark selected option text
         # verify that the pointer is on the front layer
-        game_engine = self.__scene.get_game_engine()
+        game_engine = self.get_game_engine()
         game_engine.remove_sprite_from_group(self.__pointer)  # remove from list
         game_engine.add_sprite_to_group(self.__pointer)  # return to list at higher layer
         self.__pointer.assign_pointer_to_menu(menu)
@@ -269,7 +265,7 @@ class UIManager:
                      SCREEN_SIZE[1] - BATTLE_AREA_BOTTOM)
 
         characters_list = []
-        phase_manager = self.__scene.get_phase_manager()
+        phase_manager = self.get_phase_manager()
         player_models = phase_manager.get_current_phase_player_models_list()
         for scene_object in player_models:
             if scene_object.get_type() == PLAYER_OBJECT:
@@ -278,14 +274,18 @@ class UIManager:
         menu = ModelsMenu(UIConstants.SPRITE_BLUE_MENU, menu_size, characters_list, menu_position)
 
         # add menu,  menu items and pointer to game engine sprites group
-        self.__scene.get_game_engine().add_sprite_to_group(menu)
+        self.get_game_engine().add_sprite_to_group(menu)
         for i in range(menu.get_menu_items_count()):
-            self.__scene.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
+            self.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
         # self.get_game().add_sprite_to_group(menu.get_pointer())
 
         menu.set_name("Player Models Menu")
 
         self.__menus[PLAYER_MODELS_MENU] = menu
+
+        # mark the first model of the menu
+        model = menu.get_object_from_menu(0)
+        self.add_player_marker(model)
 
     def __add_computers_models_menu(self, valid_targets=TARGET_COMPUTER_ALL):
         if self.__menus[COMPUTER_MODELS_MENU] is not None:
@@ -296,8 +296,8 @@ class UIManager:
                      SCREEN_SIZE[1] - BATTLE_AREA_BOTTOM)
 
         characters_list = []
-        # phase_manager = self.__scene.get_phase_manager()
-        models_manager = self.__scene.get_models_manager()
+        # phase_manager = self.get_phase_manager()
+        models_manager = self.get_models_manager()
         computer_models = models_manager.get_computer_sorted_models_list()
         for model in computer_models:
             if model.is_valid_target(valid_targets):
@@ -306,38 +306,36 @@ class UIManager:
         menu = ModelsMenu(UIConstants.SPRITE_BLUE_MENU, menu_size, characters_list, menu_position)
 
         # add menu,  menu items and pointer to game engine sprites group
-        self.__scene.get_game_engine().add_sprite_to_group(menu)
+        self.get_game_engine().add_sprite_to_group(menu)
         for i in range(menu.get_menu_items_count()):
-            self.__scene.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
+            self.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
         # self.get_game().add_sprite_to_group(menu.get_pointer())
 
         menu.set_name("Computer Models Menu")
 
         self.__menus[COMPUTER_MODELS_MENU] = menu
 
+        # mark the first model of the menu
+        model = menu.get_object_from_menu(0)
+        self.add_computer_markers(model)
+
     def move_pointer_up(self):
         self.__move_pointer(UP)
-        mm = self.__scene.get_models_manager()
         if self.__menus[COMPUTER_MODELS_MENU].is_focused():
-            index = self.__menus[COMPUTER_MODELS_MENU].get_index()
-            model = mm.get_computer_model_by_index(index)
+            model = self.__menus[COMPUTER_MODELS_MENU].get_selected_object()
             self.add_computer_markers(model)
         elif self.__menus[PLAYER_MODELS_MENU].is_focused():
-            index = self.__menus[PLAYER_MODELS_MENU].get_index()
-            model = mm.get_player_model_by_index(index)
-            self.add_computer_markers(model)
+            model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
+            self.add_player_marker(model)
 
     def move_pointer_down(self):
         self.__move_pointer(DOWN)
-        mm = self.__scene.get_models_manager()
         if self.__menus[COMPUTER_MODELS_MENU].is_focused():
-            index = self.__menus[COMPUTER_MODELS_MENU].get_index()
-            model = mm.get_computer_model_by_index(index)
+            model = self.__menus[COMPUTER_MODELS_MENU].get_selected_object()
             self.add_computer_markers(model)
         elif self.__menus[PLAYER_MODELS_MENU].is_focused():
-            index = self.__menus[PLAYER_MODELS_MENU].get_index()
-            model = mm.get_player_model_by_index(index)
-            self.add_computer_markers(model)
+            model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
+            self.add_player_marker(model)
 
     def __move_pointer(self, direction):
         focused_menu = self.__get_focused_menu()
@@ -351,29 +349,11 @@ class UIManager:
     def set_computers_menu(self, valid_targets):
         self.__add_computers_models_menu(valid_targets)
         self.__set_focused_menu(self.__menus[COMPUTER_MODELS_MENU])
-        mm = self.__scene.get_models_manager()
+        mm = self.get_models_manager()
         # TODO: need to mark valid targets
         # return the first computer unit and mark it
         index = self.__menus[COMPUTER_MODELS_MENU].get_index()
         self.add_computer_markers(mm.get_computer_model_by_index(index))
-
-    # -------- Markers -------- #
-    def mark_player_item(self, model):
-        for i in range(self.__menus[PLAYER_MODELS_MENU].get_menu_items_count()):
-            menu_model = self.__menus[PLAYER_MODELS_MENU].get_model_by_index(i)
-            if menu_model == model:
-                item = self.__menus[PLAYER_MODELS_MENU].get_item_from_menu(i)
-                item.mark_string()
-
-    def unmark_player_items(self):
-        for i in range(self.__menus[PLAYER_MODELS_MENU].get_menu_items_count()):
-            item = self.__menus[PLAYER_MODELS_MENU].get_item_from_menu(i)
-            item.unmark_string()
-
-    def unmark_computer_items(self):
-        for i in range(self.__menus[COMPUTER_MODELS_MENU].get_menu_items_count()):
-            item = self.__menus[COMPUTER_MODELS_MENU].get_item_from_menu(i)
-            item.unmark_string()
 
     def __remove_sub_menus(self):
         for key in [SKILLS_MENU, SPELLS_MENU, ITEMS_MENU]:
@@ -382,24 +362,44 @@ class UIManager:
                 self.__menus[key] = None
         return
 
+    # ----------------- Menu Items Markers ----------------- #
+    def unmark_player_items(self):
+        if self.__menus[PLAYER_MODELS_MENU] is not None:
+            for i in range(self.__menus[PLAYER_MODELS_MENU].get_menu_items_count()):
+                item = self.__menus[PLAYER_MODELS_MENU].get_item_from_menu(i)
+                item.unmark_string()
+
+    def unmark_computer_items(self):
+        if self.__menus[COMPUTER_MODELS_MENU] is not None:
+            for i in range(self.__menus[COMPUTER_MODELS_MENU].get_menu_items_count()):
+                item = self.__menus[COMPUTER_MODELS_MENU].get_item_from_menu(i)
+                item.unmark_string()
+
+    # ----------------- Battlefield Models Markers ----------------- #
     def __add_marker(self, model):
-
-        # if model.is_player_model():
-        marker_spritesheet = UIConstants.MARKER_GREEN_SPRITE_SHEET
-        # else:
-        #     marker_spritesheet = UIConstants.MARKER_RED_SPRITE_SHEET
-
+        marker_spritesheet = UIConstants.MARKERS_SPRITE_SHEET
         marker = AnimatedObject(marker_spritesheet, None,
                                 position=(0, 0),
                                 object_type=GAME_OBJECT)
 
-        rect = pygame.Rect((0, 0), marker.get_size())  # create a temp rect
-        rect.top = model.get_rect().top - int(rect.height)
-        rect.left = model.get_rect().centerx - int(rect.width / 2)
-        marker.set_position(rect.topleft)  # draw the marker right above the focused_sprite
+        model_position = model.get_position()
+        model_size = model.get_size()
+
+        if model.is_player_model():
+            marker.set_animation("green_marker_side")
+            x = model_position[0] - marker.get_size()[0]
+
+        else:
+            marker.set_animation("red_marker_side")
+            marker.flip_x()
+            x = model_position[0] + model_size[0]
+
+        y = model_position[1] + int(model_size[1] * 3 / 4) - (marker.get_size()[1] / 2)
+        new_position = (x, y)
+        marker.set_position(new_position)  # draw the marker right above the focused_sprite
 
         # add to game engine sprites group
-        game_engine = self.__scene.get_game_engine()
+        game_engine = self.get_game_engine()
         game_engine.add_sprite_to_group(marker)
         return marker
 
@@ -411,7 +411,7 @@ class UIManager:
 
         for model in player_models:
             self.__player_markers.append(self.__add_marker(model))
-            self.mark_player_item(model)
+            # self.mark_player_item(model)
 
     def add_computer_markers(self, computer_models):
         if type(computer_models) is not list:

@@ -117,7 +117,13 @@ class Menu(UIObject):
 
     def update(self) -> None:
         pass
-    
+
+    def mark_selected_item(self):
+        self.get_selected_item().mark_string()
+
+    def unmark_selected_item(self):
+        self.get_selected_item().unmark_string()
+
     def kill(self) -> None:
         for item in self.__menu_items_list:
             item.kill()

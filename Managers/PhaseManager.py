@@ -11,9 +11,10 @@ Each phase has it own active models and it's own actions
 
 Once all models finished their actions, the phase ends and the next phase starts
 """
-
+from Managers.Manager import Manager, PHASE_MANAGER
 from Shared.Action import Attack, RangeAttack, Spells, Skills, Items, Skip
 from Shared.GameConstants import WHITE, SCREEN_SIZE
+from Shared.Rolls import get_2d6_roll, get_d6_roll
 from UI.Text import Text
 
 MAGIC_PHASE = "Magic Phase"
@@ -23,26 +24,23 @@ CLOSE_COMBAT_PHASE = "Close Combat Phase"
 PHASES = [MAGIC_PHASE, SHOOTING_PHASE, CLOSE_COMBAT_PHASE]
 
 
-class PhaseManager:
+class PhaseManager(Manager):
 
     def __init__(self, scene):
 
-        self.__scene = scene
         self.__current_phase_index = -1
         self.__current_phase_models_list = []  # repopulate with appropriate models whenever a phase changes
         self.__texts = []
 
-    def update(self):
-        # game_engine = self.__scene.get_game_engine()
-        # ui_manager = self.__scene.get_ui_manager()
-        # # mm_manager = self.__scene.get_models_manager()
-        #
-        # if self.__get_current_phase() == MAGIC_PHASE:
-        #     ui_manager.set_focus_on_player_menu()
-        # else:
-        #     ui_manager.add_actions_menu()
+        # Magic
+        self.__player_power_pool = 0
+        self.__player_dispel_pool = 0
+        self.__computer_power_pool = 0
+        self.__computer_dispel_pool = 0
 
-        """ Update current Phase """
+        super(PhaseManager, self).__init__(scene, PHASE_MANAGER)
+
+    def update(self):
         if self.is_phase_complete():
             self.set_next_phase()
 
@@ -58,13 +56,15 @@ class PhaseManager:
         reset current model index and set model to None
         :return:
         """
-        tm = self.__scene.get_turn_manager()
-        mm = self.__scene.get_models_manager()
-        ui_manager = self.__scene.get_ui_manager()
+        tm = self.get_turn_manager()
+        mm = self.get_models_manager()
+        ui_manager = self.get_ui_manager()
 
         mm.reset_models_actions()  # reset all models actions at the start of the new phase
 
         self.get_current_phase_model_list(mm)
+        if self.__get_current_phase() == MAGIC_PHASE:
+            self.__roll_for_winds_of_magic()
 
         tm.set_current_model_index(0)
         tm.reset_current_model()
@@ -92,14 +92,14 @@ class PhaseManager:
         self.__add_phase_text()
 
     def is_phase_complete(self):
-        models_manager = self.__scene.get_models_manager()
+        models_manager = self.get_models_manager()
         self.get_current_phase_model_list(models_manager)  # need to update in case any unit died
         for model in self.__current_phase_models_list:
             if not model.is_action_done() or not model.is_animation_cycle_done():
                 # if any of the models, didn't finish it's action and animation, the phase isn't done
                 return False
 
-        models_manager = self.__scene.get_models_manager()
+        models_manager = self.get_models_manager()
         models_manager.remove_dead_models()
 
         return True
@@ -126,7 +126,7 @@ class PhaseManager:
         else:
             action = Attack()
 
-        tm = self.__scene.get_turn_manager()
+        tm = self.get_turn_manager()
         current_model = tm.get_current_model()
         if any(current_model.get_skills_list()):
             actions_list.insert(0, Skills())
@@ -140,7 +140,8 @@ class PhaseManager:
         position = (SCREEN_SIZE[0] / 2 - text_size[0]/2, 5)
         text.set_position(position)
         self.__texts.append(text)
-        game_engine = self.__scene.get_game_engine()
+        # game_engine = self.__scene.get_game_engine()
+        game_engine = self.get_game_engine()
         game_engine.add_sprite_to_group(text, 0)
 
     def __add_phase_text(self):
@@ -152,3 +153,50 @@ class PhaseManager:
         for text in self.__texts:
             text.kill()
         self.__texts = []
+
+    # ----- MAGIC PHASE (WHFB Rule Book 8th ed. p.30) ----- #
+    def __roll_for_winds_of_magic(self):
+        # player
+        roll1 = get_d6_roll()
+        roll2 = get_d6_roll()
+        self.__player_power_pool = roll1 + roll2
+        self.__player_dispel_pool = max(roll1, roll2)
+
+        # computer
+        roll1 = get_d6_roll()
+        roll2 = get_d6_roll()
+        self.__computer_power_pool = roll1 + roll2
+        self.__computer_dispel_pool = max(roll1, roll2)
+
+        self.__channeling_power_dice()
+        self.__channeling_dispel_dice()
+
+    def __channeling_power_dice(self):
+        mm = self.get_models_manager()
+        for wizard in mm.get_wizards_list():
+            if get_d6_roll() == 6:
+                if wizard.is_player_model():
+                    self.__player_power_pool += 1
+                else:
+                    self.__computer_power_pool += 1
+
+        # Power Limit WHFB p.30, number of dice can never exceed 12
+        if self.__player_power_pool >= 12:
+            self.__player_power_pool = 12
+        if self.__computer_power_pool >= 12:
+            self.__computer_power_pool = 12
+
+    def __channeling_dispel_dice(self):
+        mm = self.get_models_manager()
+        for wizard in mm.get_wizards_list():
+            if get_d6_roll() == 6:
+                if wizard.is_player_model():
+                    self.__player_dispel_pool += 1
+                else:
+                    self.__computer_dispel_pool += 1
+
+        # Power Limit WHFB p.30, number of dice can never exceed 12
+        if self.__player_dispel_pool >= 12:
+            self.__player_dispel_pool = 12
+        if self.__computer_dispel_pool >= 12:
+            self.__computer_dispel_pool = 12

@@ -6,7 +6,7 @@ Handles the models turns in each phase
 2.
 
 """
-
+from Managers.Manager import Manager, TURN_MANAGER
 from Shared.Action import Attack, RangeAttack  # , Spells, Skills, Items, Skip
 from Shared.Model import Model
 
@@ -21,25 +21,29 @@ def update_special_rules(game_engine, model_manager):
             game_engine.add_sprite_to_group(text, 0)
 
 
-class TurnManager:
+class TurnManager(Manager):
 
     def __init__(self, scene):
 
-        self.__scene = scene
         self.__player_turn = True  # TODO: maybe roll a dice to see who starts first?
 
         self.__current_model_index = 0
         self.__current_model = None
+
+        super(TurnManager, self).__init__(scene, TURN_MANAGER)
 
     def update(self):
 
         if self.__are_models_ready():
             # if all models are ready (with assigned actions and targets)
 
-            game_engine = self.__scene.get_game_engine()
-            action_manager = self.__scene.get_action_manager()
-            model_manager = self.__scene.get_models_manager()
-            # ui_manager = self.__scene.get_ui_manager()
+            game_engine = self.get_game_engine()
+            action_manager = self.get_action_manager()
+            model_manager = self.get_models_manager()
+            ui_manager = self.get_ui_manager()
+
+            ui_manager.remove_player_markers()  # hide player markers once action starts
+            ui_manager.remove_computer_markers()  # hide computer markers
 
             """ Update current unit"""
             current_model = self.get_current_model()
@@ -101,7 +105,7 @@ class TurnManager:
             self.__set_next_model_index()
 
     def __are_models_ready(self):
-        phase_manager = self.__scene.get_phase_manager()
+        phase_manager = self.get_phase_manager()
         # models_list = phase_manager.get_current_phase_models_list()
         models_list = phase_manager.get_current_phase_player_models_list()
         for model in models_list:
@@ -116,7 +120,7 @@ class TurnManager:
         self.__current_model = None
 
     def get_current_model(self) -> Model:
-        phase_manager = self.__scene.get_phase_manager()
+        phase_manager = self.get_phase_manager()
         current_phase_models_list = phase_manager.get_current_phase_models_list()
 
         # if self.__current_model_index not in range(len(current_phase_models_list)):
@@ -125,19 +129,19 @@ class TurnManager:
         return current_phase_models_list[self.__current_model_index]
 
     def get_model_unit(self, model=None):
-        mm = self.__scene.get_models_manager()
+        mm = self.get_models_manager()
         if model is None:
             model = self.get_current_model()
         return mm.get_model_unit(model)
 
     def get_opponent_unit(self, model=None):
-        mm = self.__scene.get_models_manager()
+        mm = self.get_models_manager()
         if model is None:
             model = self.get_current_model()
         return mm.get_opponent_unit(model)
 
     def __set_next_model_index(self) -> None:
-        phase_manager = self.__scene.get_phase_manager()
+        phase_manager = self.get_phase_manager()
         current_phase_models_list = phase_manager.get_current_phase_models_list()
         self.__current_model_index += 1
         if self.__current_model_index not in range(len(current_phase_models_list)):
@@ -146,7 +150,7 @@ class TurnManager:
     def play_computer_turn(self, model):
         # TODO: need to move to AI manager, send phase as parameter...
 
-        phase_manager = self.__scene.get_phase_manager()
+        phase_manager = self.get_phase_manager()
 
         action = Attack()  # default action
 
@@ -158,7 +162,7 @@ class TurnManager:
         model.set_action(action)
 
         # set action targets
-        mm = self.__scene.get_models_manager()
+        mm = self.get_models_manager()
         targets = mm.get_player_sorted_models_list()
         # TODO: improve the target selection process, lowest WS/ lowest wounds/...
         if not any(targets):
