@@ -1,26 +1,36 @@
 from Managers.Manager import Manager, LEVEL_MANAGER
 from Shared.Bestiary import *
-from Shared.GameConstants import *
+from Shared.GameConstants import GameConstants
+import logging
+logger = logging.getLogger().getChild(__name__)
 
 
 class LevelManager(Manager):
     
     def __init__(self, scene):
+        logger.info("Init")
         super(LevelManager, self).__init__(scene, LEVEL_MANAGER)
     
     def load_level(self):
+        logger.info("Load level")
 
         # ---- load player models ---- #
-        object_type = PLAYER_OBJECT
-        self.set_model(get_empire_witch_hunter(), PLAYER_TOP_FRONT, object_type)
-        self.set_model(get_warrior_priest(), PLAYER_MIDDLE_FRONT, object_type)
-        self.set_model(get_empire_witch_hunter(), PLAYER_BOTTOM_FRONT, object_type)
+        object_type = GameConstants.PLAYER_OBJECT
+        self.set_model(get_empire_witch_hunter(), GameConstants.PLAYER_TOP_FRONT, object_type)
+        self.set_model(get_warrior_priest(), GameConstants.PLAYER_MIDDLE_FRONT, object_type)
+        self.set_model(get_empire_witch_hunter(), GameConstants.PLAYER_BOTTOM_FRONT, object_type)
+        # self.set_model(get_empire_witch_hunter(), GameConstants.PLAYER_TOP_BACK, object_type)
+        # self.set_model(get_warrior_priest(), GameConstants.PLAYER_MIDDLE_BACK, object_type)
+        # self.set_model(get_empire_witch_hunter(), GameConstants.PLAYER_BOTTOM_BACK, object_type)
 
         # ---- load computer models ---- #
-        object_type = COMPUTER_OBJECT
-        self.set_model(get_dwarf_hero(), COMPUTER_TOP_FRONT, object_type, flip_x=True)
-        self.set_model(get_dwarf_hero(), COMPUTER_MIDDLE_FRONT, object_type, flip_x=True)
-        self.set_model(get_dwarf_hero(), COMPUTER_BOTTOM_FRONT, object_type, flip_x=True)
+        object_type = GameConstants.COMPUTER_OBJECT
+        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_TOP_FRONT, object_type, flip_x=True)
+        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, flip_x=True)
+        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, flip_x=True)
+        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_TOP_BACK, object_type, flip_x=True)
+        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_MIDDLE_BACK, object_type, flip_x=True)
+        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_BOTTOM_BACK, object_type, flip_x=True)
 
         mm = self.get_models_manager()
         mm.apply_special_rules_on_models()
@@ -38,6 +48,8 @@ class LevelManager(Manager):
         :param flip_x:
         :return:
         """
+        logger.info("Set Model: {}".format(model.get_name()))
+
         size = model.get_size()
 
         new_position = (position[0] - size[0] / 2, position[1] - size[1] / 2)  # position is center, need compensate

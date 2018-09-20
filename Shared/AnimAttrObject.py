@@ -17,7 +17,7 @@ TT_WM = "War Machine"
 class AnimAttrObject(AnimatedObject):
     
     def __init__(self, sprite_sheet_file=None, size=None, position=None, object_type=None,
-                 name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0, tt=TT_IN):
+                 name="", m=0, ws=0, bs=0, s=0, t=0, w=0, i=0, a=0, ld=0, wizard_level=0, tt=TT_IN):
         super(AnimAttrObject, self).__init__(sprite_sheet_file, size, position, object_type)
 
         self.__name = name
@@ -30,6 +30,7 @@ class AnimAttrObject(AnimatedObject):
         self.__I = i
         self.__A = a
         self.__LD = ld
+        self.__wizard_level = wizard_level
         self.__TT = tt
 
         self.__special_rules_list = []  # both models and weapons/armor have special rules
@@ -68,6 +69,9 @@ class AnimAttrObject(AnimatedObject):
     def get_leadership(self) -> int:
         return self.__LD
 
+    def get_wizard_level(self) -> int:
+        return self.__wizard_level
+
     def get_troop_type(self) -> str:
         return self.__TT
 
@@ -75,6 +79,13 @@ class AnimAttrObject(AnimatedObject):
         return self.__special_rules_list
 
     def add_special_rule(self, special_rule) -> None:
+        if special_rule in self.__special_rules_list:
+            return
+
+        for sr in self.__special_rules_list:
+            if special_rule.get_name() == sr.get_name():
+                return
+
         self.__special_rules_list.append(special_rule)
 
     def clear_used_up_special_rules(self) -> None:

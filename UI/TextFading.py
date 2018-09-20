@@ -1,6 +1,6 @@
 import pygame
 
-from Shared.GameConstants import WHITE
+from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
 from UI.Text import Text
 
@@ -10,7 +10,7 @@ class TextFading(Text):
     counter = 0
 
     def __init__(self, string, position,
-                 text_color=WHITE,
+                 text_color=GameConstants.WHITE,
                  background_color=None,
                  font_size=UIConstants.TEXT_SIZE_SMALL):
         super(TextFading, self).__init__(string, position, text_color, background_color, font_size)

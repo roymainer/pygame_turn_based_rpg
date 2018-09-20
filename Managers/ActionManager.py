@@ -1,9 +1,12 @@
 from Managers.Manager import Manager, ACTION_MANAGER
 from Shared import Rolls
 from Shared.Action import Attack, RangeAttack, Skip
-from Shared.GameConstants import *
+from Shared.GameConstants import GameConstants
 from Shared.Skill import Skill
 from Shared.Spell import Spell
+import logging
+logger = logging.getLogger().getChild(__name__)
+
 
 """ Key (model_ws) : value (dict : key (enemy_ws) : value (dice roll to hit)) """
 # rows: model's weapon skill, columns: target's weapon skill
@@ -65,6 +68,7 @@ class ActionManager(Manager):
 
     def __init__(self, scene):
         super(ActionManager, self).__init__(scene, ACTION_MANAGER)
+        logger.info("Init")
 
     def get_current_model(self):
         return self.get_turn_manager().get_current_model()
@@ -72,7 +76,7 @@ class ActionManager(Manager):
     def perform_action(self, model):
 
         action = model.get_action()
-        print("{} Perform Action: []".format(model.get_name(), action.get_name()))
+        logger.info("{} performing action:".format(model.get_name()))
 
         if isinstance(action, Attack):
             self.__close_combat_attacks(model)
@@ -83,37 +87,37 @@ class ActionManager(Manager):
         elif isinstance(action, Spell):
             self.__cast(model)
         elif isinstance(action, Skip):
-            pass
+            model.set_action_done()
 
         """ Model set action done"""
         model.set_action_done()  # mark models action as done
 
     def wound_target(self, target, strength=4, armor_saves_allowed=False, double_effect=False):
         target.set_animation("hurt")
-        print("Rolling to wound:")
+        logger.info("Rolling to wound:")
         roll = Rolls.get_d6_roll()
         if roll == 6:
-            print("Target wounded!")
+            logger.info("Target wounded!")
         elif roll == 1:
-            print("Failed to wound target!")
+            logger.info("Failed to wound target!")
             self.__add_text_blocked(target)
             return
         else:
             toughness = target.get_toughness()
             required_roll = TO_WOUND_CHART[strength][toughness]
-            print("Required roll to wound: " + str(required_roll))
+            logger.info("Required roll to wound: " + str(required_roll))
             if roll >= required_roll:
-                print("Target wounded!")
+                logger.info("Target wounded!")
             else:
-                print("Failed to wound target!")
+                logger.info("Failed to wound target!")
                 self.__add_text_blocked(target)
                 return
 
         if armor_saves_allowed:
-            print("Target rolling to armor save:")
+            logger.info("Target rolling to armor save:")
             roll = Rolls.get_d6_roll()
             if roll == 1:
-                print("Target armor save throw failed")
+                logger.info("Target armor save throw failed")
             else:
                 target_armor = target.get_armor()
                 target_shield = target.get_shield()
@@ -132,23 +136,23 @@ class ActionManager(Manager):
                 required_roll = armor_req_roll + shield_save_modifier
 
                 required_roll -= ARMOR_SAVE_MODIFIER[strength]  # Model/Weapon strength negates the armor save
-                print("Required roll for armor save: " + str(required_roll))
+                logger.info("Required roll for armor save: " + str(required_roll))
 
                 if roll >= required_roll:
-                    print("Target armor save throw failed")
+                    logger.info("Target armor save throw failed")
                     self.__add_text_blocked(target)
                     return
 
         # saved_by_ward = self.__get_ward_saving_throw(target)
         saved_by_ward = self.__get_ward_saving_throw()
         if saved_by_ward:
-            print("Target saved by ward!")
+            logger.info("Target saved by ward!")
             self.__add_text_saved_by_ward(target)
             return
 
         target_wounds = target.get_current_wounds()
         if double_effect:
-            print("Double damage!")
+            logger.info("Double damage!")
             wounds = 2
         else:
             wounds = 1
@@ -161,6 +165,7 @@ class ActionManager(Manager):
 
     def __close_combat_attacks(self, model):
         current_model = model
+        logger.info("{}: Close Combat".format(current_model.get_name()))
         targets = current_model.get_targets()
         if type(targets) is not list:
             targets = [targets]
@@ -170,23 +175,25 @@ class ActionManager(Manager):
             alive_targets = [x for x in targets if not x.is_killed()]
 
             if not any(alive_targets):
+                logger.info("No targets alive!")
                 return
-            print("---------- ATTACK#{}/{} ----------".format(str(a+1), str(number_of_attacks)))
+            logger.info("---------- ATTACK#{}/{} ----------".format(str(a+1), str(number_of_attacks)))
 
+            logger.info("{}: setting animation to attack".format(current_model.get_name()))
             current_model.set_animation("attack")
 
             target = alive_targets[0]  # get the first remaining alive target
+            logger.info("{}: setting target ({}) animation to hurt".format(current_model.get_name(), target.get_name()))
             target.set_animation("hurt")
 
             hit = self.__get_roll_to_hit_close_combat(target)
             if not hit:
                 # look for any re-roll to hit special rule the model has
-                print(current_model.get_special_rules_list())
                 for sr in current_model.get_special_rules_list():
                     if sr.re_roll_to_hit(target):
                         hit = self.__get_roll_to_hit_close_combat(target)
                         if hit:
-                            print("Successfully re-rolled to hit with: {}".format(sr.get_name()))
+                            logger.info("Successfully re-rolled to hit with: {}".format(sr.get_name()))
                             break
             if hit:
                 wound, killing_blow = self.__get_roll_to_wound(target)
@@ -196,7 +203,7 @@ class ActionManager(Manager):
                         if sr.re_roll_to_wound(target, Attack):
                             wound, killing_blow = self.__get_roll_to_wound(target)
                             if wound:
-                                print("Successfully re-rolled to wound with: {}".format(sr.get_name()))
+                                logger.info("Successfully re-rolled to wound with: {}".format(sr.get_name()))
                                 break
                 if wound and killing_blow:
                     # saved_by_ward = self.get_ward_saving_throw(target)
@@ -206,7 +213,7 @@ class ActionManager(Manager):
                         continue
                     else:
                         target.set_wounds(0)
-                        self.__add_text("Killing Blow!", BRIGHT_RED, target)
+                        self.__add_text("Killing Blow!", GameConstants.BRIGHT_RED, target)
                 elif wound:
                     saved_by_armor = self.__get_armor_saving_throw(target)
                     if not saved_by_armor:
@@ -235,6 +242,7 @@ class ActionManager(Manager):
 
     def __range_attack(self, model):
         current_model = model
+        logger.info("{}: Range Attack".format(current_model.get_name()))
         targets = current_model.get_targets()
         if type(targets) is not list:
             targets = [targets]
@@ -242,12 +250,15 @@ class ActionManager(Manager):
         alive_targets = [x for x in targets if not x.is_killed()]
 
         if not any(alive_targets):
-            # if all targets eliminated return
-            # self.__action_finished = True
+            logger.info("No targets alive!")
             return
 
+        logger.info("---------- RANGE ATTACK ----------")
+        logger.info("{}: setting animation to shoot".format(current_model.get_name()))
         current_model.set_animation("shoot")
+
         target = alive_targets[0]  # 1st target
+        logger.info("{}: setting target ({}) animation to hurt".format(current_model.get_name(), target.get_name()))
         target.set_animation("hurt")
 
         hit = self.__get_roll_to_hit_ranged(target)
@@ -261,7 +272,7 @@ class ActionManager(Manager):
                 else:
                     # killing blow ignores any armor save BUT NOT WARD SAVES
                     target.set_wounds(0)
-                    self.__add_text("Killing Blow!", BRIGHT_RED, target)
+                    self.__add_text("Killing Blow!", GameConstants.BRIGHT_RED, target)
             elif wound:
                 saved_by_armor = self.__get_armor_saving_throw(target)
                 if not saved_by_armor:
@@ -287,77 +298,83 @@ class ActionManager(Manager):
     def __skill(self, model):
 
         current_model = model
-        current_model.set_animation("cast")
         skill = current_model.get_action()
+        logger.info("{}: Use {}".format(current_model.get_name(), skill.get_name()))
+        logger.info("{}: setting animation to cast".format(current_model.get_name()))
+        current_model.set_animation("cast")
 
-        self.__add_text(string=skill.get_name(), text_color=CYAN, target=current_model)
+        self.__add_text(string=skill.get_name(), text_color=GameConstants.CYAN, target=current_model)
         skill.on_click(self)
-        # self.__action_finished = True
 
     def __cast(self, model):
         current_model = model
-        current_model.set_animation("cast")
         spell = current_model.get_action()
+        logger.info("{}: Use {}".format(current_model.get_name(), spell.get_name()))
+        logger.info("{}: setting animation to cast".format(current_model.get_name()))
+        current_model.set_animation("cast")
 
-        self.__add_text(string=spell.get_name(), text_color=CYAN, target=current_model)
-        spell.on_click(self)
+        self.__add_text(string=spell.get_name(), text_color=GameConstants.CYAN, target=current_model)
+        cast_successful = spell.on_click(self)
+        if not cast_successful:
+            self.__add_text_miscast(current_model)
+            current_model.set_miscast()
 
     def __get_roll_to_hit_close_combat(self, target) -> bool:
-        print("Rolling to hit:")
+        logger.info("Rolling to hit:")
         roll = Rolls.get_d6_roll()
         if roll == 6:
-            print("Target hit!")
+            logger.info("Target hit!")
             return True
         elif roll == 1:
-            print("Missed target!")
+            logger.info("Missed target!")
             return False
         else:
             current_model = self.get_current_model()
             ws = current_model.get_weapon_skill()
             target_ws = target.get_weapon_skill()
             required_roll = TO_HIT_CHART_CLOSE_COMBAT[ws][target_ws]
-            print("Required roll to hit: " + str(required_roll))
+            logger.info("Required roll to hit: " + str(required_roll))
             if roll >= required_roll:
-                print("Target hit!")
+                logger.info("Target hit!")
                 return True
-        print("Missed target!")
+        logger.info("Missed target!")
         return False
 
     # noinspection PyUnusedLocal
     def __get_roll_to_hit_ranged(self, target) -> bool:
         # TODO: target might be behind cover
-        print("Rolling to hit:")
+        logger.info("Rolling to hit:")
         roll = Rolls.get_d6_roll()
         if roll == 6:
-            print("Target hit!")
+            logger.info("Target hit!")
             return True
         elif roll == 1:
-            print("Missed target!")
+            logger.info("Missed target!")
             return False
         else:
             current_model = self.get_current_model()
             bs = current_model.get_ballistic_skill()
             required_roll = TO_HIT_CHART_RANGED[bs]
-            print("Required roll to hit: " + str(required_roll))
+            logger.info("Required roll to hit: " + str(required_roll))
             if roll >= required_roll:
-                print("Target hit!")
+                logger.info("Target hit!")
                 return True
-        print("Missed target!")
+        logger.info("Missed target!")
         return False
 
     def __get_roll_to_wound(self, target) -> (bool, bool):
-        print("Rolling to wound:")
+        logger.info("Rolling to wound:")
         current_model = self.get_current_model()
         roll = Rolls.get_d6_roll()
         if roll == 6:
-            print("Target wounded!")
+            logger.info("Target wounded!")
             for sr in current_model.get_special_rules_list():
                 if sr.is_killing_blow(target):
-                    print("Killing Blow!")
+                    logger.info("Killing Blow!")
                     return True, True
             return True, False
         elif roll == 1:
-            print("Failed to wound target!")
+            logger.info("Failed to wound target!")
             return False, False
         else:
             s = current_model.get_strength()
@@ -366,18 +383,18 @@ class ActionManager(Manager):
                 s += sr.get_strength_bonus()
             target_t = target.get_toughness()
             required_roll = TO_WOUND_CHART[s][target_t]
-            print("Required roll to wound: " + str(required_roll))
+            logger.info("Required roll to wound: " + str(required_roll))
             if roll >= required_roll:
-                print("Target wounded!")
+                logger.info("Target wounded!")
                 return True, False
-        print("Failed to wound target!")
+        logger.info("Failed to wound target!")
         return False, False
 
     def __get_armor_saving_throw(self, target) -> bool:
-        print("Target rolling to armor save:")
+        logger.info("Target rolling to armor save:")
         roll = Rolls.get_d6_roll()
         if roll == 1:
-            print("Target armor save throw failed")
+            logger.info("Target armor save throw failed")
             return False
         else:
             current_model = self.get_current_model()
@@ -399,25 +416,25 @@ class ActionManager(Manager):
             required_roll = armor_req_roll + shield_save_modifier
 
             required_roll -= ARMOR_SAVE_MODIFIER[s]  # Model/Weapon strength negates the armor save
-            print("Required roll for armor save: " + str(required_roll))
+            logger.info("Required roll for armor save: " + str(required_roll))
 
             if roll >= required_roll:
                 return True
-        print("Target armor save throw failed")
+        logger.info("Target armor save throw failed")
         return False
 
     # noinspection PyMethodMayBeStatic
     # def __get_ward_saving_throw(self, target) -> bool:
     def __get_ward_saving_throw(self) -> bool:
-        print("Target rolling to ward save:")
+        logger.info("Target rolling to ward save:")
 
         # TODO: finish ward saving throw
-        print("Incomplete code!")
+        logger.info("Incomplete code!")
         return False
 
         # roll = Rolls.get_d6_roll()
         # if roll == 1:
-        #     print("Target save throw failed")
+        #     logger.info("Target save throw failed")
         #     return False
         # else:
         #     target_wards = target.get_wards()  # always roll on the best ward, they don't accumulate
@@ -431,10 +448,10 @@ class ActionManager(Manager):
         #
         #             required_roll = WARD_SAVES[ward]
         #             if roll >= required_roll:
-        #                 print("Target saved by armor!")
+        #                 logger.info("Target saved by armor!")
         #                 return True
         #
-        # print("Target save throw failed")
+        # logger.info("Target save throw failed")
         # return False
 
     # -------- Texts -------- #
@@ -443,13 +460,16 @@ class ActionManager(Manager):
         target.add_action_results_text(string, text_color)
 
     def __add_text_miss(self, target):
-        self.__add_text("Miss", BRIGHT_YELLOW, target)
+        self.__add_text("Miss", GameConstants.BRIGHT_YELLOW, target)
 
     def __add_text_hit(self, target):
-        self.__add_text("Hit", BRIGHT_YELLOW, target)
+        self.__add_text("Hit", GameConstants.BRIGHT_YELLOW, target)
 
     def __add_text_blocked(self, target):
-        self.__add_text("Blocked", BRIGHT_YELLOW, target)
+        self.__add_text("Blocked", GameConstants.BRIGHT_YELLOW, target)
 
     def __add_text_saved_by_ward(self, target):
-        self.__add_text("Saved by ward", BRIGHT_YELLOW, target)
+        self.__add_text("Saved by ward", GameConstants.BRIGHT_YELLOW, target)
+
+    def __add_text_miscast(self, target):
+        self.__add_text("Miscast!", GameConstants.BRIGHT_YELLOW, target)

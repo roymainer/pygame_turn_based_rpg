@@ -46,4 +46,3 @@ class UIObject(Sprite):
     def set_size(self, size: Tuple) -> None:
         self.image = pygame.transform.scale(self.image, size)
         self.rect.size = size
-

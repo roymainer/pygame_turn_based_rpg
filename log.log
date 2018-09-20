@@ -1,0 +1,32 @@
+               GameEngine - Pygame init:
+  Scenes.PlayingGameScene - Initiate managers:
+    Managers.LevelManager - Init
+    Managers.PhaseManager - Init
+   Managers.ModelsManager - Init
+     Managers.TurnManager - Init
+   Managers.ActionManager - Init
+       Managers.UIManager - Init
+    Managers.MagicManager - Init
+    Managers.LevelManager - Load level
+    Managers.LevelManager - Set Model: Witch Hunter
+    Managers.LevelManager - Set Model: Warrior Priest
+    Managers.LevelManager - Set Model: Witch Hunter
+    Managers.LevelManager - Set Model: Dwarf Hero
+    Managers.LevelManager - Set Model: Dwarf Hero
+    Managers.LevelManager - Set Model: Dwarf Hero
+    Managers.LevelManager - Set Model: Dwarf Hero
+    Managers.LevelManager - Set Model: Dwarf Hero
+    Managers.LevelManager - Set Model: Dwarf Hero
+        Phases.MagicPhase - Init
+    Managers.MagicManager - Roll for winds of magic
+    Managers.MagicManager - Player Power Pool: 3
+    Managers.MagicManager - Player Dispel Pool: 2
+    Managers.MagicManager - Computer Power Pool: 6
+    Managers.MagicManager - Computer Dispel Pool: 4
+       Managers.UIManager - Updating all menus
+       Managers.UIManager - Adding Player Models Menu
+       Managers.UIManager - Adding Computer Models Menu
+       Managers.UIManager - Adding Actions Menu
+       Managers.UIManager - Setting Focus on Player Models Menu
+     Scenes.MainMenuScene - Init
+     Scenes.MainMenuScene - Creating main menu

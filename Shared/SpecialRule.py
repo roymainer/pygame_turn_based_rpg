@@ -159,6 +159,15 @@ class ImmuneToPsychology(SpecialRule):
         return True
 
 
+class TerrorToFear(SpecialRule):
+    def __init__(self):
+        super(TerrorToFear, self).__init__(name="Terror To Fear")
+
+    def get_terror_ld_test_result(self, ld):
+        # TODO: need to actually pass the fear test to the function in oreder to return a valid result
+        return self.get_fear_ld_test_result()
+
+
 # ------------------- Empire Special Rules ------------------- #
 class AccusationSR(SpecialRule):
 
@@ -182,17 +191,24 @@ class GrimResolveSR(SpecialRule):
     def __init__(self):
         super(GrimResolveSR, self).__init__(name="Grim Resolve")
 
+    def on_init(self, model, unit, enemy_unit):
+        for model in unit:
+            model.add_special_rule(TerrorToFear())
+            self.add_target(model)
+
     def get_fear_ld_test_result(self) -> bool:
         return True
 
     # noinspection PyMethodMayBeStatic
     def get_terror_ld_test_result(self, ld) -> bool:
         roll = get_2d6_roll()
-
         if roll == 2 or roll <= ld:
             return True
-
         return False
+
+    def on_kill(self, model, unit, enemy_unit):
+        for target in self.get_targets():
+            target.remove_special_rule("Terror To Fear")
 
 
 class ToolsOfJudgmentSR(SpecialRule):
@@ -208,7 +224,7 @@ class ToolsOfJudgmentSR(SpecialRule):
         if type(attack_type) == RangeAttack:
             return False
         for sr in target.get_special_rules_list():
-            if isinstance(sr, Undead) or isinstance(sr, Daemonic):
+            if isinstance(sr, Undead) or isinstance(sr, Daemonic) or target.is_wizard():
                 return True
         return False
 
@@ -305,7 +321,7 @@ class Resolute(SpecialRule):
         super(Resolute, self).__init__(name="Resolute")
 
     def get_strength_bonus(self) -> int:
-        print("Got +1 Strength using Resolute Special Rule")
+        # print("Got +1 Strength using Resolute Special Rule")
         self.set_used_up()
         return 1
 

@@ -1,6 +1,6 @@
 import pygame
 
-from Shared.GameConstants import WHITE, BRIGHT_GREEN
+from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
 from UI.UIObject import UIObject
 
@@ -8,7 +8,7 @@ from UI.UIObject import UIObject
 class Text(UIObject):
 
     def __init__(self, string, position,
-                 text_color=WHITE,
+                 text_color=GameConstants.WHITE,
                  background_color=None,
                  font_size=UIConstants.TEXT_SIZE_SMALL):
 
@@ -45,7 +45,7 @@ class Text(UIObject):
     def mark_string(self) -> None:
         font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
 
-        self.image = font_obj.render(self.__string, False, BRIGHT_GREEN, self.__background_color)
+        self.image = font_obj.render(self.__string, False, GameConstants.BRIGHT_GREEN, self.__background_color)
 
         topleft = self.rect.topleft  # save previous position
         self.rect = self.image.get_rect()  # create a new rect

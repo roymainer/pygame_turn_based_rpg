@@ -7,8 +7,6 @@ class Scene:
 
     def __init__(self, game_engine):
         self.__game_engine = game_engine  # save the game class/engine
-        # self.__texts = []  # each scene has a list of text to display
-        # self.__buttons = []  # a list of buttons
         self.__scene_objects = []
 
     def get_game_engine(self):

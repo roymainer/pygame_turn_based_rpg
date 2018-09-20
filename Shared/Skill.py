@@ -1,5 +1,5 @@
 from Shared.Action import Skills
-from Shared.GameConstants import TARGET_COMPUTER_SINGLE_ANY
+from Shared.GameConstants import GameConstants
 from Shared.SpecialRule import AccusationSR
 
 
@@ -33,7 +33,7 @@ class Skill:
 
 class SniperSkill(Skill):
     def __init__(self):
-        super(SniperSkill, self).__init__("Snipe", valid_targets=TARGET_COMPUTER_SINGLE_ANY)
+        super(SniperSkill, self).__init__("Snipe", valid_targets=GameConstants.TARGET_COMPUTER_SINGLE_ANY)
 
     # def on_click(self, model, targets):
     def on_click(self, action_manager):
@@ -49,7 +49,7 @@ class AccusationSkill(Skill):
     """
 
     def __init__(self):
-        super(AccusationSkill, self).__init__("Accusation", valid_targets=TARGET_COMPUTER_SINGLE_ANY)
+        super(AccusationSkill, self).__init__("Accusation", valid_targets=GameConstants.TARGET_COMPUTER_SINGLE_ANY)
         self.__model = None
 
     # def on_click(self, model, targets) -> None:

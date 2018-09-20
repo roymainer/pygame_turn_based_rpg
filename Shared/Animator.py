@@ -6,7 +6,7 @@ Created: Jul 30, 2018
 @author: Roy Mainer
 """
 import pygame
-from Shared.GameConstants import SIZE_RATIO
+from Shared.GameConstants import GameConstants
 
 
 def prepare_animations(sprite_sheet_file, atlas_file, sprite_size=None) -> dict:
@@ -44,7 +44,7 @@ def prepare_animations(sprite_sheet_file, atlas_file, sprite_size=None) -> dict:
             sprite = pygame.transform.scale(sprite, sprite_size)
 
         size = sprite.get_size()
-        new_size = (int(size[0] * SIZE_RATIO), int(size[1] * SIZE_RATIO))
+        new_size = (int(size[0] * GameConstants.SIZE_RATIO), int(size[1] * GameConstants.SIZE_RATIO))
         sprite = pygame.transform.scale(sprite, new_size)
 
         animation_dictionary[action].append(sprite)  # add to list
@@ -82,9 +82,9 @@ class Animator(object):
         else:
             return index + 1
 
-    def get_next_sprite(self, animation_key) -> pygame.Surface:
+    def get_sprite_by_key(self, animation_key) -> pygame.Surface:
         """
-        Returns the next sprite in the animation
+        Returns sprite by key
         :param animation_key:
         :return: surface
         """

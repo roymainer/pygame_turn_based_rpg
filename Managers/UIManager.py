@@ -1,12 +1,13 @@
 from Managers.Manager import Manager, UI_MANAGER
-from Shared.Action import Skip
 from Shared.AnimatedObject import AnimatedObject
-from Shared.GameConstants import *
-from Shared.Model import ACTION_ATTACK, ACTION_SPELLS, ACTION_SKILLS, ACTION_SHOOT, ACTION_SKIP  # ACTION_ITEMS
+from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
+from UI.DiceController import DiceController
 from UI.Menu import Menu
 from UI.MenuPointer import MenuPointer
 from UI.ModelsMenu import ModelsMenu
+import logging
+logger = logging.getLogger().getChild(__name__)
 
 PLAYER_MODELS_MENU = 0
 COMPUTER_MODELS_MENU = 1
@@ -14,21 +15,24 @@ ACTIONS_MENU = 2
 SPELLS_MENU = 3
 ITEMS_MENU = 4
 SKILLS_MENU = 5
+DICE_CONTROLLER = 6
 
-UP = 0
-DOWN = 1
+UP = "Up"
+DOWN = "Down"
 
 
 # noinspection PyTypeChecker,PyUnboundLocalVariable
 class UIManager(Manager):
 
     def __init__(self, scene):
+        logger.info("Init")
         self.__menus = {PLAYER_MODELS_MENU: None,
                         COMPUTER_MODELS_MENU: None,
                         ACTIONS_MENU: None,
                         SKILLS_MENU: None,
                         SPELLS_MENU: None,
-                        ITEMS_MENU: None}
+                        ITEMS_MENU: None,
+                        DICE_CONTROLLER: None}
 
         self.__player_markers = []
         self.__computer_markers = []
@@ -37,109 +41,37 @@ class UIManager(Manager):
         super(UIManager, self).__init__(scene, UI_MANAGER)
 
     def on_init(self):
+        logger.info("On init:")
         self.__add_player_models_menu()
         self.__add_computers_models_menu()
         self.set_focus_on_player_menu()
 
-    # -------- Menus -------- #
-    def menu_item_pressed(self):
-        mm = self.get_models_manager()
-
-        focused_menu = self.__get_focused_menu()
-        focused_menu.mark_selected_item()  # mark the selected text
-        current_model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
-
-        # ----------------- ACTIONS MENU ----------------- #
-        if focused_menu == self.__menus[ACTIONS_MENU]:
-            action_string = focused_menu.get_selected_item().get_string()  # get selected action string
-
-            if action_string == ACTION_ATTACK or action_string == ACTION_SHOOT:
-                if action_string == ACTION_SHOOT:
-                    weapon = current_model.get_ranged_weapon()
-                else:
-                    weapon = current_model.get_melee_weapon()
-
-                action = weapon.get_action()
-                valid_targets = weapon.get_valid_targets(current_model)
-                current_model.set_action(action)
-                self.set_computers_menu(valid_targets)
-
-            elif action_string == ACTION_SKILLS:
-                self.add_skills_menu(current_model)
-                self.__set_focused_menu(self.__menus[SKILLS_MENU])
-
-            elif action_string == ACTION_SPELLS:
-                self.add_spells_menu(current_model)
-                self.__set_focused_menu(self.__menus[SPELLS_MENU])
-
-            elif action_string == ACTION_SKIP:
-                current_model.set_action(Skip())
-                current_model.set_targets(current_model)
-                self.set_focus_on_player_menu()
-                self.move_pointer_down()
-
-        # ----------------- SKILLS/SPELLS MENU ----------------- #
-        if focused_menu == self.__menus[SKILLS_MENU] or focused_menu == self.__menus[SPELLS_MENU]:
-            actions_list = []
-            if focused_menu == self.__menus[SKILLS_MENU]:
-                actions_list = current_model.get_skills_list()
-            elif focused_menu == self.__menus[SPELLS_MENU]:
-                actions_list = current_model.get_spells_list()
-
-            string = focused_menu.get_selected_item().get_string()  # get the selected skill string
-
-            # get the models selected skill
-            for action in actions_list:
-                if action.get_name() == string:
-                    break
-
-            current_model.set_action(action)
-
-            valid_targets = action.get_valid_targets()  # get valid targets from skill
-
-            if valid_targets in [TARGET_COMPUTER_ALL, TARGET_COMPUTER_ALL_FRONT, TARGET_COMPUTER_ALL_BACK]:
-                targets = mm.get_valid_targets_models(valid_targets)
-                current_model.set_targets(targets)
-            else:
-                self.set_computers_menu(valid_targets)
-
-        # ----------------- COMPUTER MODELS MENU ----------------- #
-        if focused_menu == self.__menus[COMPUTER_MODELS_MENU]:
-            targets = self.__menus[COMPUTER_MODELS_MENU].get_selectd_model()
-            current_model.set_targets(targets)
-            self.remove_computer_markers()
-            self.__remove_sub_menus()
-            # self.__set_focused_menu(self.__menus[ACTIONS_MENU])
-            self.set_focus_on_player_menu()
-            self.move_pointer_down()
-
-        # ----------------- Player MODELS MENU ----------------- #
-        if focused_menu == self.__menus[PLAYER_MODELS_MENU]:
-            self.add_actions_menu()
-            # noinspection PyTypeChecker
-            self.__set_focused_menu(self.__menus[ACTIONS_MENU])
-
     def return_to_previous_menu(self):
         # self.__set_focused_menu(menu=self.__menus[ACTIONS_MENU])
+        self.get_focused_menu().unmark_selected_item()
         self.set_focus_on_player_menu()
-        self.__remove_sub_menus()
+        self.remove_sub_menus()
         return
 
     def update_all_menus(self):
+        logger.info("Updating all menus")
         phase_manager = self.get_phase_manager()
+        models_manager = self.get_models_manager()
 
         if self.__menus[PLAYER_MODELS_MENU] is None:
             self.__add_player_models_menu()
         else:
             player_models = phase_manager.get_current_phase_player_models_list()
             self.__menus[PLAYER_MODELS_MENU].update_menu(self.get_game_engine(), player_models)
-            model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
-            self.add_player_marker(model)
+            if any(player_models):
+                model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
+                self.__add_player_marker(model)
 
         if self.__menus[COMPUTER_MODELS_MENU] is None:
             self.__add_computers_models_menu()
         else:
-            computer_models = phase_manager.get_current_phase_computer_models_list()
+            # computer_models = phase_manager.get_current_phase_computer_models_list()
+            computer_models = models_manager.get_computer_sorted_models_list()
             self.__menus[COMPUTER_MODELS_MENU].update_menu(self.get_game_engine(), computer_models)
 
         self.add_actions_menu()
@@ -147,7 +79,70 @@ class UIManager(Manager):
 
         return
 
+    def get_selected_player_model(self):
+        return self.__menus[PLAYER_MODELS_MENU].get_selected_object()
+
+    def __add_player_models_menu(self):
+        logger.info("Adding Player Models Menu")
+        # kill previous player menu
+        if self.__menus[PLAYER_MODELS_MENU] is not None:
+            self.__menus[PLAYER_MODELS_MENU].kill()
+            self.__menus[PLAYER_MODELS_MENU] = None
+
+        menu_size = (GameConstants.PLAYER_UNITS_MENU_WIDTH,
+                     GameConstants.SCREEN_SIZE[1] - GameConstants.BATTLE_AREA_BOTTOM)
+        menu_position = (0, GameConstants.BATTLE_AREA_BOTTOM)
+
+        player_models = self.get_phase_manager().get_current_phase_player_models_list()
+
+        menu = ModelsMenu(UIConstants.SPRITE_BLUE_MENU, menu_size, player_models, menu_position)
+
+        # add menu,  menu items and pointer to game engine sprites group
+        self.get_game_engine().add_sprite_to_group(menu)
+        for i in range(menu.get_menu_items_count()):
+            self.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
+
+        menu.set_name("Player Models Menu")
+
+        self.__menus[PLAYER_MODELS_MENU] = menu
+
+        if not any(player_models):
+            # if phase no active player units, return
+            return
+
+        # mark the first model of the menu
+        model = menu.get_object_from_menu(0)
+        self.__add_player_marker(model)
+
+    def __add_computers_models_menu(self):
+        logger.info("Adding Computer Models Menu")
+        if self.__menus[COMPUTER_MODELS_MENU] is not None:
+            self.__menus[COMPUTER_MODELS_MENU].kill()
+            self.__menus[COMPUTER_MODELS_MENU] = None
+
+        menu_size = (GameConstants.COMPUTER_MODELS_MENU_WIDTH,
+                     GameConstants.SCREEN_SIZE[1] - GameConstants.BATTLE_AREA_BOTTOM)
+        menu_position = (GameConstants.COMPUTER_FRONT_COLUMN - GameConstants.PADX, GameConstants.BATTLE_AREA_BOTTOM)
+
+        computer_models = self.get_models_manager().get_computer_sorted_models_list()
+
+        menu = ModelsMenu(UIConstants.SPRITE_BLUE_MENU, menu_size, computer_models, menu_position)
+
+        # add menu,  menu items and pointer to game engine sprites group
+        self.get_game_engine().add_sprite_to_group(menu)
+        for i in range(menu.get_menu_items_count()):
+            self.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
+
+        menu.set_name("Computer Models Menu")
+
+        self.__menus[COMPUTER_MODELS_MENU] = menu
+
+        # mark the first model of the menu
+        model = menu.get_object_from_menu(0)
+        self.__add_computer_markers(model)
+
     def add_actions_menu(self):
+        logger.info("Adding Actions Menu")
         if self.__menus[ACTIONS_MENU] is not None:
             self.__menus[ACTIONS_MENU].kill()  # delete the menu from any of it's groups
             self.__menus[ACTIONS_MENU] = None
@@ -155,12 +150,13 @@ class UIManager(Manager):
         player_menu_size = self.__menus[PLAYER_MODELS_MENU].get_size()
         computer_menu_size = self.__menus[COMPUTER_MODELS_MENU].get_size()
 
-        menu_size = (SCREEN_SIZE[0] - player_menu_size[0] - computer_menu_size[0],
+        menu_size = (GameConstants.SCREEN_SIZE[0] - player_menu_size[0] - computer_menu_size[0],
                      player_menu_size[1])
 
         menu_actions_list = self.get_phase_manager().get_current_phase_actions_list()
 
-        menu_position = (self.__menus[PLAYER_MODELS_MENU].get_rect().right, BATTLE_AREA_BOTTOM)
+        menu_position = (self.__menus[PLAYER_MODELS_MENU].get_rect().right,
+                         GameConstants.BATTLE_AREA_BOTTOM)
         menu = Menu(UIConstants.SPRITE_BLUE_MENU, menu_size, menu_actions_list, menu_position)
 
         game_engine = self.get_game_engine()
@@ -173,26 +169,23 @@ class UIManager(Manager):
 
         # noinspection PyTypeChecker
         self.__menus[ACTIONS_MENU] = menu
-        self.__set_focused_menu(menu)
-        # self.__pointer.assign_pointer_to_menu(menu)
-
-    def remove_actions_menu(self):
-        self.__menus[ACTIONS_MENU].kill()  # remove the actions menu
 
     def add_skills_menu(self, model):
+        logger.info("Adding Skills Menu")
         skills_list = model.get_skills_list()
-        self.__add_menu(SKILLS_MENU, skills_list)
+        self.__add_sub_menu(SKILLS_MENU, skills_list)
 
     def add_spells_menu(self, model):
-        spells_list = model.get_spells_list()
-        self.__add_menu(SPELLS_MENU, spells_list)
+        logger.info("Adding Spells Menu")
+        uncast_spells_list = model.get_uncast_spells_list()
+        self.__add_sub_menu(SPELLS_MENU, uncast_spells_list)
 
     def add_items_menu(self, model):
+        logger.info("Adding Items Menu")
         items_list = model.get_items_list()
-        self.__add_menu(ITEMS_MENU, items_list)
+        self.__add_sub_menu(ITEMS_MENU, items_list)
 
-    def __add_menu(self, menu_key, menu_items_list):
-
+    def __add_sub_menu(self, menu_key, menu_items_list):
         menus_dict = {SKILLS_MENU: "Skills Menu", SPELLS_MENU: "Spells Menu", ITEMS_MENU: "Items Menu"}
 
         # delete either of these menus before adding a new one
@@ -206,9 +199,10 @@ class UIManager(Manager):
 
         menu_size = (int(actions_menu.get_size()[0]*3/4), actions_menu.get_size()[1])
 
-        menu_position = (computer_menu.get_rect().left - int(menu_size[0]), BATTLE_AREA_BOTTOM)
+        menu_position = (computer_menu.get_rect().left - int(menu_size[0]), GameConstants.BATTLE_AREA_BOTTOM)
 
         menu = Menu(UIConstants.SPRITE_BLUE_MENU, menu_size, menu_items_list, menu_position)
+        menu.set_name(menu_key)
 
         game_engine = self.get_game_engine()
         game_engine.add_sprite_to_group(menu)
@@ -219,8 +213,11 @@ class UIManager(Manager):
         menu.set_name(menus_dict[menu_key])
 
         self.__menus[menu_key] = menu
+        self.__set_focused_menu(menu)
 
+    # ----------------- Menu Focus Controllers ----------------- #
     def __set_focused_menu(self, menu):
+        logger.info("Setting Focus on {}".format(menu.get_name()))
         # remove focus from all other menus
         for _menu in self.__menus.values():
             if _menu is None:
@@ -230,10 +227,6 @@ class UIManager(Manager):
 
         menu.set_focused()
         menu.unmark_selected_item()  # unmark selected option text
-        # selected_item = menu.get_selected_item()
-        # if selected_item is None:
-        #     return
-        # selected_item.unmark_string()
 
         # verify that the pointer is on the front layer
         game_engine = self.get_game_engine()
@@ -243,10 +236,33 @@ class UIManager(Manager):
         return
 
     def set_focus_on_player_menu(self):
-        menu = self.__menus[PLAYER_MODELS_MENU]
-        self.__set_focused_menu(menu)
+        self.__set_focused_menu(self.__menus[PLAYER_MODELS_MENU])
 
-    def __get_focused_menu(self) -> Menu:
+    def set_focus_on_computer_menu(self, valid_targets):
+        self.__add_computers_models_menu()
+        self.__set_focused_menu(self.__menus[COMPUTER_MODELS_MENU])
+        mm = self.get_models_manager()
+        # TODO: need to mark valid targets
+        # return the first computer unit and mark it
+        index = self.__menus[COMPUTER_MODELS_MENU].get_index()
+        self.__add_computer_markers(mm.get_computer_model_by_index(index))
+
+    def set_focus_on_actions_menu(self):
+        self.__set_focused_menu(self.__menus[ACTIONS_MENU])
+
+    def __set_focus_on_dice_menu(self):
+        logger.info("Setting focus on Dice Controller")
+        menu = self.__menus[DICE_CONTROLLER]
+        # remove focus from all other menus
+        for _menu in self.__menus.values():
+            if _menu is None:
+                continue
+            else:
+                _menu.unset_focused()
+
+        menu.set_focused()
+
+    def get_focused_menu(self) -> Menu:
         focused_menu = self.__menus[ACTIONS_MENU]  # default
         for menu in self.__menus.values():
             if menu is None:
@@ -256,120 +272,79 @@ class UIManager(Manager):
                 break
         return focused_menu
 
-    def __add_player_models_menu(self):
-        if self.__menus[PLAYER_MODELS_MENU] is not None:
-            self.__menus[PLAYER_MODELS_MENU].kill()
-            self.__menus[PLAYER_MODELS_MENU] = None
+    def is_focused_on_player_models_menu(self) -> bool:
+        return self.get_focused_menu() == self.__menus[PLAYER_MODELS_MENU]
 
-        menu_size = (PLAYER_UNITS_MENU_WIDTH,
-                     SCREEN_SIZE[1] - BATTLE_AREA_BOTTOM)
+    def is_focused_on_computer_models_menu(self) -> bool:
+        return self.get_focused_menu() == self.__menus[COMPUTER_MODELS_MENU]
 
-        characters_list = []
-        phase_manager = self.get_phase_manager()
-        player_models = phase_manager.get_current_phase_player_models_list()
-        for scene_object in player_models:
-            if scene_object.get_type() == PLAYER_OBJECT:
-                characters_list.append(scene_object)
-        menu_position = (0, BATTLE_AREA_BOTTOM)
-        menu = ModelsMenu(UIConstants.SPRITE_BLUE_MENU, menu_size, characters_list, menu_position)
+    def is_focused_on_actions_menu(self) -> bool:
+        return self.get_focused_menu() == self.__menus[ACTIONS_MENU]
 
-        # add menu,  menu items and pointer to game engine sprites group
-        self.get_game_engine().add_sprite_to_group(menu)
-        for i in range(menu.get_menu_items_count()):
-            self.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
-        # self.get_game().add_sprite_to_group(menu.get_pointer())
+    def is_focused_on_skills_menu(self) -> bool:
+        return self.get_focused_menu() == self.__menus[SKILLS_MENU]
 
-        menu.set_name("Player Models Menu")
+    def is_focused_on_spells_menu(self) -> bool:
+        return self.get_focused_menu() == self.__menus[SPELLS_MENU]
 
-        self.__menus[PLAYER_MODELS_MENU] = menu
+    def is_focused_on_items_menu(self) -> bool:
+        return self.get_focused_menu() == self.__menus[ITEMS_MENU]
 
-        # mark the first model of the menu
-        model = menu.get_object_from_menu(0)
-        self.add_player_marker(model)
+    def is_focused_on_dice_controller(self) -> bool:
+        return self.get_focused_menu() == self.__menus[DICE_CONTROLLER]
 
-    def __add_computers_models_menu(self, valid_targets=TARGET_COMPUTER_ALL):
-        if self.__menus[COMPUTER_MODELS_MENU] is not None:
-            self.__menus[COMPUTER_MODELS_MENU].kill()
-            self.__menus[COMPUTER_MODELS_MENU] = None
-
-        menu_size = (COMPUTER_MODELS_MENU_WIDTH,
-                     SCREEN_SIZE[1] - BATTLE_AREA_BOTTOM)
-
-        characters_list = []
-        # phase_manager = self.get_phase_manager()
-        models_manager = self.get_models_manager()
-        computer_models = models_manager.get_computer_sorted_models_list()
-        for model in computer_models:
-            if model.is_valid_target(valid_targets):
-                characters_list.append(model)
-        menu_position = (COMPUTER_FRONT_COLUMN - PADX, BATTLE_AREA_BOTTOM)
-        menu = ModelsMenu(UIConstants.SPRITE_BLUE_MENU, menu_size, characters_list, menu_position)
-
-        # add menu,  menu items and pointer to game engine sprites group
-        self.get_game_engine().add_sprite_to_group(menu)
-        for i in range(menu.get_menu_items_count()):
-            self.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
-        # self.get_game().add_sprite_to_group(menu.get_pointer())
-
-        menu.set_name("Computer Models Menu")
-
-        self.__menus[COMPUTER_MODELS_MENU] = menu
-
-        # mark the first model of the menu
-        model = menu.get_object_from_menu(0)
-        self.add_computer_markers(model)
-
+    # ----------------- Menu Pointers Controllers ----------------- #
     def move_pointer_up(self):
         self.__move_pointer(UP)
         if self.__menus[COMPUTER_MODELS_MENU].is_focused():
             model = self.__menus[COMPUTER_MODELS_MENU].get_selected_object()
-            self.add_computer_markers(model)
+            self.__add_computer_markers(model)
         elif self.__menus[PLAYER_MODELS_MENU].is_focused():
             model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
-            self.add_player_marker(model)
+            self.__add_player_marker(model)
 
     def move_pointer_down(self):
         self.__move_pointer(DOWN)
         if self.__menus[COMPUTER_MODELS_MENU].is_focused():
             model = self.__menus[COMPUTER_MODELS_MENU].get_selected_object()
-            self.add_computer_markers(model)
+            self.__add_computer_markers(model)
         elif self.__menus[PLAYER_MODELS_MENU].is_focused():
             model = self.__menus[PLAYER_MODELS_MENU].get_selected_object()
-            self.add_player_marker(model)
+            self.__add_player_marker(model)
 
     def __move_pointer(self, direction):
-        focused_menu = self.__get_focused_menu()
+        focused_menu = self.get_focused_menu()
+        if not hasattr(focused_menu, "move_pointer_up"):
+            return
+        logger.info("{}: Move pointer {}".format(focused_menu.get_name(), direction))
         if direction == UP:
             focused_menu.move_pointer_up()
         elif direction == DOWN:
             focused_menu.move_pointer_down()
         return
 
-    # def set_computers_menu(self, action, action_manager, valid_targets):
-    def set_computers_menu(self, valid_targets):
-        self.__add_computers_models_menu(valid_targets)
-        self.__set_focused_menu(self.__menus[COMPUTER_MODELS_MENU])
-        mm = self.get_models_manager()
-        # TODO: need to mark valid targets
-        # return the first computer unit and mark it
-        index = self.__menus[COMPUTER_MODELS_MENU].get_index()
-        self.add_computer_markers(mm.get_computer_model_by_index(index))
-
-    def __remove_sub_menus(self):
+    def remove_sub_menus(self):
+        logger.info("Remove sub menus")
         for key in [SKILLS_MENU, SPELLS_MENU, ITEMS_MENU]:
             if self.__menus[key] is not None:
                 self.__menus[key].kill()
                 self.__menus[key] = None
+
+        if self.__menus[DICE_CONTROLLER] is not None:
+            self.destroy_dice_controller()
         return
 
     # ----------------- Menu Items Markers ----------------- #
-    def unmark_player_items(self):
+    def mark_selected_item(self):
+        self.get_focused_menu().mark_selected_item()
+
+    def __unmark_player_items(self):
         if self.__menus[PLAYER_MODELS_MENU] is not None:
             for i in range(self.__menus[PLAYER_MODELS_MENU].get_menu_items_count()):
                 item = self.__menus[PLAYER_MODELS_MENU].get_item_from_menu(i)
                 item.unmark_string()
 
-    def unmark_computer_items(self):
+    def __unmark_computer_items(self):
         if self.__menus[COMPUTER_MODELS_MENU] is not None:
             for i in range(self.__menus[COMPUTER_MODELS_MENU].get_menu_items_count()):
                 item = self.__menus[COMPUTER_MODELS_MENU].get_item_from_menu(i)
@@ -380,7 +355,7 @@ class UIManager(Manager):
         marker_spritesheet = UIConstants.MARKERS_SPRITE_SHEET
         marker = AnimatedObject(marker_spritesheet, None,
                                 position=(0, 0),
-                                object_type=GAME_OBJECT)
+                                object_type=GameConstants.GAME_OBJECT)
 
         model_position = model.get_position()
         model_size = model.get_size()
@@ -403,7 +378,7 @@ class UIManager(Manager):
         game_engine.add_sprite_to_group(marker)
         return marker
 
-    def add_player_marker(self, player_models):
+    def __add_player_marker(self, player_models):
         if type(player_models) is not list:
             player_models = [player_models]
 
@@ -413,7 +388,7 @@ class UIManager(Manager):
             self.__player_markers.append(self.__add_marker(model))
             # self.mark_player_item(model)
 
-    def add_computer_markers(self, computer_models):
+    def __add_computer_markers(self, computer_models):
         if type(computer_models) is not list:
             computer_models = [computer_models]
 
@@ -427,11 +402,40 @@ class UIManager(Manager):
             marker.kill()
         self.__player_markers = []
 
-        self.unmark_computer_items()
+        self.__unmark_computer_items()
 
     def remove_computer_markers(self):
         for marker in self.__computer_markers:
             marker.kill()
         self.__computer_markers = []
 
-        self.unmark_player_items()
+        self.__unmark_player_items()
+
+    # ----------------- DICE Controller ----------------- #
+    def add_dice_controller(self):
+        logger.info("Add Dice Controller")
+        magic_manager = self.get_magic_manager()
+        remaining_dice = magic_manager.get_player_power_pool()
+        menu = DiceController(remaining_dice)
+
+        game_engine = self.get_game_engine()
+        for item in menu.get_sprites():
+            game_engine.add_sprite_to_group(item)
+
+        self.__menus[DICE_CONTROLLER] = menu
+        self.__set_focus_on_dice_menu()
+
+    def get_dice(self):
+        return self.__menus[DICE_CONTROLLER].get_dice()
+
+    def increase_dice(self):
+        self.__menus[DICE_CONTROLLER].increase_dice()
+
+    def decrease_dice(self):
+        self.__menus[DICE_CONTROLLER].decrease_dice()
+
+    def destroy_dice_controller(self):
+        logger.info("Destroy Dice Controller")
+        dice_controller = self.__menus[DICE_CONTROLLER]
+        dice_controller.destroy()
+        self.__menus[DICE_CONTROLLER] = None

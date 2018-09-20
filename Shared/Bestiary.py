@@ -112,6 +112,34 @@ def get_dwarf_hero() -> Model:
     return model
 
 
+def get_dwarf_hero1() -> Model:
+    model = Model(sprite_sheet_file=DWARF_HERO_SPRITE_SHEET,
+                  name="Dwarf Hero1", m=3, ws=4, bs=3, s=3, t=4, w=1, i=2, a=2, ld=9)
+
+    model.set_armor(HeavyArmor())
+    model.add_weapon(Sword())
+
+    # TODO: add special skills
+    model.add_special_rule(AncestralGrudge())
+    model.add_special_rule(Resolute())
+
+    return model
+
+
+def get_dwarf_hero2() -> Model:
+    model = Model(sprite_sheet_file=DWARF_HERO_SPRITE_SHEET,
+                  name="Dwarf Hero2", m=3, ws=4, bs=3, s=3, t=4, w=1, i=2, a=2, ld=9)
+
+    model.set_armor(HeavyArmor())
+    model.add_weapon(Sword())
+
+    # TODO: add special skills
+    model.add_special_rule(AncestralGrudge())
+    model.add_special_rule(Resolute())
+
+    return model
+
+
 def get_undead_skeleton_halberd() -> Model:
     model = Model(sprite_sheet_file=UNDEAD_SKELETON_HALBERD_SPRITE_SHEET,
                   name="Undead Halberd", m=4, ws=2, bs=2, s=3, t=3, w=1, i=2, a=1, ld=3)

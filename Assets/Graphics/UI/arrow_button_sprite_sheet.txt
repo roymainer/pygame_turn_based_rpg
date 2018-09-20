@@ -1,0 +1,8 @@
+down_pressed-00 = 0 0 16 16
+down_unpressed-00 = 17 0 16 16
+left_pressed-00 = 34 0 16 16
+left_unpressed-00 = 0 17 16 16
+right_pressed-00 = 17 17 16 16
+right_unpressed-00 = 0 34 16 16
+up_pressed-00 = 17 34 16 16
+up_unpressed-00 = 34 17 16 16

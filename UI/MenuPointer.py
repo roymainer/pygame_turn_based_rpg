@@ -58,6 +58,8 @@ class MenuPointer(UIObject):
 
     def assign_pointer_to_menu(self, menu) -> None:
         self.__menu = menu
+        if menu.get_menu_items_count() == 0:
+            return
         self.__set_pointer_positions()
 
     def update(self) -> None:

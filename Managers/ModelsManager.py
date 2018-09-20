@@ -1,6 +1,7 @@
 from Managers.Manager import Manager, MODELS_MANAGER
-from Shared.GameConstants import TARGET_COMPUTER_ALL, TARGET_COMPUTER_ALL_FRONT, TARGET_COMPUTER_ALL_BACK, \
-    TARGET_PLAYER_ALL, TARGET_PLAYER_ALL_FRONT, TARGET_PLAYER_ALL_BACK
+from Shared.GameConstants import GameConstants
+import logging
+logger = logging.getLogger().getChild(__name__)
 
 
 def get_combined_list(player_list, computer_list, player_turn) -> list:
@@ -25,6 +26,7 @@ def get_sorted_models_list(_list, sort_parameter: str = 'get_initiative') -> lis
 class ModelsManager(Manager):
 
     def __init__(self, scene):
+        logger.info("Init")
         # TODO: could replace lists with pygame.sprite.OrderedUpdates(), sprite.kill() will remove from all lists!
         self.__player_wizards_list = []  # player wizards
         self.__player_shooter_list = []  # player shooters
@@ -84,6 +86,7 @@ class ModelsManager(Manager):
         _list = get_combined_list(player_list=self.get_player_wizards(),
                                   computer_list=self.get_computer_wizards(),
                                   player_turn=player_turn)
+        _list = [x for x in _list if not x.did_spell_miscast()]
         return _list
 
     def get_player_wizards(self) -> list:
@@ -93,6 +96,12 @@ class ModelsManager(Manager):
     def get_computer_wizards(self) -> list:
         # wizards = [x for x in self.__computer_models if x.is_wizard()]
         return self.__computer_wizards_list
+
+    def reset_spells(self):
+        logger.info("Reset Spells")
+        for wizard in self.get_wizards_list():
+            for spell in wizard.get_spells_list():
+                spell.reset_spell()
 
     # ---- Shooters ---- #
     def get_shooters_list(self, player_turn=True) -> list:
@@ -135,14 +144,17 @@ class ModelsManager(Manager):
         return self.get_computer_sorted_models_list()[index]
 
     def reset_models_actions(self):
+        # logger.info("Resetting models actions")
         for model in self.get_all_models_sorted_list():
             model.reset_action()
 
     def clear_used_up_special_rules(self):
+        logger.info("Clear used up special-rules")
         for model in self.get_all_models_sorted_list():
             model.clear_used_up_special_rules()
 
     def remove_dead_models(self):
+        logger.info("Removing dead models")
         all_models = self.get_all_models_sorted_list()
         for model in all_models:
             model_unit = self.get_model_unit(model)
@@ -150,8 +162,6 @@ class ModelsManager(Manager):
             if model.is_killed():
                 model.destroy(model_unit, opponent_unit)
                 self.remove_model(model)
-
-        # self.set_phase()  # refresh phase with available models
 
     def get_model_unit(self, model) -> list:
         unit = []
@@ -175,17 +185,17 @@ class ModelsManager(Manager):
 
         valid_models = []
 
-        if valid_targets == TARGET_COMPUTER_ALL:
+        if valid_targets == GameConstants.TARGET_COMPUTER_ALL:
             valid_models = all_computer_models
-        elif valid_targets == TARGET_COMPUTER_ALL_FRONT:
+        elif valid_targets == GameConstants.TARGET_COMPUTER_ALL_FRONT:
             valid_models = [x for x in all_computer_models if x.is_front_row()]
-        elif valid_targets == TARGET_COMPUTER_ALL_BACK:
+        elif valid_targets == GameConstants.TARGET_COMPUTER_ALL_BACK:
             valid_models = [x for x in all_computer_models if not x.is_front_row()]
-        elif valid_targets == TARGET_PLAYER_ALL:
+        elif valid_targets == GameConstants.TARGET_PLAYER_ALL:
             valid_models = all_player_models
-        elif valid_targets == TARGET_PLAYER_ALL_FRONT:
+        elif valid_targets == GameConstants.TARGET_PLAYER_ALL_FRONT:
             valid_models = [x for x in all_player_models if x.is_front_row()]
-        elif valid_targets == TARGET_PLAYER_ALL_BACK:
+        elif valid_targets == GameConstants.TARGET_PLAYER_ALL_BACK:
             valid_models = [x for x in all_player_models if not x.is_front_row()]
 
         return valid_models

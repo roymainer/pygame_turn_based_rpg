@@ -15,10 +15,6 @@ class ModelsMenu(Menu):
     def __init__(self, image_path, image_size, models_list, position):
 
         self.__models_list = models_list
-        # menu_options_list = []
-        # for model in self.__models_list:
-        #     string = get_string(model)
-        #     menu_options_list.append(string)
 
         super(ModelsMenu, self).__init__(image_path, image_size, self.__models_list, position)
         self.unset_focused()
@@ -51,7 +47,5 @@ class ModelsMenu(Menu):
 
         return
 
-    def kill(self):
-        #
-
-        super(ModelsMenu, self).kill()
+    # def kill(self):
+    #     super(ModelsMenu, self).kill()

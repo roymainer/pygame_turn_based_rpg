@@ -10,7 +10,8 @@ run
 hurt
 die
 """
-from Shared.GameConstants import *
+from Shared.GameConstants import GameConstants
+from Shared.ModelAction import ModelAction
 from Shared.UIConstants import UIConstants
 from Shared.AnimAttrObject import AnimAttrObject
 from UI.Text import Text
@@ -18,13 +19,6 @@ from UI.TextFloating import TextFloating
 
 SPRITE_SHEET = "Sprite_Sheet"
 SIZE = "Size"
-
-ACTION_ATTACK = "Attack"
-ACTION_SHOOT = "Shoot"
-ACTION_SKILLS = "Skills"
-ACTION_SPELLS = "Spells"
-ACTION_ITEMS = "Items"
-ACTION_SKIP = "Skip"
 
 
 class Model(AnimAttrObject):
@@ -37,12 +31,11 @@ class Model(AnimAttrObject):
         self.__weapons = []
         self.__shield = None
         # self.__wards = None
-        # self.__actions_list = []
         self.__skills_list = []
         self.__spells_list = []
         self.__items_list = []
 
-        self.__action_dict = {"action": None, "targets": None, "action_done": False}
+        self.__action = ModelAction()
 
         self.__action_results_texts = []
         self.__special_rules_texts = []
@@ -68,33 +61,6 @@ class Model(AnimAttrObject):
             self.set_last_animation()
         super(Model, self).set_animation(animation)
 
-    # -------- ACTION -------- #
-    def set_action(self, action):
-        self.__action_dict["action"] = action
-
-    def get_action(self):
-        return self.__action_dict["action"]
-
-    def set_targets(self, targets):
-        self.__action_dict["targets"] = targets
-
-    def get_targets(self):
-        return self.__action_dict["targets"]
-
-    def set_action_done(self):
-        self.__action_dict["action_done"] = True
-
-    def is_action_done(self):
-        return self.__action_dict["action_done"]
-
-    def is_ready(self):
-        # if model has both action and targets - it's ready
-        return None not in self.__action_dict.values()
-
-    def reset_action(self):
-        self.__action_dict = self.__action_dict.fromkeys(self.__action_dict, None)  # reset action dict
-        self.__action_dict["action_done"] = False
-
     # -------- SPECIAL RULES -------- #
     def add_special_rules(self, special_rules) -> None:
         if type(special_rules) is not list:
@@ -109,7 +75,14 @@ class Model(AnimAttrObject):
                 break
 
     def special_rules_to_texts(self) -> None:
+        self.clear_special_rules_texts()
+
         for sr in self.get_special_rules_list():
+            # avoid duplications
+            sr_names = [x.get_name() for x in self.__special_rules_texts]
+            if sr.get_name() in sr_names:
+                continue
+
             text = Text(string=sr.get_name(),
                         position=(0, 0),
                         font_size=UIConstants.TEXT_SIZE_TINY)
@@ -121,7 +94,7 @@ class Model(AnimAttrObject):
                 target_position = target.get_position()
                 target_size = target.get_size()
 
-                position = (target_position[0] - text_size[0] - 5, target_position[1] + target_size[1] - 2)
+                position = (target_position[0] - text_size[0], target_position[1] + target_size[1])
                 text.set_position(position)
                 self.__special_rules_texts.append(text)
             else:
@@ -130,17 +103,18 @@ class Model(AnimAttrObject):
                 model_size = self.get_size()
                 if any(self.__special_rules_texts):
                     position = (self.__special_rules_texts[-1].get_position()[0],
-                                self.__special_rules_texts[-1].get_position()[1] - text_size[1] - 2)
+                                self.__special_rules_texts[-1].get_position()[1] - text_size[1])
                 else:
-                    position = (model_position[0] + model_size[0] + 5, model_position[1] + model_size[1] - 2)
+                    # position = (model_position[0] + model_size[0], model_position[1] + model_size[1] - 2)
+                    position = (model_position[0], model_position[1] + model_size[1] - 2)
 
                 text.set_position(position)
                 self.__special_rules_texts.append(text)
 
-    def get_texts(self) -> list:
+    def get_special_rules_texts(self) -> list:
         return self.__special_rules_texts
 
-    def hide_models_special_rules(self):
+    def clear_models_special_rules(self):
         for text in self.__special_rules_texts:
             text.kill()
 
@@ -194,6 +168,7 @@ class Model(AnimAttrObject):
     #     # TODO: need to complete the models wards
     #     return []
 
+    # -------- SKILLS -------- #
     def add_skill(self, skill) -> None:
         self.__skills_list.append(skill)
         # self.add_action(skill.get_action())
@@ -201,6 +176,7 @@ class Model(AnimAttrObject):
     def get_skills_list(self) -> list:
         return self.__skills_list
 
+    # -------- SPELLS -------- #
     def add_spell(self, spell) -> None:
         self.__spells_list.append(spell)
         # self.add_action(spell.get_action())
@@ -208,15 +184,79 @@ class Model(AnimAttrObject):
     def get_spells_list(self) -> list:
         return self.__spells_list
 
+    def get_cast_spell_list(self):
+        return [x for x in self.get_spells_list() if x.get_is_cast()]
+
+    def get_uncast_spells_list(self) -> list:
+        return [x for x in self.get_spells_list() if not x.get_is_cast()]
+
+    # -------- ITEMS -------- #
     def add_item(self, item) -> None:
         self.__items_list.append(item)
 
     def get_items_list(self) -> list:
         return self.__items_list
 
+    # -------- ACTION -------- #
+    def set_action(self, action):
+        self.__action.set_action(action)
+
+    def get_action(self):
+        return self.__action.get_action()
+
+    def set_targets(self, targets):
+        self.__action.set_targets(targets)
+
+    def get_targets(self):
+        return self.__action.get_targets()
+
+    def set_action_ready(self):
+        self.__action.set_action_ready()
+
+    def unset_action_ready(self):
+        self.__action.unset_action_ready()
+
+    def is_action_ready(self):
+        return self.__action.is_action_ready()
+
+    def set_action_done(self):
+        self.__action.set_action_done()
+
+    def unset_action_done(self):
+        self.__action.unset_action_done()
+
+    def is_action_done(self):
+        return self.__action.is_action_done()
+
+    def set_action_animation_done(self):
+        self.__action.set_action_animation_done()
+
+    def unset_action_animation_done(self):
+        self.__action.unset_action_animation_done()
+
+    def is_action_animation_done(self):
+        return self.__action.is_action_animation_done()
+
+    def is_action_complete(self):
+        return self.__action.is_action_complete()
+
+    def set_miscast(self):
+        self.__action.set_miscast()
+
+    def unset_miscast(self):
+        self.__action.unset_miscast()
+
+    def did_spell_miscast(self):
+        return self.__action.did_spell_miscast()
+
+    def reset_action(self):
+        self.__action.reset_action()
+        self.set_animation("idle")
+
+    # -------- GENERAL -------- #
     def is_player_model(self):
         _type = self.get_type()
-        if _type == PLAYER_OBJECT:
+        if _type == GameConstants.PLAYER_OBJECT:
             return True
         return False
 
@@ -247,7 +287,7 @@ class Model(AnimAttrObject):
         text_size = text.get_size()
 
         # place beside the target
-        if model_position[0] > int(SCREEN_SIZE[0] / 2):
+        if model_position[0] > int(GameConstants.SCREEN_SIZE[0] / 2):
             x = model_position[0] - text_size[0] - 2
         else:
             x = model_position[0] + model_size[0] + 2
@@ -276,6 +316,10 @@ class Model(AnimAttrObject):
         for text in self.__special_rules_texts:
             text.kill()
         self.__special_rules_texts = []
+
+    def collide_point(self, position):
+        rect = self.get_rect()
+        return rect.collidepoint(position)
 
     def destroy(self, model_unit, opponent_unit):
         self.clear_action_results_texts()

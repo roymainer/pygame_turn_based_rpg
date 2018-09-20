@@ -5,7 +5,16 @@ class RPG:
 
     def __init__(self):
         self.__game_engine = GameEngine()
+
+    def start(self):
         self.__game_engine.start()
 
 
-RPG()
+def main():
+    RPG().start()
+
+main()
+# import cProfile
+# import re
+#
+# cProfile.run(main())

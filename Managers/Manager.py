@@ -4,6 +4,8 @@ MODELS_MANAGER = "Models Manager"
 PHASE_MANAGER = "Phase Manager"
 TURN_MANAGER = "Turn Manager"
 UI_MANAGER = "UI Manager"
+MAGIC_MANAGER = "Magic Manager"
+EVENTS_MANAGER = "Events Manager"
 
 
 class Manager:
@@ -47,3 +49,19 @@ class Manager:
         if self.__name == UI_MANAGER:
             return self
         return self.__scene.get_ui_manager()
+
+    def get_magic_manager(self):
+        if self.__name == MAGIC_MANAGER:
+            return self
+        return self.__scene.get_magic_manager()
+
+    def get_events_manager(self):
+        if self.__name == EVENTS_MANAGER:
+            return self
+        return self.__scene.get_events_manager()
+
+    def acquire_lock(self, name):
+        return self.__scene.acquire_lock(name)
+
+    def release_lock(self, name):
+        return self.__scene.release_lock(name)

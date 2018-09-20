@@ -15,7 +15,7 @@ class AnimatedObject(GameObject):
         self.__animations_list = self.__animator.get_animations_keys()
         self.__animation = None
         self.set_animation("idle")  # all animated objects start at idle
-        image = self.__animator.get_next_sprite(self.__animation)
+        image = self.__animator.get_sprite_by_key(self.__animation)
         super(AnimatedObject, self).__init__(image, position, object_type)
 
         self.__speed = (0, 0)
@@ -30,7 +30,7 @@ class AnimatedObject(GameObject):
             # if the model died and finished the animation cycle, don't update image to next sprite
             return
 
-        self.image = self.__animator.get_next_sprite(self.__animation)
+        self.image = self.__animator.get_sprite_by_key(self.__animation)
 
     # def set_speed(self, speed) -> int:
     #     self.__speed = speed
