@@ -1,0 +1,8 @@
+dwarfs_next-0 = 0 0 218 252
+dwarfs_done-1 = 219 0 218 252
+skaven_next-2 = 0 253 218 252
+skaven_done-3 = 219 253 218 252
+orcs_next-4 = 438 0 218 252
+orcs_next-5 = 657 0 218 252
+goblins_next-6 = 438 253 218 252
+goblins_next-7 = 657 253 218 252
