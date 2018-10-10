@@ -1,4 +1,209 @@
                GameEngine - Pygame init:
      Scenes.MainMenuScene - Init
      Scenes.MainMenuScene - Creating main menu
-     Scenes.MainMenuScene - Quit
+     Scenes.MainMenuScene - Selected option: Campaign
+     Scenes.CampaignScene - Init
+    Managers.LevelManager - Init
+  Shared.SavedGameHandler - Init
+     Scenes.CampaignScene - Selected option: UIObject
+  Scenes.PlayingGameScene - Initiate managers:
+    Managers.LevelManager - Init
+  Shared.SavedGameHandler - Init
+    Managers.PhaseManager - Init
+   Managers.ModelsManager - Init
+     Managers.TurnManager - Init
+   Managers.ActionManager - Init
+       Managers.UIManager - Init
+    Managers.MagicManager - Init
+    Managers.LevelManager - Load level
+    Managers.LevelManager - Set Model: Dwarf Hero
+    Managers.LevelManager - Set Model: Skavenslave
+    Managers.LevelManager - Set Model: Skavenslave
+    Managers.LevelManager - Set Model: Skavenslave
+        Phases.MagicPhase - Init
+  Scenes.PlayingGameScene - Managers.PhaseManager ------ acquired the lock
+     Phases.ShootingPhase - Init
+  Phases.CloseCombatPhase - Init
+       Managers.UIManager - Updating all menus
+       Managers.UIManager - Adding Player Models Menu
+       Managers.UIManager - Adding Computer Models Menu
+       Managers.UIManager - Adding Actions Menu
+       Managers.UIManager - Setting Focus on Player Models Menu
+  Scenes.PlayingGameScene - Managers.PhaseManager ------ released the lock
+  Scenes.PlayingGameScene - Managers.EventsManager ------ acquired the lock
+   Managers.EventsManager - Select model: Dwarf Hero
+       Managers.UIManager - Adding Actions Menu
+       Managers.UIManager - Setting Focus on Actions Menu
+   Managers.EventsManager - Select action: Attack
+       Managers.UIManager - Adding Computer Models Menu
+       Managers.UIManager - Setting Focus on Computer Models Menu
+       Managers.UIManager - Remove sub menus
+       Managers.UIManager - Setting Focus on Player Models Menu
+       Managers.UIManager - Player Models Menu: Move pointer Down
+  Scenes.PlayingGameScene - Managers.EventsManager ------ released the lock
+  Scenes.PlayingGameScene - Managers.TurnManager ------ acquired the lock
+     Managers.TurnManager - Current models's turn:   Dwarf Hero
+     Managers.TurnManager - Dwarf Hero is ready to act
+   Managers.ActionManager - Dwarf Hero performing action:
+   Managers.ActionManager - Dwarf Hero: Close Combat
+   Managers.ActionManager - ---------- ATTACK#1/3 ----------
+   Managers.ActionManager - Dwarf Hero: setting animation to attack
+   Managers.ActionManager - Dwarf Hero: setting target (Skavenslave) animation to hurt
+   Managers.ActionManager - Rolling to hit:
+   Managers.ActionManager - Target hit!
+   Managers.ActionManager - Rolling to wound:
+   Managers.ActionManager - Target wounded!
+   Managers.ActionManager - Target rolling to armor save:
+   Managers.ActionManager - Required roll for armor save: 7
+   Managers.ActionManager - Target armor save throw failed
+   Managers.ActionManager - Target rolling to ward save:
+   Managers.ActionManager - Required roll for ward save: 6
+   Managers.ActionManager - Target ward save failed
+   Managers.ActionManager - ---------- ATTACK#2/3 ----------
+   Managers.ActionManager - Dwarf Hero: setting animation to attack
+   Managers.ActionManager - Dwarf Hero: setting target (Skavenslave) animation to hurt
+   Managers.ActionManager - Rolling to hit:
+   Managers.ActionManager - Required roll to hit: 3
+   Managers.ActionManager - Target hit!
+   Managers.ActionManager - Rolling to wound:
+   Managers.ActionManager - Required roll to wound: 2
+   Managers.ActionManager - Target wounded!
+   Managers.ActionManager - Target rolling to armor save:
+   Managers.ActionManager - Required roll for armor save: 7
+   Managers.ActionManager - Target armor save throw failed
+   Managers.ActionManager - Target rolling to ward save:
+   Managers.ActionManager - Required roll for ward save: 6
+   Managers.ActionManager - Target ward save failed
+   Managers.ActionManager - ---------- ATTACK#3/3 ----------
+   Managers.ActionManager - Dwarf Hero: setting animation to attack
+   Managers.ActionManager - Dwarf Hero: setting target (Skavenslave) animation to hurt
+   Managers.ActionManager - Rolling to hit:
+   Managers.ActionManager - Required roll to hit: 3
+   Managers.ActionManager - Missed target!
+   Managers.ActionManager - Rolling to hit:
+   Managers.ActionManager - Required roll to hit: 3
+   Managers.ActionManager - Target hit!
+   Managers.ActionManager - Successfully re-rolled to hit with: Ancestral Grudge
+   Managers.ActionManager - Rolling to wound:
+   Managers.ActionManager - Required roll to wound: 2
+   Managers.ActionManager - Target wounded!
+   Managers.ActionManager - Target rolling to armor save:
+   Managers.ActionManager - Required roll for armor save: 7
+   Managers.ActionManager - Target armor save throw failed
+   Managers.ActionManager - Target rolling to ward save:
+   Managers.ActionManager - Required roll for ward save: 6
+     Managers.TurnManager - Dwarf Hero attack animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Dwarf Hero idle animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Dwarf Hero idle animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Dwarf Hero idle animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Skavenslave die animation finished
+   Managers.ModelsManager - Removing dead models
+    Managers.PhaseManager - Refresh current phase models list
+     Managers.TurnManager - All models finished their animation cycle
+     Managers.TurnManager - Set next model index
+     Managers.TurnManager - Current models's turn:   Skavenslave
+     Managers.TurnManager - Playing Computer Turn
+     Managers.TurnManager - Skavenslave is ready to act
+   Managers.ActionManager - Skavenslave performing action:
+   Managers.ActionManager - Skavenslave: Close Combat
+   Managers.ActionManager - ---------- ATTACK#1/1 ----------
+   Managers.ActionManager - Skavenslave: setting animation to attack
+   Managers.ActionManager - Skavenslave: setting target (Dwarf Hero) animation to hurt
+   Managers.ActionManager - Rolling to hit:
+   Managers.ActionManager - Target hit!
+   Managers.ActionManager - Rolling to wound:
+   Managers.ActionManager - Required roll to wound: 6
+   Managers.ActionManager - Failed to wound target!
+     Managers.TurnManager - Skavenslave attack animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave idle animation finished
+     Managers.TurnManager - Clearing models action results texts
+             Phases.Phase - ################ Close Combat Phase is complete ################
+  Scenes.PlayingGameScene - Managers.TurnManager ------ released the lock
+  Scenes.PlayingGameScene - Managers.PhaseManager ------ acquired the lock
+   Managers.ModelsManager - Reset Spells
+   Managers.ModelsManager - Clear used up special-rules
+    Managers.MagicManager - Roll for winds of magic
+    Managers.MagicManager - Player Power Pool: 12
+    Managers.MagicManager - Player Dispel Pool: 6
+    Managers.MagicManager - Computer Power Pool: 6
+    Managers.MagicManager - Computer Dispel Pool: 5
+        Phases.MagicPhase - Init
+     Phases.ShootingPhase - Init
+  Phases.CloseCombatPhase - Init
+       Managers.UIManager - Updating all menus
+       Managers.UIManager - Adding Actions Menu
+       Managers.UIManager - Setting Focus on Player Models Menu
+  Scenes.PlayingGameScene - Managers.PhaseManager ------ released the lock
+  Scenes.PlayingGameScene - Managers.EventsManager ------ acquired the lock
+   Managers.EventsManager - Select model: Dwarf Hero
+       Managers.UIManager - Adding Actions Menu
+       Managers.UIManager - Setting Focus on Actions Menu
+   Managers.EventsManager - Select action: Attack
+       Managers.UIManager - Adding Computer Models Menu
+       Managers.UIManager - Setting Focus on Computer Models Menu
+       Managers.UIManager - Remove sub menus
+       Managers.UIManager - Setting Focus on Player Models Menu
+       Managers.UIManager - Player Models Menu: Move pointer Down
+  Scenes.PlayingGameScene - Managers.EventsManager ------ released the lock
+  Scenes.PlayingGameScene - Managers.TurnManager ------ acquired the lock
+     Managers.TurnManager - Current models's turn:   Dwarf Hero
+     Managers.TurnManager - Dwarf Hero is ready to act
+   Managers.ActionManager - Dwarf Hero performing action:
+   Managers.ActionManager - Dwarf Hero: Close Combat
+   Managers.ActionManager - ---------- ATTACK#1/3 ----------
+   Managers.ActionManager - Dwarf Hero: setting animation to attack
+   Managers.ActionManager - Dwarf Hero: setting target (Skavenslave) animation to hurt
+   Managers.ActionManager - Rolling to hit:
+   Managers.ActionManager - Required roll to hit: 3
+   Managers.ActionManager - Target hit!
+   Managers.ActionManager - Rolling to wound:
+   Managers.ActionManager - Required roll to wound: 3
+   Managers.ActionManager - Target wounded!
+   Managers.ActionManager - Target rolling to armor save:
+   Managers.ActionManager - Required roll for armor save: 7
+   Managers.ActionManager - Target armor save throw failed
+   Managers.ActionManager - Target rolling to ward save:
+   Managers.ActionManager - Required roll for ward save: 6
+   Managers.ActionManager - Target ward save failed
+   Managers.ActionManager - No targets alive!
+     Managers.TurnManager - Dwarf Hero attack animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Dwarf Hero idle animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Dwarf Hero idle animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Dwarf Hero idle animation finished
+     Managers.TurnManager - Clearing models action results texts
+     Managers.TurnManager - Skavenslave is killed, setting animation to 'die'
+     Managers.TurnManager - Skavenslave die animation finished
+   Managers.ModelsManager - Removing dead models
+    Managers.PhaseManager - Refresh current phase models list
+   Managers.EventsManager - All computer models are killed, battle is won!
+       Managers.UIManager - Add Continue Controller
+       Managers.UIManager - Setting focus on Continue Button
+  Scenes.PlayingGameScene - Managers.TurnManager ------ released the lock
+             Phases.Phase - ################ Close Combat Phase is complete ################
+  Scenes.PlayingGameScene - Managers.EventsManager ------ acquired the lock
+  Scenes.PlayingGameScene - Setting next level for current act
+  Shared.SavedGameHandler - Init
+  Shared.SavedGameHandler - Saving dictionary: {'level_number': '2'}
+     Scenes.CampaignScene - Init
+    Managers.LevelManager - Init
+  Shared.SavedGameHandler - Init
+     Scenes.CampaignScene - Quit

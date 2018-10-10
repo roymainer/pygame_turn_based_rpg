@@ -57,7 +57,7 @@ class AccusationSkill(Skill):
 
         turn_manager = action_manager.get_turn_manager()
         current_model = turn_manager.get_current_model()
-        targets = current_model.get_targets()
+        targets = current_model.get_next_target()
 
         if type(targets) is list:
             target = targets[0]

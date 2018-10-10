@@ -170,23 +170,21 @@ class ActionManager(Manager):
     def __close_combat_attacks(self, model):
         current_model = model
         logger.info("{}: Close Combat".format(current_model.get_name()))
-        targets = current_model.get_targets()
-        if type(targets) is not list:
-            targets = [targets]
+
         number_of_attacks = current_model.get_attacks()
+
         for a in range(number_of_attacks):
 
-            alive_targets = [x for x in targets if not x.is_killed()]
-
-            if not any(alive_targets):
+            target = self.get_next_target(current_model)
+            if target is None:
                 logger.info("No targets alive!")
                 return
+
             logger.info("---------- ATTACK#{}/{} ----------".format(str(a+1), str(number_of_attacks)))
 
             logger.info("{}: setting animation to attack".format(current_model.get_name()))
             current_model.set_animation("attack")
 
-            target = alive_targets[0]  # get the first remaining alive target
             logger.info("{}: setting target ({}) animation to hurt".format(current_model.get_name(), target.get_name()))
             target.set_animation("hurt")
 
@@ -245,7 +243,7 @@ class ActionManager(Manager):
     def __range_attack(self, model):
         current_model = model
         logger.info("{}: Range Attack".format(current_model.get_name()))
-        targets = current_model.get_targets()
+        targets = current_model.get_next_target()
         if type(targets) is not list:
             targets = [targets]
 
@@ -487,3 +485,31 @@ class ActionManager(Manager):
 
     def __add_text_dispel_failed(self, dispelling_model):
         self.__add_text("Dispel Failed", GameConstants.DARK_GRAY, dispelling_model)
+
+    def get_next_target(self, current_model):
+
+        selected_targets = current_model.get_targets()
+        if type(selected_targets) is not list:
+            selected_targets = [selected_targets]
+
+        alive_targets = [x for x in selected_targets if not x.is_killed()]
+        if any(alive_targets):
+            return alive_targets[0]
+
+        models_manager = self.get_models_manager()
+
+        if current_model.is_player_model():
+            targets = models_manager.get_computer_sorted_models_list()
+        else:
+            targets = models_manager.get_player_sorted_models_list()
+
+        front_row_targets = [x for x in targets if x.is_front_row() and not x.is_killed()]
+        if any(front_row_targets):
+            return front_row_targets[0]
+
+
+        back_row_targets = [x for x in targets if not x.is_front_row() and not x.is_killed()]
+        if any(back_row_targets):
+            return back_row_targets[0]
+
+        return None

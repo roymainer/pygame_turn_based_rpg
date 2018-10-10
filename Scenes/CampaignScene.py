@@ -7,6 +7,7 @@ from Shared.Button import TextButton
 from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
 from UI.MenuPointer import MenuPointer
+from UI.Text import Text
 
 logger = logging.getLogger().getChild(__name__)
 
@@ -24,6 +25,9 @@ class CampaignScene(Scene):
         self.__set_background()
         self.__create_buttons()
         self.__create_pointer()
+
+        self.__texts = []
+        self.__add_campaign_texts()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -88,3 +92,21 @@ class CampaignScene(Scene):
         else:
             from Scenes.MainMenuScene import MainMenuScene
             game_engine.set_scene(MainMenuScene)
+
+    def __add_campaign_texts(self):
+        act = self.__level_manager.get_act()
+        act_number = act.get_act_number()
+        level_number = act.get_level()
+
+        position = (20, 20)
+        act_text = Text("Act " + act_number, position, GameConstants.BLACK, None, UIConstants.FONT_SIZE_MEDIUM)
+
+        position = (position[0], position[1] + act_text.get_size()[1])
+        level_text = Text("Level " + level_number, position, GameConstants.BLACK, None, UIConstants.FONT_SIZE_MEDIUM)
+
+        self.__texts.append(act_text)
+        self.__texts.append(level_text)
+
+        game_engine = self.get_game_engine()
+        for text in self.__texts:
+            game_engine.add_sprite_to_group(text)

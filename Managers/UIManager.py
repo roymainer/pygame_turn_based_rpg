@@ -35,8 +35,10 @@ class UIManager(Manager):
                         ACTIONS_MENU: None,
                         SKILLS_MENU: None,
                         SPELLS_MENU: None,
+                        DISPEL_MENU: None,
                         ITEMS_MENU: None,
                         DICE_CONTROLLER: None,
+                        DISPEL_DICE_CONTROLLER: None,
                         CONTINUE_BUTTON: None}
 
         self.__player_markers = []

@@ -21,6 +21,9 @@ class Act:
     def get_campaign_background(self):
         pass
 
+    def get_act_number(self):
+        pass
+
     def get_level(self):
         return self.__level
 
@@ -32,6 +35,9 @@ class Act1(Act):
 
     def __init__(self, level):
         super(Act1, self).__init__(level, GameConstants.ACT1_PATH_SPRITE_SHEET)
+
+    def get_act_number(self):
+        return "1"
 
     def get_campaign_background(self):
         background = pygame.image.load(GameConstants.ACT1_BACKGROUND)
@@ -47,15 +53,22 @@ class Act1(Act):
 
     def get_next_round_models(self) -> dict:
 
-        if self.get_level() == '1':
+        level = self.get_level()
+
+        if level == '1':
             # TODO: this should be loaded from an xml
             player_models_dict = {GameConstants.PLAYER_MIDDLE_FRONT: get_dwarf_hero}
             computer_models_dict = {GameConstants.COMPUTER_TOP_FRONT: get_skaven_slave,
                                     GameConstants.COMPUTER_MIDDLE_FRONT: get_skaven_slave,
                                     GameConstants.COMPUTER_BOTTOM_FRONT: get_skaven_slave}
+        elif level == '2':
+            player_models_dict = {GameConstants.PLAYER_MIDDLE_FRONT: get_dwarf_hero}
+            computer_models_dict = {GameConstants.COMPUTER_TOP_FRONT: get_skaven_slave,
+                                    GameConstants.COMPUTER_MIDDLE_FRONT: get_skaven_slave,
+                                    GameConstants.COMPUTER_BOTTOM_FRONT: get_skaven_slave}
 
-            return {GameConstants.PLAYER_OBJECT: player_models_dict,
-                    GameConstants.COMPUTER_OBJECT: computer_models_dict}
+        return {GameConstants.PLAYER_OBJECT: player_models_dict,
+                GameConstants.COMPUTER_OBJECT: computer_models_dict}
 
 
 # acts dict returns the act matching the level number (many to one)

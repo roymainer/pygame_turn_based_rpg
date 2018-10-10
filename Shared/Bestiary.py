@@ -19,7 +19,8 @@ DWARF_HERO_SPRITE_SHEET = get_sprite_sheet_path("dwarf_hero_sprite_sheet.png")
 
 def get_dwarf_hero() -> Model:
     model = Model(sprite_sheet_file=DWARF_HERO_SPRITE_SHEET,
-                  name="Dwarf Hero", m=3, ws=4, bs=3, s=3, t=4, w=1, i=2, a=2, ld=9)
+                  # name="Dwarf Hero", m=3, ws=4, bs=3, s=3, t=4, w=1, i=2, a=2, ld=9)
+                  name="Dwarf Hero", m=3, ws=6, bs=4, s=4, t=5, w=2, i=3, a=3, ld=10)  # Thane
 
     model.set_armor(HeavyArmor())
     model.add_weapon(Sword())
