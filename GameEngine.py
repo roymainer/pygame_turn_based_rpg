@@ -1,34 +1,9 @@
-import logging
-
 import pygame
 from Scenes.MainMenuScene import MainMenuScene
 from Scenes.PlayingGameScene import PlayingGameScene
+from Scenes.CampaignScene import CampaignScene
 from Shared.GameConstants import GameConstants
-
-
-def get_logger():
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-
-    # create file handler
-    fh = logging.FileHandler('log.log', mode='w')
-    fh.setLevel(logging.INFO)
-
-    # create console handler
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-
-    # create formatter and add it to the handlers
-    # formatter = logging.Formatter('%(asctime)s - %(name)15s - %(levelname)s - %(message)s')
-    formatter = logging.Formatter('%(name)25s - %(message)s')
-    fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-
-    # add the handlers to the logger
-    logger.addHandler(fh)
-    logger.addHandler(ch)
-
-    return logger
+from logger import get_logger
 
 
 class GameEngine:
@@ -48,16 +23,11 @@ class GameEngine:
         """ Sprites groups"""
         self.__all_sprites = pygame.sprite.LayeredUpdates()  # layered sprites
 
-        self.__mouse_position = None
-        self.__mouse_buttons = None
-
         background = pygame.Surface(GameConstants.SCREEN_SIZE)
         self.__background = background.fill(GameConstants.WHITE)
 
-        self.__scenes = (PlayingGameScene(self),
-                         MainMenuScene(self))
-
-        self.__current_scene = 1
+        self.__current_scene = MainMenuScene(self)
+        # self.__current_scene = CampaignScene(self)
 
         return
 
@@ -74,20 +44,19 @@ class GameEngine:
             cycle_time += seconds
 
             if cycle_time > GameConstants.INTERVAL:
-                self.__mouse_buttons = pygame.mouse.get_pressed()
-                self.__mouse_position = pygame.mouse.get_pos()
+                # self.__mouse_buttons = pygame.mouse.get_pressed()
+                # self.__mouse_position = pygame.mouse.get_pos()
 
                 cycle_time = 0
                 self.__all_sprites.clear(self.__screen, self.__background)
 
-                current_scene = self.__scenes[self.__current_scene]
-                current_scene.handle_events()
-                current_scene.update()
+                self.__current_scene.handle_events()
+                self.__current_scene.update()
 
                 self.__all_sprites.update()
                 self.__all_sprites.draw(self.__screen)
 
-                print("Number of sprites: {}".format(self.__all_sprites.sprites().count()))
+                # print("Number of sprites: {}".format(len(self.__all_sprites.sprites())))
 
             pygame.display.set_caption("[FPS]: %.2f" % (self.__clock.get_fps()))
 
@@ -97,7 +66,9 @@ class GameEngine:
         return
 
     def set_scene(self, scene):
-        self.__current_scene = scene
+        self.empty_sprites_group()  # clear all sprites from previous scene
+        self.__current_scene = scene(self)  # initialize new scene
+        self.__screen.blit(self.__background, (0, 0))  # blit the background once, to refresh it from last scene
 
     def stop(self):
         self.__mainloop = False
@@ -119,3 +90,5 @@ class GameEngine:
 
     def set_background(self, background: pygame.Surface):
         self.__background = background
+
+

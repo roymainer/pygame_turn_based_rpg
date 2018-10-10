@@ -6,10 +6,12 @@ Handles the models turns in each phase
 2.
 
 """
+import logging
+
 from Managers.Manager import Manager, TURN_MANAGER
 from Shared.Action import Attack, RangeAttack  # , Spells, Skills, Items, Skip
 from Shared.Model import Model
-import logging
+
 logger = logging.getLogger().getChild(__name__)
 
 
@@ -49,6 +51,7 @@ class TurnManager(Manager):
             model_manager = self.get_models_manager()
             phase_manager = self.get_phase_manager()
             ui_manager = self.get_ui_manager()
+            events_manager = self.get_events_manager()
 
             ui_manager.remove_player_markers()  # hide player markers once action starts
             ui_manager.remove_computer_markers()  # hide computer markers
@@ -78,6 +81,11 @@ class TurnManager(Manager):
                     if not model.is_animation_cycle_done():
                         return
 
+                """ Check if battle is over """
+                events_manager.is_battle_over()
+                if events_manager.get_is_battle_over():
+                    self.release_lock(__name__)
+
                 """ Check if phase is complete """
                 if phase_manager.is_phase_complete():
                     self.release_lock(__name__)
@@ -86,7 +94,6 @@ class TurnManager(Manager):
                     """ Advance to next model """
                     logger.info("All models finished their animation cycle")
                     self.__set_next_model_index()
-
 
     def animate_death_and_remove_killed_models(self, model_manager, phase_manager):
         """ Animate death and remove killed models """
@@ -142,6 +149,12 @@ class TurnManager(Manager):
 
     def __are_models_actions_ready(self):
         phase_manager = self.get_phase_manager()
+        events_manager = self.get_events_manager()
+
+        if events_manager.get_is_battle_over():
+            self.release_lock(__name__)
+            return False
+
         # models_list = phase_manager.get_current_phase_models_list()
         models_list = phase_manager.get_current_phase_player_models_list()
 
@@ -189,10 +202,11 @@ class TurnManager(Manager):
     def get_current_model(self) -> Model:
         phase_manager = self.get_phase_manager()
         current_phase_models_list = phase_manager.get_current_phase_models_list()
-        try:
-            current_model = current_phase_models_list[self.__current_model_index]
-        except:
-            print("Error")
+        current_model = current_phase_models_list[self.__current_model_index]
+        # try:
+        #     current_model = current_phase_models_list[self.__current_model_index]
+        # except:
+        #     print("Error")
         return current_model
 
     def get_model_unit(self, model=None):
@@ -240,3 +254,11 @@ class TurnManager(Manager):
         model.set_targets(target)
         model.set_action_ready()
         return
+
+    def __clear_texts(self):
+        for text in self.__texts:
+            text.kill()
+        self.__texts = []
+
+    def destroy(self):
+        self.__clear_texts()

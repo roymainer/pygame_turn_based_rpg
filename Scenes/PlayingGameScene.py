@@ -10,6 +10,9 @@ from Managers.UIManager import UIManager
 from Shared.GameConstants import GameConstants
 from Scenes.Scene import Scene
 import logging
+
+from Shared.SavedGameHandler import SavedGameHandler
+
 logger = logging.getLogger().getChild(__name__)
 
 
@@ -20,6 +23,7 @@ class PlayingGameScene(Scene):
         logger.info("Initiate managers:")
         self.__level_manager = LevelManager(self)  # level manager loads the level and models
         self.__phase_manager = PhaseManager(self)  # Phase manager handles turn phases (Magic/Shooting/Close Combat)
+
         self.__models_manager = ModelsManager(self)  # models manager handles the scenes models
         self.__turn_manager = TurnManager(self)  # handles the Turn (Phases and models turns)
         self.__action_manager = ActionManager(self)  # action manager handles each models action
@@ -27,17 +31,20 @@ class PlayingGameScene(Scene):
         self.__magic_manager = MagicManager(self)  # Magic manager handles the power pool during Magic Phase
         self.__events_manager = EventsManager(self)  # handles events and keyboard presses
 
+        # synchronization lock
+        self.__lock = None
+
         # initialize:
-        self.__level_manager.load_level()  # load the level (will populate the models manager)
+        self.__level_manager.load_level_models()  # load the level (will populate the models manager)
         self.__phase_manager.on_init()  # load the first battle phase (Magic Phase)
 
         self.create_background()  # TODO : move to load level
 
-        # synchronization lock
-        self.__lock = None
+        self.__events_manager.handle_events()  # without this call, first magic phase is skipped
 
     def handle_events(self):
-        self.__events_manager.handle_events()
+        if self.__events_manager.handle_events():
+            self.return_to_campaign_screen()
 
     def update(self):
 
@@ -55,7 +62,7 @@ class PlayingGameScene(Scene):
         """ Draw special rules of focused-on unit """
         for model in self.__models_manager.get_all_models_sorted_list():
             if model.collide_point(pygame.mouse.get_pos()):
-                print("Collision with model: {} at: {}".format(model.get_name(), pygame.mouse.get_pos()))
+                # print("Collision with model: {} at: {}".format(model.get_name(), pygame.mouse.get_pos()))
                 model.special_rules_to_texts()
                 special_rules_texts = model.get_special_rules_texts()
                 for srt in special_rules_texts:
@@ -141,3 +148,25 @@ class PlayingGameScene(Scene):
 
         self.get_game_engine().set_background(surface)
         return
+
+    def return_to_campaign_screen(self):
+        # TODO: call destroy for all managers?
+        player_models = self.__models_manager.get_player_sorted_models_list()
+        alive_player_models = [x for x in player_models if not x.is_killed()]
+
+        computer_models = self.__models_manager.get_computer_sorted_models_list()
+        alive_computer_models = [x for x in computer_models if not x.is_killed()]
+
+        if not any(alive_player_models):
+            logger.info("Returning to Campaign Screen")
+
+        if not any(alive_computer_models):
+            logger.info("Setting next level for current act")
+            save_game_handler = SavedGameHandler()
+            level_number = int(save_game_handler.load("level_number"))
+
+            level_number = str(level_number + 1)
+            save_game_handler.save({"level_number": level_number})
+
+        from Scenes.CampaignScene import CampaignScene
+        self.get_game_engine().set_scene(CampaignScene)

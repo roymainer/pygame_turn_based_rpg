@@ -1,5 +1,5 @@
 from Phases.Phase import Phase, MAGIC_PHASE, SHOOTING_PHASE
-from Shared.Action import Spells, Skip
+from Shared.Action import Spells, Skip, Dispel
 import logging
 logger = logging.getLogger().getChild(__name__)
 
@@ -62,6 +62,7 @@ class MagicPhase(Phase):
     def get_phase_actions_list(self, turn_manager) -> list:
         actions_list = super(MagicPhase, self).get_phase_actions_list(turn_manager)
         actions_list.insert(0, Spells())
+        actions_list.insert(1, Dispel())
         return actions_list
 
     def get_next_phase_key(self):

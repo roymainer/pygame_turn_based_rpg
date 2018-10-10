@@ -12,7 +12,7 @@ class AnimatedObject(GameObject):
     def __init__(self, sprite_sheet_file, size, position, object_type):
 
         self.__animator = Animator(sprite_sheet_file, sprite_size=size)
-        self.__animations_list = self.__animator.get_animations_keys()
+        # self.__animations_list = self.__animator.get_animations_keys()
         self.__animation = None
         self.set_animation("idle")  # all animated objects start at idle
         image = self.__animator.get_sprite_by_key(self.__animation)
@@ -40,7 +40,8 @@ class AnimatedObject(GameObject):
 
     def set_animation(self, animation) -> None:
         if animation not in self.get_animations_list():
-            self.__animation = self.__animations_list[0]
+            # self.__animation = self.__animations_list[0]
+            self.__animation = self.get_animations_list()[0]
         if animation != self.__animation:
             self.__animator.reset_animation()
             self.__animation = animation

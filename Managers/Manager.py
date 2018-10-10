@@ -65,3 +65,6 @@ class Manager:
 
     def release_lock(self, name):
         return self.__scene.release_lock(name)
+
+    def destroy(self):
+        pass

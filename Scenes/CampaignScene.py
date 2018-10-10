@@ -1,30 +1,29 @@
 import logging
-
 import pygame
 
+from Managers.LevelManager import LevelManager
 from Scenes.Scene import Scene
 from Shared.Button import TextButton
 from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
-from UI.Menu import Menu
 from UI.MenuPointer import MenuPointer
 
 logger = logging.getLogger().getChild(__name__)
 
-MENU_OPTIONS = ["Campaign", "Custom Battle", "Quit"]
 
-
-class MainMenuScene(Scene):
+class CampaignScene(Scene):
 
     def __init__(self, game_engine):
-        super(MainMenuScene, self).__init__(game_engine)
+        super(CampaignScene, self).__init__(game_engine)
         logger.info("Init")
-        self.__main_menu = None
+        self.__next_button = None
+        self.__back_button = None
         self.__pointer = None
 
-        self.__create_background()
-        self.__create_main_menu()
-        self.__create_main_menu_pointer()
+        self.__level_manager = LevelManager(self)
+        self.__set_background()
+        self.__create_buttons()
+        self.__create_pointer()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -34,61 +33,58 @@ class MainMenuScene(Scene):
 
             if event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_UP:
-                    self.__main_menu.move_pointer_up()
-                if event.key == pygame.K_DOWN:
-                    self.__main_menu.move_pointer_down()
+                if event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
+                    self.__move_pointer()
                 if event.key == pygame.K_RETURN:
-                    self.__menu_item_pressed()
+                    self.__button_pressed()
 
-    def __create_background(self):
-        background = pygame.image.load(GameConstants.MAIN_MENU_BACKGROUND)
-        background = pygame.transform.smoothscale(background, GameConstants.SCREEN_SIZE)
-        self.get_game_engine().set_background(background)
-        return
+    def __set_background(self):
+        game_engine = self.get_game_engine()
+        background = self.__level_manager.get_act().get_campaign_background()
+        game_engine.set_background(background)
 
-    def __create_main_menu(self):
-        logger.info("Creating main menu")
+    def __create_buttons(self):
+        screen_size = GameConstants.SCREEN_SIZE
 
-        size = (100, 500)
-        position = (0, 0)
+        position = (screen_size[0] * 15/20, screen_size[1] * 9/10)
+        self.__next_button = TextButton(UIConstants.BLUE_BUTTON_SPRITE_SHEET, (100, 50),
+                                        "Continue", UIConstants.FONT_SIZE_LARGE, position)
 
-        # TODO: create ButtonsMenu
-        menu_button_size = (100, 50)
-        menu_options = []
-        for string in MENU_OPTIONS:
-            menu_options.append(TextButton(UIConstants.BLUE_BUTTON_SPRITE_SHEET, menu_button_size, string,
-                                           UIConstants.FONT_SIZE_XLARGE, position))
-        menu = Menu(UIConstants.SPRITE_BLUE_MENU, size, menu_options, position)
-
-        menu.update_size()  # update the menu size according to buttons
-
-        # reposition main menu
-        posx = int(GameConstants.SCREEN_SIZE[0] / 8) - int(menu.get_size()[0] / 2)
-        posy = int(GameConstants.SCREEN_SIZE[1] / 6) - int(menu.get_size()[1] / 2)
-        menu.set_position((posx, posy))
-        menu.set_name("Main Menu")
-
-        self.__main_menu = menu
+        position = (screen_size[0] * 2/20, screen_size[1] * 9/10)
+        self.__back_button = TextButton(UIConstants.BLUE_BUTTON_SPRITE_SHEET, (100, 50),
+                                        "Back", UIConstants.FONT_SIZE_LARGE, position)
 
         game_engine = self.get_game_engine()
-        game_engine.add_sprite_to_group(menu)
-        for i in range(menu.get_ui_objects_list_count()):
-            game_engine.add_sprite_to_group(menu.get_ui_object_from_menu(i))
+        game_engine.add_sprite_to_group(self.__next_button)
+        game_engine.add_sprite_to_group(self.__back_button)
 
-    def __create_main_menu_pointer(self):
+    def __create_pointer(self):
         pointer = MenuPointer()
         game_engine = self.get_game_engine()
-        # game_engine.remove_sprite_from_group(pointer)
         game_engine.add_sprite_to_group(pointer)
-        pointer.assign_pointer_to_menu(self.__main_menu)
+        pointer.assign_pointer_to_button(self.__next_button)
         self.__pointer = pointer
 
-    def __menu_item_pressed(self):
-        button = self.__main_menu.get_selected_object()
-        button_name = button.get_name()
-        logger.info("Selected option: {}".format(button_name))
+    def __move_pointer(self):
+        current_button = self.__pointer.get_button()
+        if current_button == self.__next_button:
+            new_button = self.__back_button
+        else:
+            new_button = self.__next_button
 
-        # Campaign
-        if button_name == MENU_OPTIONS[0]:
-            from
+        self.__pointer.assign_pointer_to_button(new_button)
+
+    def __button_pressed(self):
+        button = self.__pointer.get_button()
+        logger.info("Selected option: {}".format(button.get_name()))
+
+        game_engine = self.get_game_engine()
+
+        # battle
+        if button == self.__next_button:
+            from Scenes.PlayingGameScene import PlayingGameScene
+            game_engine.set_scene(PlayingGameScene)
+
+        else:
+            from Scenes.MainMenuScene import MainMenuScene
+            game_engine.set_scene(MainMenuScene)

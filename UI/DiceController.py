@@ -10,14 +10,15 @@ from UI.UIObject import UIObject
 class ArrowButtonGenerator:
     def __init__(self):
         self.__animator = Animator(UIConstants.ARROW_BUTTON_SPRITE_SHEET)
-        self.__buttons_list = self.__animator.get_animations_keys()
+        # self.__buttons_list = self.__animator.get_animations_keys()
 
     def __get_arrow(self, key):
         image = self.__animator.get_sprite_by_key("{}_unpressed".format(key))
-        pressed_image = self.__animator.get_sprite_by_key("{}_pressed".format(key))
         size = image.get_size()
         position = (0, 0)
-        return Button(image, pressed_image, image, size, position)
+        button = Button(UIConstants.ARROW_BUTTON_SPRITE_SHEET, size, position)
+        button.set_button(key)
+        return button
 
     def get_up_arrow_button(self):
         return self.__get_arrow("up")
@@ -44,7 +45,7 @@ class DiceController:
         self.__left_arrow_button = arrow_button_generator.get_left_arrow_button()
         self.__right_arrow_button = arrow_button_generator.get_right_arrow_button()
         self.__dice_text = Text(self.get_string(), (0, 0),
-                                text_color=GameConstants.WHITE, font_size=UIConstants.TEXT_SIZE_LARGE)
+                                text_color=GameConstants.WHITE, font_size=UIConstants.FONT_SIZE_LARGE)
 
         # position the text
         text_size = self.__dice_text.get_size()

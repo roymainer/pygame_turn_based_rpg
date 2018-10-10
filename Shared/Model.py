@@ -10,10 +10,10 @@ run
 hurt
 die
 """
+from Shared.AnimAttrObject import AnimAttrObject
 from Shared.GameConstants import GameConstants
 from Shared.ModelAction import ModelAction
 from Shared.UIConstants import UIConstants
-from Shared.AnimAttrObject import AnimAttrObject
 from UI.Text import Text
 from UI.TextFloating import TextFloating
 
@@ -50,7 +50,17 @@ class Model(AnimAttrObject):
         return self.get_name()
 
     def get_menu_item_string(self) -> str:
-        string = self.get_name() + "_" + "HP:" + str(self.get_current_wounds()) + "/" + str(self.get_wounds())
+        # string = self.get_name() + "_" + "HP:" + str(self.get_current_wounds()) + "/" + str(self.get_wounds())
+        string = self.get_name() + "_{}  {} {} {} {}{}{} {} {}  {}".format(self.get_weapon_skill(),
+                                                                           self.get_ballistic_skill(),
+                                                                           self.get_strength(),
+                                                                           self.get_toughness(),
+                                                                           self.get_current_wounds(),
+                                                                           "/",
+                                                                           self.get_wounds(),
+                                                                           self.get_initiative(),
+                                                                           self.get_attacks(),
+                                                                           self.get_leadership())
         num_chars = len(string)
         delta_chars = UIConstants.MENU_MAX_CHARS - num_chars
         string = string.replace("_", " " * delta_chars)
@@ -83,30 +93,46 @@ class Model(AnimAttrObject):
             if sr.get_name() in sr_names:
                 continue
 
-            text = Text(string=sr.get_name(),
-                        position=(0, 0),
-                        font_size=UIConstants.TEXT_SIZE_TINY)
-
-            text_size = text.get_size()
-
             for target in sr.get_targets():
+
+                if target == self:
+                    continue
+
                 # if the special rules applies for specific target like accusation, blit near target
+                text = Text(string=sr.get_name(),
+                            position=(0, 0),
+                            font_size=UIConstants.FONT_SIZE_TINY)
+                text_size = text.get_size()
                 target_position = target.get_position()
                 target_size = target.get_size()
 
                 position = (target_position[0] - text_size[0], target_position[1] + target_size[1])
+
+                # fix position of new special rules so they won't overlap
+                while True:
+                    if any([x for x in self.__special_rules_texts if x.get_position() == position]):
+                        position = (position[0], position[1] - text_size[1] - 2)  # blit one above the other
+                    else:
+                        break
+
                 text.set_position(position)
                 self.__special_rules_texts.append(text)
             else:
+                text = Text(string=sr.get_name(),
+                            position=(0, 0),
+                            font_size=UIConstants.FONT_SIZE_TINY)
+                text_size = text.get_size()
                 # if the special rule applies for the model itself, blit near model
                 model_position = self.get_position()
                 model_size = self.get_size()
-                if any(self.__special_rules_texts):
-                    position = (self.__special_rules_texts[-1].get_position()[0],
-                                self.__special_rules_texts[-1].get_position()[1] - text_size[1])
-                else:
-                    # position = (model_position[0] + model_size[0], model_position[1] + model_size[1] - 2)
-                    position = (model_position[0], model_position[1] + model_size[1] - 2)
+
+                position = (model_position[0], model_position[1] + model_size[1])
+                # fix position of new special rules so they won't overlap
+                while True:
+                    if any([x for x in self.__special_rules_texts if x.get_position() == position]):
+                        position = (position[0], position[1] - text_size[1] - 2)  # blit one above the other
+                    else:
+                        break
 
                 text.set_position(position)
                 self.__special_rules_texts.append(text)
@@ -279,6 +305,24 @@ class Model(AnimAttrObject):
 
     def is_killed(self) -> bool:
         return self.get_current_wounds() <= 0
+
+    def get_wards(self, attack) -> list:
+        ward = 10
+
+        for sr in self.get_special_rules_list():
+            ward = min(ward, sr.get_ward_save(attack, self))
+
+        armor = self.get_armor()
+        if armor is not None:
+            for sr in armor.get_special_rules_list():
+                ward = min(ward, sr.get_ward_save(attack, self))
+
+        shield = self.get_shield()
+        if shield is not None:
+            for sr in shield.get_special_rules_list():
+                ward = min(ward, sr.get_ward_save(attack, self))
+
+        return ward
 
     def add_action_results_text(self, string, text_color):
         model_position = self.get_position()

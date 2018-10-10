@@ -1,5 +1,6 @@
 from Managers.Manager import Manager, UI_MANAGER
 from Shared.AnimatedObject import AnimatedObject
+from Shared.Button import TextButton
 from Shared.GameConstants import GameConstants
 from Shared.UIConstants import UIConstants
 from UI.DiceController import DiceController
@@ -13,9 +14,12 @@ PLAYER_MODELS_MENU = 0
 COMPUTER_MODELS_MENU = 1
 ACTIONS_MENU = 2
 SPELLS_MENU = 3
-ITEMS_MENU = 4
-SKILLS_MENU = 5
-DICE_CONTROLLER = 6
+DISPEL_MENU = 4
+ITEMS_MENU = 5
+SKILLS_MENU = 6
+DICE_CONTROLLER = 7
+DISPEL_DICE_CONTROLLER = 8
+CONTINUE_BUTTON = 9
 
 UP = "Up"
 DOWN = "Down"
@@ -32,7 +36,8 @@ class UIManager(Manager):
                         SKILLS_MENU: None,
                         SPELLS_MENU: None,
                         ITEMS_MENU: None,
-                        DICE_CONTROLLER: None}
+                        DICE_CONTROLLER: None,
+                        CONTINUE_BUTTON: None}
 
         self.__player_markers = []
         self.__computer_markers = []
@@ -99,8 +104,9 @@ class UIManager(Manager):
 
         # add menu,  menu items and pointer to game engine sprites group
         self.get_game_engine().add_sprite_to_group(menu)
-        for i in range(menu.get_menu_items_count()):
-            self.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
+        self.get_game_engine().add_sprite_to_group(menu.get_table_header())
+        for i in range(menu.get_ui_objects_list_count()):
+            self.get_game_engine().add_sprite_to_group(menu.get_ui_object_from_menu(i))
 
         menu.set_name("Player Models Menu")
 
@@ -130,8 +136,9 @@ class UIManager(Manager):
 
         # add menu,  menu items and pointer to game engine sprites group
         self.get_game_engine().add_sprite_to_group(menu)
-        for i in range(menu.get_menu_items_count()):
-            self.get_game_engine().add_sprite_to_group(menu.get_item_from_menu(i))
+        self.get_game_engine().add_sprite_to_group(menu.get_table_header())
+        for i in range(menu.get_ui_objects_list_count()):
+            self.get_game_engine().add_sprite_to_group(menu.get_ui_object_from_menu(i))
 
         menu.set_name("Computer Models Menu")
 
@@ -162,8 +169,8 @@ class UIManager(Manager):
         game_engine = self.get_game_engine()
         # add menu,  menu items and pointer to game engine sprites group
         game_engine.add_sprite_to_group(menu)
-        for i in range(menu.get_menu_items_count()):
-            game_engine.add_sprite_to_group(menu.get_item_from_menu(i))
+        for i in range(menu.get_ui_objects_list_count()):
+            game_engine.add_sprite_to_group(menu.get_ui_object_from_menu(i))
 
         menu.set_name("Actions Menu")
 
@@ -206,8 +213,8 @@ class UIManager(Manager):
 
         game_engine = self.get_game_engine()
         game_engine.add_sprite_to_group(menu)
-        for i in range(menu.get_menu_items_count()):
-            game_engine.add_sprite_to_group(menu.get_item_from_menu(i))
+        for i in range(menu.get_ui_objects_list_count()):
+            game_engine.add_sprite_to_group(menu.get_ui_object_from_menu(i))
         # self.__pointer.assign_pointer_to_menu(menu)
 
         menu.set_name(menus_dict[menu_key])
@@ -262,6 +269,29 @@ class UIManager(Manager):
 
         menu.set_focused()
 
+    def __set_focus_on_dispel_dice_menu(self):
+        logger.info("Setting focus on Dice Controller")
+        menu = self.__menus[DISPEL_DICE_CONTROLLER]
+        for _menu in self.__menus.values():
+            if _menu is None:
+                continue
+            else:
+                _menu.unset_focused()
+
+        menu.set_focused()
+
+    def __set_focus_on_continue_button(self):
+        logger.info("Setting focus on Continue Button")
+        menu = self.__menus[CONTINUE_BUTTON]
+        # remove focus from all other menus
+        for _menu in self.__menus.values():
+            if _menu is None:
+                continue
+            else:
+                _menu.unset_focused()
+
+        menu.set_focused()
+
     def get_focused_menu(self) -> Menu:
         focused_menu = self.__menus[ACTIONS_MENU]  # default
         for menu in self.__menus.values():
@@ -287,11 +317,20 @@ class UIManager(Manager):
     def is_focused_on_spells_menu(self) -> bool:
         return self.get_focused_menu() == self.__menus[SPELLS_MENU]
 
+    def is_focused_on_dispel_menu(self) -> bool:
+        return self.get_focused_menu() == self.__menus[DISPEL_MENU]
+
     def is_focused_on_items_menu(self) -> bool:
         return self.get_focused_menu() == self.__menus[ITEMS_MENU]
 
     def is_focused_on_dice_controller(self) -> bool:
         return self.get_focused_menu() == self.__menus[DICE_CONTROLLER]
+
+    def is_focused_on_dispel_dice_controller(self) -> bool:
+        return self.get_focused_menu() == self.__menus[DISPEL_DICE_CONTROLLER]
+
+    def is_focused_on_continue_button(self) -> bool:
+        return self.get_focused_menu() == self.__menus[CONTINUE_BUTTON]
 
     # ----------------- Menu Pointers Controllers ----------------- #
     def move_pointer_up(self):
@@ -332,7 +371,13 @@ class UIManager(Manager):
 
         if self.__menus[DICE_CONTROLLER] is not None:
             self.destroy_dice_controller()
+
+        if self.__menus[DISPEL_DICE_CONTROLLER] is not None:
+            self.destroy_dispel_dice_controller()
         return
+
+    def get_pointer(self):
+        return self.__pointer
 
     # ----------------- Menu Items Markers ----------------- #
     def mark_selected_item(self):
@@ -340,15 +385,20 @@ class UIManager(Manager):
 
     def __unmark_player_items(self):
         if self.__menus[PLAYER_MODELS_MENU] is not None:
-            for i in range(self.__menus[PLAYER_MODELS_MENU].get_menu_items_count()):
-                item = self.__menus[PLAYER_MODELS_MENU].get_item_from_menu(i)
-                item.unmark_string()
+            for ui_obj in self.__menus[PLAYER_MODELS_MENU].get_ui_objects_list():
+                ui_obj.unmark_string()
+            # for i in range(self.__menus[PLAYER_MODELS_MENU].get_menu_items_count()):
+            #     item = self.__menus[PLAYER_MODELS_MENU].get_item_from_menu(i)
+            #     item.unmark_string()
 
     def __unmark_computer_items(self):
         if self.__menus[COMPUTER_MODELS_MENU] is not None:
-            for i in range(self.__menus[COMPUTER_MODELS_MENU].get_menu_items_count()):
-                item = self.__menus[COMPUTER_MODELS_MENU].get_item_from_menu(i)
-                item.unmark_string()
+            for ui_obj in self.__menus[COMPUTER_MODELS_MENU].get_ui_objects_list():
+                ui_obj.unmark_string()
+
+            # for i in range(self.__menus[COMPUTER_MODELS_MENU].get_menu_items_count()):
+            #     item = self.__menus[COMPUTER_MODELS_MENU].get_item_from_menu(i)
+            #     item.unmark_string()
 
     # ----------------- Battlefield Models Markers ----------------- #
     def __add_marker(self, model):
@@ -359,6 +409,9 @@ class UIManager(Manager):
 
         model_position = model.get_position()
         model_size = model.get_size()
+
+        if not hasattr(model, "is_player_model()"):
+            return
 
         if model.is_player_model():
             marker.set_animation("green_marker_side")
@@ -399,6 +452,8 @@ class UIManager(Manager):
 
     def remove_player_markers(self):
         for marker in self.__player_markers:
+            if marker is None:
+                continue
             marker.kill()
         self.__player_markers = []
 
@@ -406,12 +461,14 @@ class UIManager(Manager):
 
     def remove_computer_markers(self):
         for marker in self.__computer_markers:
+            if marker is None:
+                continue
             marker.kill()
         self.__computer_markers = []
 
         self.__unmark_player_items()
 
-    # ----------------- DICE Controller ----------------- #
+    # ----------------- Spell Dice Controller ----------------- #
     def add_dice_controller(self):
         logger.info("Add Dice Controller")
         magic_manager = self.get_magic_manager()
@@ -439,3 +496,69 @@ class UIManager(Manager):
         dice_controller = self.__menus[DICE_CONTROLLER]
         dice_controller.destroy()
         self.__menus[DICE_CONTROLLER] = None
+
+    # ----------------- Dispel Dice Controller ----------------- #
+    def add_dispel_dice_controller(self):
+        logger.info("Add Dispel Dice Controller")
+        magic_manager = self.get_magic_manager()
+        remaining_dispel_dice = magic_manager.get_player_dispel_pool()
+        menu = DiceController(remaining_dispel_dice)
+
+        game_engine = self.get_game_engine()
+        for item in menu.get_sprites():
+            game_engine.add_sprite_to_group(item)
+
+        self.__menus[DISPEL_DICE_CONTROLLER] = menu
+        self.__set_focus_on_dispel_dice_menu()
+
+    def get_dispel_dice(self):
+        return self.__menus[DISPEL_DICE_CONTROLLER].get_dice()
+
+    def increase_dispel_dice(self):
+        self.__menus[DISPEL_DICE_CONTROLLER].increase_dice()
+
+    def decrease_dispel_dice(self):
+        self.__menus[DISPEL_DICE_CONTROLLER].increase_dice()
+
+    def destroy_dispel_dice_controller(self):
+        logger.info("Destroy Dispel Dice Controller")
+        ddc = self.__menus[DISPEL_DICE_CONTROLLER]
+        ddc.destroy()
+        self.__menus[DISPEL_DICE_CONTROLLER] = None
+
+    # ----------------- End Battle Controllers ----------------- #
+    def add_game_over_controls(self, posy=0):
+        logger.info("Add Continue Controller")
+        button = TextButton(string="Continue", position=(0, 0))
+        position = (int(GameConstants.SCREEN_SIZE[0] / 2) - int(button.get_size()[0] / 2), posy + 50)
+        button.set_position(position)
+        self.__menus[CONTINUE_BUTTON] = button
+
+        self.get_game_engine().add_sprite_to_group(button)
+        self.__set_focus_on_continue_button()
+        if self.__pointer is None:
+            self.__pointer = MenuPointer()
+            self.get_game_engine().add_sprite_to_group(self.__pointer)
+        self.__pointer.assign_pointer_to_button(button)
+
+    def destroy(self):
+        # kill all menus
+        for key in self.__menus.keys():
+            if key == DICE_CONTROLLER:
+                continue
+            if self.__menus[key] is not None:
+                self.__menus[key].kill()
+                self.__menus[key] = None
+
+        if self.__menus[DICE_CONTROLLER] is not None:
+            self.destroy_dice_controller()
+
+        if self.__menus[DISPEL_DICE_CONTROLLER] is not None:
+            self.destroy_dispel_dice_controller()
+
+        self.remove_player_markers()  # kill player markers
+        self.remove_computer_markers()  # kill computer markers
+
+        # kill the pointer
+        self.__pointer.kill()
+        self.__pointer = None

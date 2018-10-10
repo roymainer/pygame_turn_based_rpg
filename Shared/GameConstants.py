@@ -60,12 +60,20 @@ class GameConstants:
     PLAYER_UNITS_MENU_WIDTH = PLAYERS_FRONT_COLUMN + 1 * PADX
     COMPUTER_MODELS_MENU_WIDTH = SCREEN_SIZE[0] - COMPUTER_FRONT_COLUMN + PADX
 
-    """ BACKGROUNDS """
+    """ GRAPHICS PATHS """
     ASSETS_GFX_PATH = os.path.join("Assets", "Graphics")
+    ASSETS_GFX_ACTS_PATH = os.path.join(ASSETS_GFX_PATH, "Acts")
     ASSETS_GFX_BACKGROUNDS_PATH = os.path.join(ASSETS_GFX_PATH, "Backgrounds")
+
+    """ BACKGROUNDS """
     MAIN_MENU_BACKGROUND = os.path.join(ASSETS_GFX_BACKGROUNDS_PATH, "main_menu_background.jpg")
+
     DARK_LAIR = os.path.join("Assets", "Graphics", "dark_lair.png")
     CAVE_TILE = os.path.join("Assets", "Graphics", "cave_tile.png")
+
+    """ ACTS """
+    ACT1_BACKGROUND = os.path.join(ASSETS_GFX_ACTS_PATH, "act1_background.png")
+    ACT1_PATH_SPRITE_SHEET = os.path.join(ASSETS_GFX_ACTS_PATH, "act1_paths_sprite_sheet.png")
 
     """ COLORS """
     WHITE = (255, 255, 255)

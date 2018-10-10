@@ -31,6 +31,9 @@ class UIObject(Sprite):
     def get_image(self) -> pygame.Surface:
         return self.image
 
+    def set_image(self, image):
+        self.image = image
+
     def get_rect(self) -> pygame.Rect:
         return self.rect
 

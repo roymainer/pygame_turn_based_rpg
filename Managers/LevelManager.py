@@ -1,7 +1,10 @@
+from Shared.Acts import get_act_object
 from Managers.Manager import Manager, LEVEL_MANAGER
-from Shared.Bestiary import *
 from Shared.GameConstants import GameConstants
 import logging
+
+from Shared.SavedGameHandler import SavedGameHandler
+
 logger = logging.getLogger().getChild(__name__)
 
 
@@ -9,28 +12,35 @@ class LevelManager(Manager):
     
     def __init__(self, scene):
         logger.info("Init")
+        self.__save_game_handler = SavedGameHandler()
+        self.__act = self.set_act()
         super(LevelManager, self).__init__(scene, LEVEL_MANAGER)
-    
-    def load_level(self):
+
+    def set_act(self):
+        level = self.__save_game_handler.load(SavedGameHandler.LEVEL_NUMBER)
+        act = get_act_object(level)
+        act_obj = act(level)
+        return act_obj
+
+    def get_act(self):
+        return self.__act
+
+    def load_level_models(self):
         logger.info("Load level")
+
+        models_dict = self.__act.get_next_round_models()
 
         # ---- load player models ---- #
         object_type = GameConstants.PLAYER_OBJECT
-        self.set_model(get_empire_witch_hunter(), GameConstants.PLAYER_TOP_FRONT, object_type)
-        self.set_model(get_warrior_priest(), GameConstants.PLAYER_MIDDLE_FRONT, object_type)
-        self.set_model(get_empire_witch_hunter(), GameConstants.PLAYER_BOTTOM_FRONT, object_type)
-        # self.set_model(get_empire_witch_hunter(), GameConstants.PLAYER_TOP_BACK, object_type)
-        # self.set_model(get_warrior_priest(), GameConstants.PLAYER_MIDDLE_BACK, object_type)
-        # self.set_model(get_empire_witch_hunter(), GameConstants.PLAYER_BOTTOM_BACK, object_type)
+        player_models_dict = models_dict[object_type]
+        for key_position, model_func in player_models_dict.items():
+            self.set_model(model_func(), key_position, object_type)
 
         # ---- load computer models ---- #
         object_type = GameConstants.COMPUTER_OBJECT
-        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_TOP_FRONT, object_type, flip_x=True)
-        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_MIDDLE_FRONT, object_type, flip_x=True)
-        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_BOTTOM_FRONT, object_type, flip_x=True)
-        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_TOP_BACK, object_type, flip_x=True)
-        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_MIDDLE_BACK, object_type, flip_x=True)
-        self.set_model(get_dwarf_hero(), GameConstants.COMPUTER_BOTTOM_BACK, object_type, flip_x=True)
+        computer_models_dict = models_dict[object_type]
+        for key_position, model_func in computer_models_dict.items():
+            self.set_model(model_func(), key_position, object_type, flip_x=True)
 
         mm = self.get_models_manager()
         mm.apply_special_rules_on_models()

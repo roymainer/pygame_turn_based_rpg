@@ -3,7 +3,7 @@ import random
 from Shared.Action import Attack, RangeAttack
 from Shared.Attributes import Attributes
 from Shared.GameConstants import GameConstants
-from Shared.SpecialRule import AlwaysStrikesLast
+from Shared.SpecialRule import AlwaysStrikesLast, FightInExtraRank
 
 
 class Weapon(Attributes):
@@ -84,6 +84,12 @@ def get_hand_weapon():
 class Sword(Weapon):
     def __init__(self):
         super(Sword, self).__init__(name="Sword")
+
+
+class Spear(Weapon):
+    def __init__(self):
+        super(Spear, self).__init__(name="Spear")
+        self.add_special_rule(FightInExtraRank())
 
 
 class Mace(Weapon):

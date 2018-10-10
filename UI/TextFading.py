@@ -12,7 +12,7 @@ class TextFading(Text):
     def __init__(self, string, position,
                  text_color=GameConstants.WHITE,
                  background_color=None,
-                 font_size=UIConstants.TEXT_SIZE_SMALL):
+                 font_size=UIConstants.FONT_SIZE_SMALL):
         super(TextFading, self).__init__(string, position, text_color, background_color, font_size)
         self.__original_image = self.get_image().copy()
         self.__alpha = 255
@@ -32,14 +32,14 @@ class TextFading(Text):
             self.__alpha = 0
         super(TextFading, self).update()
 
-        print("TextFading Object #"+str(self.__index) + ", Alpha: " + str(self.__alpha))
+        # print("TextFading Object #"+str(self.__index) + ", Alpha: " + str(self.__alpha))
 
     def get_alpha(self) -> int:
         return self.__alpha
 
     def kill(self) -> None:
-        print("Killing: " + self.__repr__())
+        # print("Killing: " + self.__repr__())
         TextFading.counter -= 1
-        print("TextFading Counter: " + str(TextFading.counter))
+        # print("TextFading Counter: " + str(TextFading.counter))
         self.__original_image = None
         super(TextFading, self).kill()

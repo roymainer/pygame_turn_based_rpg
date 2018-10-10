@@ -42,10 +42,10 @@ def prepare_animations(sprite_sheet_file, atlas_file, sprite_size=None) -> dict:
 
         if sprite_size is not None:
             sprite = pygame.transform.scale(sprite, sprite_size)
-
-        size = sprite.get_size()
-        new_size = (int(size[0] * GameConstants.SIZE_RATIO), int(size[1] * GameConstants.SIZE_RATIO))
-        sprite = pygame.transform.scale(sprite, new_size)
+        else:
+            size = sprite.get_size()
+            new_size = (int(size[0] * GameConstants.SIZE_RATIO), int(size[1] * GameConstants.SIZE_RATIO))
+            sprite = pygame.transform.scale(sprite, new_size)
 
         animation_dictionary[action].append(sprite)  # add to list
 
@@ -89,7 +89,11 @@ class Animator(object):
         :return: surface
         """
 
-        if animation_key != self.__animation_key:
+        if animation_key not in self.get_animations_keys():
+            self.__animation_key = self.get_animations_keys()[0]
+            self.__sprite_index = 0
+
+        elif animation_key != self.__animation_key:
             # if changed to new animation, update key and reset sprite index
             self.__animation_key = animation_key
             self.__sprite_index = 0

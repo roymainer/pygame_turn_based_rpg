@@ -10,14 +10,14 @@ class Text(UIObject):
     def __init__(self, string, position,
                  text_color=GameConstants.WHITE,
                  background_color=None,
-                 font_size=UIConstants.TEXT_SIZE_SMALL):
+                 font_size=UIConstants.FONT_SIZE_SMALL):
 
         self.__text_color = text_color
         self.__background_color = background_color
         self.__font_size = font_size
 
         self.__string = string
-        font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)
+        font_obj = pygame.font.Font(UIConstants.MONOSPACE_FONT, self.__font_size)
         self.image = font_obj.render(string, False, self.__text_color, self.__background_color)
 
         self.rect = self.image.get_rect()
@@ -34,7 +34,7 @@ class Text(UIObject):
     def set_string(self, string) -> None:
         self.__string = string  # update text string
 
-        font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
+        font_obj = pygame.font.Font(UIConstants.MONOSPACE_FONT, self.__font_size)  # create a new font object
 
         self.image = font_obj.render(self.__string, False, self.__text_color, self.__background_color)
 
@@ -43,7 +43,7 @@ class Text(UIObject):
         self.rect.topleft = topleft  # update new rects position
 
     def mark_string(self) -> None:
-        font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
+        font_obj = pygame.font.Font(UIConstants.MONOSPACE_FONT, self.__font_size)  # create a new font object
 
         self.image = font_obj.render(self.__string, False, GameConstants.BRIGHT_GREEN, self.__background_color)
 
@@ -52,7 +52,7 @@ class Text(UIObject):
         self.rect.topleft = topleft  # update new rects position
 
     def unmark_string(self) -> None:
-        font_obj = pygame.font.Font(UIConstants.ARCADE_CLASSIC_FONT, self.__font_size)  # create a new font object
+        font_obj = pygame.font.Font(UIConstants.MONOSPACE_FONT, self.__font_size)  # create a new font object
 
         self.image = font_obj.render(self.__string, False, self.__text_color, self.__background_color)
 

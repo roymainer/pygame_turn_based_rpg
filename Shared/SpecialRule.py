@@ -46,8 +46,8 @@ class SpecialRule:
     def is_killing_blow(self, target) -> bool:
         return False
 
-    def get_ward_save(self, attack, model) -> bool:
-        return False
+    def get_ward_save(self, attack, model) -> int:
+        return 10  # by default return a number which will fail the D6 throw
 
     def set_used_up(self) -> None:
         self.__used_up = True
@@ -75,6 +75,12 @@ class SpecialRule:
 
 
 # ------------------- General Special Rules ------------------- #
+class FightInExtraRank(SpecialRule):
+    def __init__(self):
+        super(FightInExtraRank, self).__init__("Fight In Extra Rank")
+        # TODO: implement for strategy game
+
+
 class AlwaysStrikesLast(SpecialRule):
     def __init__(self):
         super(AlwaysStrikesLast, self).__init__("Always Strikes Last")
@@ -110,16 +116,12 @@ class Parry(SpecialRule):
     def get_ward_save(self, attack, model):
         attack_type = attack.get_attack_type()
         if attack_type in [Attack.ATTACK_TYPE_STOMP, Attack.ATTACK_TYPE_THUNDER_STOMP]:
-            return False
+            return 10
 
         if model.is_frenzied():
-            return False
+            return 10
 
-        roll = get_d6_roll()
-        if roll >= 6:
-            return True
-        else:
-            return False
+        return 6
 
 
 class Flammable(SpecialRule):
@@ -275,11 +277,7 @@ class ShieldOfFaithSR(SpecialRule):
         self.set_used_up()  # remove by end of turn
 
     def get_ward_save(self, attack, model):
-        roll = get_d6_roll()
-        if roll >= 5:
-            return True
-        else:
-            return False
+        return 5
 
 
 class SoulfireSR(SpecialRule):

@@ -1,6 +1,6 @@
 from Managers.Manager import Manager, ACTION_MANAGER
 from Shared import Rolls
-from Shared.Action import Attack, RangeAttack, Skip
+from Shared.Action import Attack, RangeAttack, Skip, Dispel
 from Shared.GameConstants import GameConstants
 from Shared.Skill import Skill
 from Shared.Spell import Spell
@@ -86,13 +86,18 @@ class ActionManager(Manager):
             self.__skill(model)
         elif isinstance(action, Spell):
             self.__cast(model)
+        elif isinstance(action, Dispel):
+            # TODO: consider adding dispel animation or notification
+            model.set_action_done()
         elif isinstance(action, Skip):
             model.set_action_done()
 
         """ Model set action done"""
         model.set_action_done()  # mark models action as done
 
-    def wound_target(self, target, strength=4, armor_saves_allowed=False, double_effect=False):
+    def wound_target(self, target, attack, strength=4, armor_saves_allowed=False, double_effect=False):
+        """ Wound Target by spell or any special attack like stomp, not range or close combat """
+
         target.set_animation("hurt")
         logger.info("Rolling to wound:")
         roll = Rolls.get_d6_roll()
@@ -143,8 +148,7 @@ class ActionManager(Manager):
                     self.__add_text_blocked(target)
                     return
 
-        # saved_by_ward = self.__get_ward_saving_throw(target)
-        saved_by_ward = self.__get_ward_saving_throw()
+        saved_by_ward = self.__get_ward_saving_throw(target, attack)
         if saved_by_ward:
             logger.info("Target saved by ward!")
             self.__add_text_saved_by_ward(target)
@@ -206,8 +210,7 @@ class ActionManager(Manager):
                                 logger.info("Successfully re-rolled to wound with: {}".format(sr.get_name()))
                                 break
                 if wound and killing_blow:
-                    # saved_by_ward = self.get_ward_saving_throw(target)
-                    saved_by_ward = False
+                    saved_by_ward = self.__get_ward_saving_throw(target)
                     if saved_by_ward:
                         self.__add_text_saved_by_ward(target)
                         continue
@@ -218,8 +221,7 @@ class ActionManager(Manager):
                     saved_by_armor = self.__get_armor_saving_throw(target)
                     if not saved_by_armor:
                         # TODO: return the wards
-                        # saved_by_ward = self.get_ward_saving_throw(target)
-                        saved_by_ward = False
+                        saved_by_ward = self.__get_ward_saving_throw(target)
                         if saved_by_ward:
                             self.__add_text_saved_by_ward(target)
                             continue
@@ -265,9 +267,9 @@ class ActionManager(Manager):
         if hit:
             wound, killing_blow = self.__get_roll_to_wound(target)
             if wound and killing_blow:
-                # saved_by_ward = self.__get_ward_saving_throw(target)
-                saved_by_ward = self.__get_ward_saving_throw()
+                saved_by_ward = self.__get_ward_saving_throw(target)
                 if saved_by_ward:
+                    self.__add_text_saved_by_ward(target)
                     return
                 else:
                     # killing blow ignores any armor save BUT NOT WARD SAVES
@@ -276,24 +278,30 @@ class ActionManager(Manager):
             elif wound:
                 saved_by_armor = self.__get_armor_saving_throw(target)
                 if not saved_by_armor:
-                    # saved_by_ward = self.get_ward_saving_throw(target)
-                    # if saved_by_ward:
-                    #     return
-                    # else:
-                    self.__add_text_hit(target)
-                    target_wounds = target.get_wounds()
-                    weapon = current_model.get_ranged_weapon()
-                    double_damage = is_double_damage(current_model, weapon, target)
-                    if double_damage:
-                        target.set_wounds(target_wounds - 2)
+                    saved_by_ward = self.__get_ward_saving_throw(target)
+                    if not saved_by_ward:
+                        """ TARGET IS HIT """
+                        self.__add_text_hit(target)
+                        target_wounds = target.get_wounds()
+                        weapon = current_model.get_ranged_weapon()
+                        double_damage = is_double_damage(current_model, weapon, target)
+                        if double_damage:
+                            target.set_wounds(target_wounds - 2)
+                        else:
+                            target.set_wounds(target_wounds - 1)
                     else:
-                        target.set_wounds(target_wounds - 1)
+                        """ TARGET SAVED BY WARD """
+                        self.__add_text_saved_by_ward(target)
                 else:
+                    """ TARGET SAVED BY ARMOR """
                     self.__add_text_blocked(target)
             else:
+                """ TARGET SAVED BY TOUGHNESS """
                 self.__add_text_blocked(target)
         else:
+            """ MISSED TARGET """
             self.__add_text_miss(target)
+        return
 
     def __skill(self, model):
 
@@ -313,11 +321,23 @@ class ActionManager(Manager):
         logger.info("{}: setting animation to cast".format(current_model.get_name()))
         current_model.set_animation("cast")
 
-        self.__add_text(string=spell.get_name(), text_color=GameConstants.CYAN, target=current_model)
-        cast_successful = spell.on_click(self)
-        if not cast_successful:
+        dispelling_model = spell.get_dispelling_model()
+        if dispelling_model is not None:
+            logger.info("{}: Dispelling".format(dispelling_model.get_name()))
+            logger.info("{}: setting animation to cast".format(dispelling_model.get_name()))
+            dispelling_model.set_animation("cast")
+
+        self.__add_text(string=spell.get_name(), text_color=GameConstants.CYAN, target=current_model)  # add spell text
+
+        cast_successful, dispelled = spell.on_click(self)  # try casting
+
+        if dispelled:
+            self.__add_text_dispelled(current_model, dispelling_model)
+        elif not cast_successful:
             self.__add_text_miscast(current_model)
             current_model.set_miscast()
+        elif dispelling_model is not None:
+            self.__add_text_dispel_failed(dispelling_model)
 
     def __get_roll_to_hit_close_combat(self, target) -> bool:
         logger.info("Rolling to hit:")
@@ -424,35 +444,22 @@ class ActionManager(Manager):
         return False
 
     # noinspection PyMethodMayBeStatic
-    # def __get_ward_saving_throw(self, target) -> bool:
-    def __get_ward_saving_throw(self) -> bool:
+    def __get_ward_saving_throw(self, target, attack=Attack()) -> bool:
         logger.info("Target rolling to ward save:")
 
-        # TODO: finish ward saving throw
-        logger.info("Incomplete code!")
-        return False
+        best_ward = target.get_wards(attack)
+        logger.info("Required roll for ward save: {}".format(str(best_ward)))
 
-        # roll = Rolls.get_d6_roll()
-        # if roll == 1:
-        #     logger.info("Target save throw failed")
-        #     return False
-        # else:
-        #     target_wards = target.get_wards()  # always roll on the best ward, they don't accumulate
-        #     # TODO: wards should be objects
-        #     for ward in target_wards:
-        #         if "ARMOR" in ward or "SHIELD" in ward or "TALISMAN" in ward:
-        #
-        #             if Bestiary.WARD_SHIELD_CHARMED in ward:
-        #                 # charmed shield is single use only
-        #                 target.remove_ward(ward)
-        #
-        #             required_roll = WARD_SAVES[ward]
-        #             if roll >= required_roll:
-        #                 logger.info("Target saved by armor!")
-        #                 return True
-        #
-        # logger.info("Target save throw failed")
-        # return False
+        roll = Rolls.get_d6_roll()
+
+        if roll == 1:
+            logger.info("Target ward save failed")
+            return False
+        elif roll >= best_ward:
+            return True
+
+        logger.info("Target ward save failed")
+        return False
 
     # -------- Texts -------- #
     # noinspection PyMethodMayBeStatic
@@ -473,3 +480,10 @@ class ActionManager(Manager):
 
     def __add_text_miscast(self, target):
         self.__add_text("Miscast!", GameConstants.BRIGHT_YELLOW, target)
+
+    def __add_text_dispelled(self, casting_model, dispelling_model):
+        self.__add_text("Spell Failed!", GameConstants.DARK_GRAY, casting_model)
+        self.__add_text("Dispelled Successfully", GameConstants.CYAN, dispelling_model)
+
+    def __add_text_dispel_failed(self, dispelling_model):
+        self.__add_text("Dispel Failed", GameConstants.DARK_GRAY, dispelling_model)

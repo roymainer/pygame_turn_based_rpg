@@ -1,23 +1,7 @@
-from Shared.Action import Spells
+from Shared.Action import Spells, Attack
 from Shared.GameConstants import GameConstants
 from Shared.Rolls import get_d6_roll
 from Shared.SpecialRule import HammerOfSigmarSR, ShieldOfFaithSR, SoulfireSR
-
-
-def is_cast_successful(spell_cost, assigned_dice, wizard_level):
-    roll = 0
-    for dice in range(assigned_dice):
-        roll += get_d6_roll()
-
-    if roll <= 2:
-        # see WHFB Rule Book 8th ed,p.32
-        return False
-
-    roll += wizard_level
-
-    if roll >= spell_cost:
-        return True
-    return False
 
 
 class Spell:
@@ -28,6 +12,9 @@ class Spell:
         self.__is_cast = False
         self.__cost = cost
         self.__dice = 0
+        self.__casting_result = 0
+        self.__dispel_dice = 0
+        self.__dispelling_model = None
 
     def get_name(self) -> str:
         return self.__name
@@ -50,8 +37,62 @@ class Spell:
     def get_action(self):
         return Spells()
 
-    def on_click(self, action_manager) -> None:
+    def __get_cast_result(self, wizard_level) -> int:
+        casting_result = 0
+        for dice in range(self.get_dice()):
+            casting_result += get_d6_roll()
+
+        if casting_result <= 2:
+            # see WHFB Rule Book 8th ed, p.32
+            return 0
+
+        casting_result += wizard_level
+        return casting_result
+
+    def __get_dispel_result(self, wizard_level) -> int:
+        dispel_result = 0
+        for dice in range(self.get_dispel_dice()):
+            dispel_result += get_d6_roll()
+
+        if dispel_result <= 2:
+            # see WHFB rule book 8th ed, p.35
+            return 0
+
+        dispel_result += wizard_level
+        return dispel_result
+
+    def __is_dispelled(self):
+        pass
+
+    def __is_cast_successful(self, casting_result):
+
+        spell_cost = self.get_cost()
+
+        if casting_result >= spell_cost:
+            self.__casting_result = casting_result
+            return True
+        return False
+
+    def on_click(self, action_manager) -> (bool, bool):
+        """
+        :param action_manager:
+        :return: cast successfully: (True, False), miscast: (False, False), dispelled: (False, True)
+        """
+        turn_manager = action_manager.get_turn_manager()
+        wizard_level = turn_manager.get_current_model().get_wizard_level()
+
         self.set_is_cast()  # mark spell as cast
+
+        cast_result = self.__get_cast_result(wizard_level)
+        dispel_result = self.__get_dispel_result(wizard_level)
+
+        if cast_result < self.get_cost():
+            return False, False  # cast failed
+
+        elif dispel_result >= cast_result:
+            return False, True  # dispelled
+
+        return True, False  # cast successfully
 
     def set_is_cast(self):
         self.__is_cast = True
@@ -72,6 +113,18 @@ class Spell:
     def get_cost(self):
         return self.__cost
 
+    def set_dispel_dice(self, dice):
+        self.__dispel_dice = dice
+
+    def get_dispel_dice(self):
+        return self.__dispel_dice
+
+    def set_dispelling_model(self, model):
+        self.__dispelling_model = model
+
+    def get_dispelling_model(self):
+        return self.__dispelling_model
+
 
 class HammerOfSigmar(Spell):
     """
@@ -83,20 +136,18 @@ class HammerOfSigmar(Spell):
     def __init__(self):
         super(HammerOfSigmar, self).__init__(name="Hammer Of Sigmar", cost=3)
 
-    def on_click(self, action_manager):
+    def on_click(self, action_manager) -> (bool, bool):
+
+        cast_success, dispelled = super(HammerOfSigmar, self).on_click(action_manager)
+        if not cast_success:
+            return cast_success, dispelled
+
         turn_manager = action_manager.get_turn_manager()
-        wizard_level = turn_manager.get_current_model().get_wizard_level()
         unit = turn_manager.get_model_unit()
-
-        self.set_is_cast()  # mark spell as cast
-
-        if not is_cast_successful(self.get_cost(), self.get_dice(), wizard_level):
-            return False
-
         for character in unit:
             character.add_special_rule(HammerOfSigmarSR())
 
-        return True
+        return True, False
 
 
 class ShieldOfFaith(Spell):
@@ -110,20 +161,18 @@ class ShieldOfFaith(Spell):
         super(ShieldOfFaith, self).__init__(name="Shield Of Faith", cost=3)
 
     def on_click(self, action_manager):
+        cast_success, dispelled = super(ShieldOfFaith, self).on_click(action_manager)
+        if not cast_success:
+            return cast_success, dispelled
+
         turn_manager = action_manager.get_turn_manager()
-        wizard_level = turn_manager.get_current_model().get_wizard_level()
         unit = turn_manager.get_model_unit()
-
-        self.set_is_cast()  # mark spell as cast
-
-        if not is_cast_successful(self.get_cost(), self.get_dice(), wizard_level):
-            return False
 
         # cast the spell
         for character in unit:
             character.add_special_rule(ShieldOfFaithSR())
 
-        return True
+        return True, False
 
 
 class Soulfire(Spell):
@@ -138,14 +187,13 @@ class Soulfire(Spell):
         super(Soulfire, self).__init__(name="Soulfire", cost=3)
 
     def on_click(self, action_manager):
+
+        cast_success, dispelled = super(Soulfire, self).on_click(action_manager)
+        if not cast_success:
+            return cast_success, dispelled
+
         turn_manager = action_manager.get_turn_manager()
-        wizard_level = turn_manager.get_current_model().get_wizard_level()
         unit = turn_manager.get_model_unit()
-
-        self.set_is_cast()  # mark spell as cast
-
-        if not is_cast_successful(self.get_cost(), self.get_dice(), wizard_level):
-            return False
 
         # assign soulfire to all models in current models unit
         for character in unit:
@@ -162,8 +210,9 @@ class Soulfire(Spell):
                     strength = 5
                 if sr.is_flammable():
                     double_effect = True
-            action_manager.wound_target(target, strength=strength,
+            # TODO: might need to change attack type
+            action_manager.wound_target(target, attack=Attack(), strength=strength,
                                         armor_saves_allowed=False,
                                         double_effect=double_effect)
 
-        return True
+        return True, False

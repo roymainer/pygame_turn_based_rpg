@@ -49,6 +49,19 @@ class Spells(Action):
         super(Spells, self).__init__("Spells")
 
 
+class Dispel(Action):
+
+    def __init__(self):
+        self.__spell = None
+        super(Dispel, self).__init__("Dispel")
+
+    def set_spell(self, spell):
+        self.__spell = spell
+
+    def get_spell(self):
+        return self.__spell
+
+
 class Items(Action):
 
     def __init__(self):

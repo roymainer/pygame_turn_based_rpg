@@ -14,10 +14,10 @@ logger = logging.getLogger().getChild(__name__)
 MENU_OPTIONS = ["Campaign", "Custom Battle", "Quit"]
 
 
-class CampaignScene(Scene):
+class CustomBattleScene(Scene):
 
     def __init__(self, game_engine):
-        super(CampaignScene, self).__init__(game_engine)
+        super(CustomBattleScene, self).__init__(game_engine)
         logger.info("Init")
         self.__main_menu = None
         self.__pointer = None

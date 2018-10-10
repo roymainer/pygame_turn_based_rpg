@@ -32,14 +32,20 @@ class PhaseManager(Manager):
         super(PhaseManager, self).__init__(scene, PHASE_MANAGER)
 
     def on_init(self):
-        # wizards = self.get_models_manager().get_wizards_list()
-        # self.__current_phase = MagicPhase(self, wizards)
         self.__current_phase = MagicPhase(self)
-        self.get_magic_manager().roll_for_winds_of_magic()  # roll for winds of magic
-        self.get_ui_manager().update_all_menus()
-        self.__add_phase_text()
+        self.update()
+        # # wizards = self.get_models_manager().get_wizards_list()
+        # # if any(wizards):
+        # self.get_magic_manager().roll_for_winds_of_magic()  # roll for winds of magic
+        # self.get_ui_manager().update_all_menus()
+        # self.__add_phase_text()
 
     def update(self):
+
+        events_manager = self.get_events_manager()
+        if events_manager.get_is_battle_over():
+            return
+
         if self.acquire_lock(__name__):
             phase_ready = self.set_next_phase()  # True if the phase is ready, meaning there are fitting models
             while not phase_ready:
@@ -130,3 +136,7 @@ class PhaseManager(Manager):
         for text in self.__texts:
             text.kill()
         self.__texts = []
+
+    def destroy(self):
+        self.__clear_texts()
+
